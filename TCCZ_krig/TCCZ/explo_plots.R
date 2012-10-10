@@ -1,5 +1,5 @@
 ##Exploratory plotting
-setwd("D:/SRS/data_SRS/TCCZ_krig/R_work - Copy")
+#setwd("D:/work/Code/srs_work/TCCZ_krig/TCCZ")
 rm(list=ls())
 require(scatterplot3d)
 require(geoR)
@@ -16,3 +16,5 @@ scatterplot3d(x=TCCZe$UTM_N,y=TCCZe$UTM_E,z=TCCZe$TCCZ_top, type = "h",
 TCCZg<-as.geodata(TCCZe, coords.col=2:3, data.col=5)
 
 points(TCCZg, cex.min = 1, cex.max = 1, col = "gray")
+
+#points(TCCZg, cex.min = 1, cex.max = 4)
