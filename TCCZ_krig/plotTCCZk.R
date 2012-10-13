@@ -12,6 +12,8 @@ head(TCCZkH)
 # )
 wireframe(Ztccz ~ X * Y, data=TCCZkH)
 
+levelplot(Ztccz ~ X * Y, data=TCCZkH, xlab = "UTM E (m)", ylab = "UTM N (m)",main = "TCCZ top elevation data", col.regions = terrain.colors(100), aspect="xy")
+
 #TCCZ.loess <- loess(Ztccz ~ X*Y, data = TCCZkH, degree = 2, span = 0.25)
 
 #image(TCCZkH$X, TCCZkH$Y, TCCZkH$Ztccz, xlab = "UTM E (m)", ylab = "UTM N (m)",main = "TCCZ top elevation data")
