@@ -8,6 +8,8 @@ require(geoR)
 TCCZe<-readRDS("TCCZ_o.rdata")
 summary(TCCZe)
 
+hist(TCCZe$TCCZ_top, breaks = 20)
+
 scatterplot3d(x=TCCZe$UTM_N,y=TCCZe$UTM_E,z=TCCZe$TCCZ_top, type = "h",
               xlab = "UTM Easting", ylab = "UTM Northing",
               zlab = "Elevation TCCZ (ft)",
