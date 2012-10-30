@@ -5,5 +5,5 @@ TCCZdatac<-TCCZdata
 ##Convert non meaningful zeros to NAs
 TCCZdatac[TCCZdatac==0]<-NA
 
-##Convert to a spatial object
+##Save as flat object
 saveRDS(TCCZdatac, file = "TCCZ.rdata")
