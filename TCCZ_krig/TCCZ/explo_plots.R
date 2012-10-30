@@ -1,5 +1,5 @@
 ##Exploratory plotting
-#setwd("D:/work/Code/srs_work/TCCZ_krig/TCCZ")
+setwd("D:/work/Code/srs_work/TCCZ_krig/TCCZ")
 rm(list=ls())
 require(scatterplot3d)
 require(geoR)
