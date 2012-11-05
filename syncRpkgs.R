@@ -7,4 +7,4 @@ save(MyPkgs, file = "MyPkgs.Rdata")
 
 load("MyPkgs.Rdata")
 
-install.packages(MyPkgs.sl27$Package, dependencies = TRUE)
+install.packages(MyPkgs$Package, dependencies = TRUE)
