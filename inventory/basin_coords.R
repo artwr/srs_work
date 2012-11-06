@@ -1,0 +1,4 @@
+f3basin<-read.table("f3basin_utm.txt", sep="\t", col.names=c("UTM_E","UTM_N"))
+f3basin27<-read.table("f3basin_utm27.txt", sep="\t", col.names=c("UTM_E","UTM_N"))
+saveRDS(f3basin,"f3basin.rdata")
+saveRDS(f3basin27,"f3basin27.rdata")
