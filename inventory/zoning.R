@@ -3,6 +3,7 @@ require(geoR)
 require(geoRglm)
 require(fields)
 require(akima)
+require(splancs)
 #require()
 #load data
 #rm(list=ls())
@@ -36,6 +37,14 @@ no.max<-3682109
 ea.min<-436175
 ea.max<-437158
 
+d.ea<-c(436175,436175,437158,438158,436175)
+d.no<-c(3680929,3682109,3682109,3680929,3680929)
+pp<-cbind(d.ea,d.no)
+#plot(pp, type="b")
+areapl(pp)
+
+#
+
 TCCZ.interp<-interp(TCCZe$UTM_E, TCCZe$UTM_N, TCCZe$TCCZ_top, xo=seq(ea.min, ea.max, length = 30), yo=seq(no.min, no.max, length = 50), linear = TRUE, extrap=FALSE, duplicate = "error")
 wlavg.interp<-interp(wlavg$EASTING, wlavg$NORTHING, wlavg$mean, xo=seq(ea.min, ea.max, length = 30), yo=seq(no.min, no.max, length = 50), linear = TRUE, extrap=FALSE, duplicate = "mean")
 
@@ -44,7 +53,9 @@ wlavg.interp<-interp(wlavg$EASTING, wlavg$NORTHING, wlavg$mean, xo=seq(ea.min, e
 #image and contour plot for the TCCZ
 image.plot(TCCZ.interp)
 contour(TCCZ.interp$x,TCCZ.interp$y,TCCZ.interp$z)
-plot(f3basin$UTM_E,f3basin$UTM_N, add=TRUE)
+points(f3basin27$UTM_E,f3basin27$UTM_N,type="l")
+points(TCCZe$UTM_E, TCCZe$UTM_N, pch=19)
+text(TCCZe$UTM_E, TCCZe$UTM_N, labels=TCCZe$UWI)
 
 #image and contour plot for the water level
 image.plot(wlavg.interp)
@@ -53,7 +64,8 @@ contour(wlavg.interp$x,wlavg.interp$y,wlavg.interp$z)
 #
 #image and contour plot for the water level
 #image.plot(wlavg.interp)
-contour(wlavg.interp$x,wlavg.interp$y,wlavg.interp$z-TCCZ.interp$z, xlim=c(ea.min,ea.max), ylim=c(no.min,no.max), asp = 1, bty ="n")
+contour(wlavg.interp$x,wlavg.interp$y,wlavg.interp$z-TCCZ.interp$z,  asp = 1, bty ="n")
+#xlim=c(ea.min,ea.max), ylim=c(no.min,no.max),
 #points(f3basin$UTM_E,f3basin$UTM_N,type="l")
 points(f3basin27$UTM_E,f3basin27$UTM_N,type="l")
 points(wlavg$EASTING, wlavg$NORTHING, pch=19)
