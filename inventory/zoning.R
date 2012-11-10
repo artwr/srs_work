@@ -17,6 +17,9 @@ wlavg<-readRDS("wlavg.rdata")
 f3basin<-readRDS("f3basin.rdata")
 f3basin27<-readRDS("f3basin27.rdata")
 
+#
+wll<-split(wl,wl$MYEAR)
+
 
 #
 selectyear<-function (x,y) {subset(x, x$MYEAR == y)}
