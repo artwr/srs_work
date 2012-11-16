@@ -6,21 +6,37 @@ tritium.raw<-read.csv("tritium4R.csv")
 
 wl.raw<-read.csv("wl4R.csv")
 
+#Remove FEX8 because of the 2 screens.
+wl.clean<-wl.raw[!wl.raw$STATION_ID=='FEX  8',]
+tritium.clean<-tritium.raw[!tritium.raw$STATION_ID=='FEX  8',]
+
+#Visual inspection of the data
+#wl.fex8<-wl.raw[wl.raw$STATION_ID=='FEX  8',]
+#tritium.fex8<-tritium.raw[tritium.raw$STATION_ID=='FEX  8',]
+
+
 #Compute aggregates per station, year
-#tritium.avg<-ddply(tritium.raw, c("STATION_SEQ","MYEAR"), colMeans)
-tritium.avg<-aggregate(cbind(RESULT, PQL) ~ STATION_SEQ + STATION_ID + EASTING + NORTHING + LATITUDE + LONGITUDE + MYEAR,tritium.raw,mean, na.action = na.pass)
+#
+#tritium.avg<-aggregate(cbind(RESULT, PQL) ~ STATION_SEQ + STATION_ID + EASTING + NORTHING + LATITUDE + LONGITUDE + MYEAR,tritium.clean,mean, na.action = na.pass)
 
-tritium.sd<-aggregate(cbind(RESULT, PQL) ~ STATION_SEQ + STATION_ID + EASTING + NORTHING + LATITUDE + LONGITUDE + MYEAR,tritium.raw, sd, na.action = na.pass)
+#tritium.sd<-aggregate(cbind(RESULT, PQL) ~ STATION_SEQ + STATION_ID + EASTING + NORTHING + LATITUDE + LONGITUDE + MYEAR,tritium.clean, sd, na.action = na.pass)
 
-tritium.mad<-aggregate(cbind(RESULT, PQL) ~ STATION_SEQ + STATION_ID + EASTING + NORTHING + LATITUDE + LONGITUDE + MYEAR,tritium.raw,mad, na.action = na.pass)
+#tritium.mad<-aggregate(cbind(RESULT, PQL) ~ STATION_SEQ + STATION_ID + EASTING + NORTHING + LATITUDE + LONGITUDE + MYEAR,tritium.clean,mad, na.action = na.pass)
 
-tritium.summary1<-summaryBy(RESULT ~ STATION_SEQ + STATION_ID + MYEAR + EASTING + NORTHING, data=tritium.raw, FUN=function(x) c(count=length(x), mean=mean(x), median=median(x), sd=sd(x), mad=mad(x)))
+# Using doBy
+tritium.summary1<-summaryBy(RESULT ~ STATION_SEQ + STATION_ID + MYEAR + EASTING + NORTHING, data=tritium.clean, FUN=function(x) c(count=length(x), mean=mean(x), median=median(x), sd=sd(x), mad=mad(x)))
 
-tritium.plyr1<-ddply(tritium.raw, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT)))
-#format(tritium.raw$LATITUDE[1:10], digits=10)
+#Using plyr
+tritium.plyr1<-ddply(tritium.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
+
+#
+
+
 #For the water levels
-wl.plyr1<-ddply(wl.raw, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$WATER_ELEV),median=median(x$WATER_ELEV),sd=sd(x$WATER_ELEV)))
-wl.plyra<-ddply(wl.raw, c('STATION_SEQ','STATION_ID','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$WATER_ELEV),median=median(x$WATER_ELEV),sd=sd(x$WATER_ELEV),min=min(x$WATER_ELEV),max=max(x$WATER_ELEV)))
+wl.plyr1<-ddply(wl.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$WATER_ELEV),median=median(x$WATER_ELEV),sd=sd(x$WATER_ELEV),mad=mad(x$WATER_ELEV),min=min(x$WATER_ELEV),max=max(x$WATER_ELEV)))
+
+#average across years
+wl.plyra<-ddply(wl.clean, c('STATION_SEQ','STATION_ID','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$WATER_ELEV),median=median(x$WATER_ELEV),sd=sd(x$WATER_ELEV),mad=mad(x$WATER_ELEV),min=min(x$WATER_ELEV),max=max(x$WATER_ELEV)))
 
 
 #Save as R datasets
