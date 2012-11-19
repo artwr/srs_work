@@ -49,6 +49,8 @@ thavg$TCCZ.se.fit<-pre1$se.fit
 #Compute the thickness at the relevant points
 thavg$thick<-thavg$mean-thavg$TCCZ.fit
 
+summary(thavg$thick)
+
 
 
 
