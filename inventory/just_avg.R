@@ -30,8 +30,27 @@ tritiuml<-split(tritium,tritium$MYEAR)
 #tritium.1984<-selectyear(tritium, 1984)
 #summary(tritium[tritium$STATION_ID=='FSB115D',])
 #TCCZ.lm<-lm(TCCZ_top~UTM_E+UTM_N,data=TCCZe,na.action=na.omit)
-#TCCZ.loess1 = loess(TCCZ_top~UTM_E+UTM_N, data = TCCZe, degree = 1, span = 0.25)
+
+#Local polynomial fit (1st order)
+TCCZ.loess1 <- loess(TCCZ_top~EASTING+NORTHING, data = TCCZe, degree = 1, span = 0.25)
+#second order polynomial
 #TCCZ.loess2 = loess(TCCZ_top~UTM_E+UTM_N, data = TCCZe, degree = 2, span = 0.25)
+#predict(TCCZ.loess1,newdata = wlavg[,c("EASTING","NORTHING")], na.action = na.omit)
+
+#Create the aquifer thickness data frame
+thavg<-wlavg
+#Add the TCCZ values predicted by the linear model
+#thavg$TCCZ<-predict(TCCZ.loess1,newdata = wlavg[,c("EASTING","NORTHING")], na.action = na.exclude)
+#Same with standard error estimates
+pre1<-predict(TCCZ.loess1,newdata = wlavg[,c("EASTING","NORTHING")],se = TRUE ,na.action = na.exclude)
+thavg$TCCZ.fit<-pre1$fit
+thavg$TCCZ.se.fit<-pre1$se.fit
+
+#Compute the thickness at the relevant points
+thavg$thick<-thavg$mean-thavg$TCCZ.fit
+
+
+
 
 #2D interpolation within the bounds of interest.
 no.min<-3680930
@@ -55,7 +74,7 @@ interpext.peryear<- function(x) interp(x$EASTING, x$NORTHING, x$mean, xo=seq(ea.
 
 #
 
-TCCZ.interp<-interp(TCCZe$UTM_E, TCCZe$UTM_N, TCCZe$TCCZ_top, xo=seq(ea.min, ea.max, length = ea.b), yo=seq(no.min, no.max, length = no.b), linear = TRUE, extrap=FALSE, duplicate = "error")
+TCCZ.interp<-interp(TCCZe$EASTING, TCCZe$NORTHING, TCCZe$TCCZ_top, xo=seq(ea.min, ea.max, length = ea.b), yo=seq(no.min, no.max, length = no.b), linear = TRUE, extrap=FALSE, duplicate = "error")
 
 wlavg.interp<-interp(wlavg$EASTING, wlavg$NORTHING, wlavg$mean, xo=seq(ea.min, ea.max, length = ea.b), yo=seq(no.min, no.max, length = no.b), linear = TRUE, extrap=FALSE, duplicate = "mean")
 
