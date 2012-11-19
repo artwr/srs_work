@@ -34,30 +34,40 @@ tritiuml<-split(tritium,tritium$MYEAR)
 #TCCZ.loess2 = loess(TCCZ_top~UTM_E+UTM_N, data = TCCZe, degree = 2, span = 0.25)
 
 #2D interpolation within the bounds of interest.
-no.min<-3680929
-no.max<-3682109
+no.min<-3680930
+no.max<-3682110
 ea.min<-436175
-ea.max<-437158
+ea.max<-437155
 
-d.ea<-c(436175,436175,437158,438158,436175)
-d.no<-c(3680929,3682109,3682109,3680929,3680929)
+#number of breaks
+ea.b<-1+(ea.max-ea.min)/20
+no.b<-1+(no.max-no.min)/20
+
+d.ea<-c(ea.min,ea.min,ea.max,ea.max,ea.min)
+d.no<-c(no.min,no.max,no.max,no.min,no.min)
 pp<-cbind(d.ea,d.no)
 #plot(pp, type="b")
 area.dom<-areapl(pp)
 
-interp.peryear<- function(x) interp(x$EASTING, x$NORTHING, x$mean, xo=seq(ea.min, ea.max, length = 45), yo=seq(no.min, no.max, length = 50), linear = TRUE, extrap=FALSE, duplicate = "mean");
+interp.peryear<- function(x) interp(x$EASTING, x$NORTHING, x$mean, xo=seq(ea.min, ea.max, length = ea.b), yo=seq(no.min, no.max, length = no.b), linear = TRUE, extrap=FALSE, duplicate = "mean");
+
+interpext.peryear<- function(x) interp(x$EASTING, x$NORTHING, x$mean, xo=seq(ea.min, ea.max, length = ea.b), yo=seq(no.min, no.max, length = no.b), linear = TRUE, extrap=TRUE, duplicate = "mean");
 
 #
 
-TCCZ.interp<-interp(TCCZe$UTM_E, TCCZe$UTM_N, TCCZe$TCCZ_top, xo=seq(ea.min, ea.max, length = 45), yo=seq(no.min, no.max, length = 50), linear = TRUE, extrap=FALSE, duplicate = "error")
+TCCZ.interp<-interp(TCCZe$UTM_E, TCCZe$UTM_N, TCCZe$TCCZ_top, xo=seq(ea.min, ea.max, length = ea.b), yo=seq(no.min, no.max, length = no.b), linear = TRUE, extrap=FALSE, duplicate = "error")
 
-wlavg.interp<-interp(wlavg$EASTING, wlavg$NORTHING, wlavg$mean, xo=seq(ea.min, ea.max, length = 45), yo=seq(no.min, no.max, length = 50), linear = TRUE, extrap=FALSE, duplicate = "mean")
+wlavg.interp<-interp(wlavg$EASTING, wlavg$NORTHING, wlavg$mean, xo=seq(ea.min, ea.max, length = ea.b), yo=seq(no.min, no.max, length = no.b), linear = TRUE, extrap=FALSE, duplicate = "mean")
 
-tritium.interp<-interp(tritium$EASTING, tritium$NORTHING, tritium$mean, xo=seq(ea.min, ea.max, length = 30), yo=seq(no.min, no.max, length = 50), linear = TRUE, extrap=FALSE, duplicate = "mean")
+tritium.interp<-interp(tritium$EASTING, tritium$NORTHING, tritium$mean, xo=seq(ea.min, ea.max, length = ea.b), yo=seq(no.min, no.max, length = no.b), linear = TRUE, extrap=FALSE, duplicate = "mean")
 
-wll.interp<-llply(wll, interp.peryear, .progress = "text", .inform = FALSE, .parallel = FALSE)
+wll.interp<-llply(wll, interp.peryear)
 
-tritiuml.interp<-llply(tritiuml, interp.peryear, .progress = "text", .inform = FALSE, .parallel = FALSE)
+tritiuml.interp<-llply(tritiuml, interp.peryear)
+
+wll.interpext<-llply(wll, interpext.peryear, .progress = "text", .inform = FALSE)
+
+tritiuml.interpext<-llply(tritiuml, interpext.peryear, .progress = "text", .inform = FALSE)
 
 
 #create aquifer thickness
@@ -67,9 +77,18 @@ thickness<-llply(wll.interp,function(ll){list(x=ll$x, y=ll$y, z=as.matrix(0.3048
 #is.list(testthickness['1984'][[1]])
 #To access 
 #testthickness['1984'][[1]][[3]]
-contour(testthickness['1988'][[1]][[1]],testthickness['1988'][[1]][[2]],testthickness['1988'][[1]][[3]])
-
+#contour(testthickness['1988'][[1]][[1]],testthickness['1988'][[1]][[2]],testthickness['1988'][[1]][[3]])
 #image.plot(testthickness['1985'][[1]])
+
+#A quick look at the tritium data per year
+image.plot(tritiuml.interp['1990'][[1]])
+points(tritium$EASTING, tritium$NORTHING, pch=19)
+
+
+replaceNAwithzero<-function(m){m[is.na(m)]<-0};
+
+
+
 # #image and contour plot for the TCCZ
 # image.plot(TCCZ.interp)
 # contour(TCCZ.interp$x,TCCZ.interp$y,TCCZ.interp$z)
