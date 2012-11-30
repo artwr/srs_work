@@ -6,6 +6,7 @@ require(akima)
 require(splancs)
 require(plyr)
 require(ggplot2)
+require(scales)
 
 #Clear all, set na.exclude
 rm(list=ls())
@@ -32,6 +33,8 @@ wlavg<-readRDS("../SRS_data/wlavg.rdata")
 wll<-split(wl,wl$MYEAR)
 tritiuml<-split(tritium,tritium$MYEAR)
 
+
+#########################################################
 #2.
 #Define interpolation domain and compute area, define other parameters
 #
@@ -47,6 +50,9 @@ no.b<-1+(no.max-no.min)/20
 #ea
 ea.v<-seq(ea.min, ea.max, length = ea.b)
 no.v<-seq(no.min, no.max, length = no.b)
+
+#Create the expandgrid df for predictions
+testgrid1<-expand.grid(EASTING=ea.v, NORTHING=no.v)
 
 #Create polygon to compute area.
 d.ea<-c(ea.min,ea.min,ea.max,ea.max,ea.min)
@@ -127,12 +133,12 @@ inventoryjahlm<-merge(tritiumavg[tritiumavg$MYEAR>=1984,],th.avg.peryearhlm,by="
 inventoryja<-merge(inventoryjah,th.avg.peryearhb,by="MYEAR")
 inventoryja<-merge(inventoryja,th.avg.peryearhlm,by="MYEAR")
 #inventoryja[,c("count","h.mean","h.median","h.sd","h.mad","h.min","h.max")]<-th.avg.peryear[, c("count","h.mean","h.median","h.sd","h.mad","h.min","h.max")]
-inventoryjah$inventory<-area.dom*porosity.mean*inventoryjah$h.mean*inventoryjah$mean*.3048*1e-9*porosity.mean
-inventoryjahb$inventory<-area.dom*porosity.mean*inventoryjahb$hb.mean*inventoryjahb$mean*.3048*1e-9*porosity.mean
-inventoryjahlm$inventory<-area.dom*porosity.mean*inventoryjahlm$hlm.mean*inventoryjahlm$mean*.3048*1e-9*porosity.mean
-inventoryja$inventory1<-area.dom*porosity.mean*inventoryja$h.mean*inventoryja$mean*.3048*1e-9*porosity.mean
-inventoryja$inventory1b<-area.dom*porosity.mean*inventoryja$hb.mean*inventoryja$mean*.3048*1e-9*porosity.mean
-inventoryja$inventory1lm<-area.dom*porosity.mean*inventoryja$hlm.mean*inventoryja$mean*.3048*1e-9*porosity.mean
+inventoryjah$inventory<-area.dom*porosity.mean*inventoryjah$h.mean*inventoryjah$mean*.3048*1e-9
+inventoryjahb$inventory<-area.dom*porosity.mean*inventoryjahb$hb.mean*inventoryjahb$mean*.3048*1e-9
+inventoryjahlm$inventory<-area.dom*porosity.mean*inventoryjahlm$hlm.mean*inventoryjahlm$mean*.3048*1e-9
+inventoryja$inventory1<-area.dom*porosity.mean*inventoryja$h.mean*inventoryja$mean*.3048*1e-9
+inventoryja$inventory1b<-area.dom*porosity.mean*inventoryja$hb.mean*inventoryja$mean*.3048*1e-9
+inventoryja$inventory1lm<-area.dom*porosity.mean*inventoryja$hlm.mean*inventoryja$mean*.3048*1e-9
 
 rm(inventoryjah)
 rm(inventoryjahb)
@@ -146,14 +152,25 @@ rm(th.avg.peryearhlm)
 
 #Draft ggplot for the inventory
 #qplot(MYEAR, inventory, data=inventoryja)
-# ja.plot<-ggplot(data=inventoryja, aes(x=MYEAR))
-# ja.plot<- ja.plot +geom_line(aes(y=inventory1, colour='blue'))
-# ja.plot<- ja.plot +geom_line(aes(y=inventory1b, colour='red'))
-# ja.plot<- ja.plot +geom_line(aes(y=inventory1lm, colour='green'))
-# ja.plot<-ja.plot+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
-# ja.plot
+ja.plot<-ggplot(data=inventoryja, aes(x=MYEAR))
+ja.plot<- ja.plot +geom_line(aes(y=inventory1), colour='blue')
+ja.plot<- ja.plot +geom_line(aes(y=inventory1b), colour='red')
+ja.plot<- ja.plot +geom_line(aes(y=inventory1lm), colour='green')
+ja.plot<-ja.plot+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+ja.plot
 
 
+# log2 scaling of the y axis (with visually-equal spacing)
+ja.plotlog1<- ja.plot + scale_y_continuous(trans=log10_trans())
+ja.plotlog1
+# log2 coordinate transformation (with visually-diminishing spacing)
+ja.plotlog2<- ja.plot + coord_trans(y="log2")
+ja.plotlog2
+
+saveRDS(inventoryja, file = "inventoryja.rdata")
+
+inventoryja.csv<-inventoryja[,c("MYEAR","inventory1","inventory1b","inventory1lm")]
+write.csv(inventoryja.csv, file="inventoryja.csv",eol="\r\n")
 
 ########################################
 #4. Do the calculation again, this time with interpolation on a regular grid.
@@ -176,11 +193,10 @@ wlavg.interp<-interp(wlavg$EASTING, wlavg$NORTHING, wlavg$mean, xo=ea.v, yo=no.v
 #prewllm<-predict(wlavg.lm,newdata = testgrid1,se = TRUE ,na.action = na.omit)
 
 #Create the loess models for wl and tritium
-loess<- function(zzl) loess()
+#loess<- function(zzl) loess()
 
 
 # Use of the loess model and linear models for TCCZ prediction
-testgrid1<-expand.grid(EASTING=ea.v, NORTHING=no.v)
 pre3<-predict(TCCZ.loess1,newdata = testgrid1,se = TRUE ,na.action = na.omit)
 pre3b<-predict(TCCZ.loess1b,newdata = testgrid1,se = TRUE ,na.action = na.omit)
 pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE ,na.action = na.omit)
