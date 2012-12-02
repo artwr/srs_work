@@ -23,34 +23,36 @@ options(na.action="na.exclude")
 #Selected matrix functions from Henrik Bengtsson
 # https://stat.ethz.ch/pipermail/r-help/2003-October/040484.html
 # http://www1.maths.lth.se/help/R/image/image.R
-# Mirror matrix (left-right)
-mirror.matrix <- function(x) {
-  xx <- as.data.frame(x);
-  xx <- rev(xx);
-  xx <- as.matrix(xx);
-  xx;
-}
-# Rotate matrix 90 clockworks
-rotate90.matrix <- function(x) {
-  t(mirror.matrix(x))
-}
-# Rotate matrix 180 clockworks
-rotate180.matrix <- function(x) { 
-  xx <- rev(x);
-  dim(xx) <- dim(x);
-  xx;
-}
-# Rotate matrix 270 clockworks
-rotate270.matrix <- function(x) {
-  mirror.matrix(t(x))
-}
+# # Mirror matrix (left-right)
+# mirror.matrix <- function(x) {
+#   xx <- as.data.frame(x);
+#   xx <- rev(xx);
+#   xx <- as.matrix(xx);
+#   xx;
+# }
+# # Rotate matrix 90 clockworks
+# rotate90.matrix <- function(x) {
+#   t(mirror.matrix(x))
+# }
+# # Rotate matrix 180 clockworks
+# rotate180.matrix <- function(x) { 
+#   xx <- rev(x);
+#   dim(xx) <- dim(x);
+#   xx;
+# }
+# # Rotate matrix 270 clockworks
+# rotate270.matrix <- function(x) {
+#   mirror.matrix(t(x))
+# }
 
 #################################
 #1.
 #load data
 #tritium<-readRDS("../SRS_data/tritium.rdata")
 tritium<-readRDS("../SRS_data/tritiumf.rdata")
+tritiumC<-readRDS("../SRS_data/tritiumC.rdata")
 tritiumavg<-readRDS("../SRS_data/tritiumavg.rdata")
+tritiumCavg<-readRDS("../SRS_data/tritiumCavg.rdata")
 wl<-readRDS("../SRS_data/wl.rdata")
 TCCZe_all<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
 TCCZe<-TCCZe_all[!is.na(TCCZe_all$TCCZ_top),]
@@ -64,14 +66,17 @@ wlavg<-readRDS("../SRS_data/wlavg.rdata")
 tritium$logmean<-log(tritium$mean)
 tritium$log10mean<-log10(tritium$mean)
 #
+tritiumC$logmean<-log(tritiumC$mean)
+tritiumC$log10mean<-log10(tritiumC$mean)
 #Split per measurement year
 wll<-split(wl,wl$MYEAR)
 tritiuml<-split(tritium,tritium$MYEAR)
-
+tritiumCl<-split(tritiumC,tritiumC$MYEAR)
 #Select 1988 and after
 wll2<-wll[5:length(wll)]
 tritiuml2<-tritiuml[10:length(tritiuml)]
-#names(tritiuml2)
+tritiumCl2<-tritiumCl[3:length(tritiumCl)]
+# names(tritiuml2)
 #########################################################
 #2.
 #Define interpolation domain and compute area, define other parameters
@@ -100,6 +105,9 @@ area.dom<-areapl(pp)
 #Define porosity value
 porosity.mean<-.3
 porosity.sd<-.03
+
+#C thickness in m
+Cth<-10*.3048
 
 #########################################################
 #3. Do simple average calculations on the well positions only
@@ -150,11 +158,16 @@ inventoryja<-merge(tritiumavg[tritiumavg$MYEAR>=1984,],th.avg.peryearh,by="MYEAR
 inventoryja<-merge(inventoryja,th.avg.peryearhb,by="MYEAR")
 inventoryja<-merge(inventoryja,th.avg.peryearhlm,by="MYEAR")
 
+inventoryCja<-data.frame(MYEAR=tritiumCavg[,c("MYEAR")])
+inventoryCja$inventoryC<-area.dom*porosity.mean*Cth*tritiumCavg$mean*1e-9
+
 #Compute the inventory
 inventoryja$inventory1<-area.dom*porosity.mean*inventoryja$h.mean*inventoryja$mean*.3048*1e-9
 inventoryja$inventory1b<-area.dom*porosity.mean*inventoryja$hb.mean*inventoryja$mean*.3048*1e-9
 inventoryja$inventory1lm<-area.dom*porosity.mean*inventoryja$hlm.mean*inventoryja$mean*.3048*1e-9
+inventoryja<-merge(inventoryja,inventoryCja,by="MYEAR")
 
+rm(thperyear)
 rm(thperyear.cleanh)
 rm(thperyear.cleanhb)
 rm(thperyear.cleanhlm)
@@ -168,8 +181,9 @@ ja.plot<-ggplot(data=inventoryja, aes(x=MYEAR))
 ja.plot<- ja.plot +geom_line(aes(y=inventory1), colour='blue')
 ja.plot<- ja.plot +geom_line(aes(y=inventory1b), colour='red')
 ja.plot<- ja.plot +geom_line(aes(y=inventory1lm), colour='green')
+ja.plot<- ja.plot +geom_line(aes(y=inventoryC), colour='violet')
 ja.plot<-ja.plot+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
-ja.plot
+print(ja.plot)
 
 
 # log2 scaling of the y axis (with visually-equal spacing)
@@ -181,7 +195,7 @@ ja.plotlog2
 
 saveRDS(inventoryja, file = "inventoryja.rdata")
 
-inventoryja.csv<-inventoryja[,c("MYEAR","inventory1","inventory1b","inventory1lm")]
+inventoryja.csv<-inventoryja[,c("MYEAR","inventory1","inventory1b","inventory1lm","inventoryC")]
 write.csv(inventoryja.csv, file="inventoryja.csv")
 
 ########################################
@@ -319,7 +333,7 @@ final.plot3<- final.plot3 +geom_point(aes(y=inventory1b), colour='red')
 final.plot3<- final.plot3 +geom_point(aes(y=inventory1lm), colour='green')
 final.plot3<- final.plot3 +geom_point(aes(y=t), colour='orange')
 final.plot3<- final.plot3 +geom_point(aes(y=tfl), colour='black')
-final.plot3<- final.plot3 + scale_y_log10()
+# final.plot3<- final.plot3 + scale_y_log10()
 final.plot3<-final.plot3+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
 print(final.plot3)
 
