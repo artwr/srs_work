@@ -13,6 +13,7 @@ require(scales)
 
 #Clear all, set na.exclude
 rm(list=ls())
+options(na.action="na.exclude")
 #options(na.action="na.omit")
 #options("na.action")
 
@@ -47,7 +48,8 @@ rotate270.matrix <- function(x) {
 #################################
 #1.
 #load data
-tritium<-readRDS("../SRS_data/tritium.rdata")
+#tritium<-readRDS("../SRS_data/tritium.rdata")
+tritium<-readRDS("../SRS_data/tritiumf.rdata")
 tritiumavg<-readRDS("../SRS_data/tritiumavg.rdata")
 wl<-readRDS("../SRS_data/wl.rdata")
 TCCZe_all<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
@@ -113,7 +115,6 @@ TCCZ.lm<-lm(TCCZ_top~EASTING+NORTHING,data=TCCZe)
 thperyear<-wl
 #Add the TCCZ values predicted by the linear models
 # with standard error estimates
-options(na.action="na.exclude")
 pre2<-predict(TCCZ.loess1,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
 pre2b<-predict(TCCZ.loess1b,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
 pre2lm<-predict(TCCZ.lm,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
@@ -193,51 +194,14 @@ write.csv(inventoryja.csv, file="inventoryja.csv")
 #The later will allow for the matching of concentration and aquifer thickness.
 ###########################################
 
-#Define short hand for AKIMA interpolation functions without and with extrapolation
-interp.peryear<- function(x) interp(x$EASTING, x$NORTHING, x$mean, xo=ea.v, yo=no.v, linear = TRUE, extrap=FALSE, duplicate = "mean");
-interpext.peryear<- function(x) interp(x$EASTING, x$NORTHING, x$mean, xo=ea.v, yo=no.v, linear = FALSE, extrap=TRUE, duplicate = "mean");
-
-#Interpolation for TCCZ
-TCCZ.interp<-interp(TCCZe$EASTING, TCCZe$NORTHING, TCCZe$TCCZ_top, xo=ea.v, yo=no.v, linear = TRUE, duplicate = "error")
-
-#Interpolation
-wll.interp<-llply(wll, interp.peryear)
-tritiuml.interp<-llply(tritiuml, interp.peryear)
-#Extrapolation
-wll.interpext<-llply(wll, interpext.peryear, .progress = "text")
-tritiuml.interpext<-llply(tritiuml, interpext.peryear, .progress = "text")
-
-#create aquifer thickness
- thickness<-llply(wll.interp,function(ll){list(x=ll$x, y=ll$y, z=as.matrix(0.3048*(ll$z-TCCZ.interp$z)))}, .progress = "text")
-
-# image.plot(TCCZ.interp)
-# image.plot(wll.interp['1996'][[1]],asp = 1)
-# image.plot(tritiuml.interp['1992'][[1]],asp = 1)
-# image.plot(wll.interpext['1988'][[1]],asp = 1)
-# image.plot(tritiuml.interpext['1992'][[1]],asp = 1)
-# contour(wll.interpext['1988'][[1]][[1]],wll.interpext['1988'][[1]][[2]],wll.interpext['1988'][[1]][[3]])
-# contour(wll.interp['1988'][[1]][[1]],wll.interp['1988'][[1]][[2]],wll.interp['1988'][[1]][[3]])
-#image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=thickness['1996'][[1]][[3]])
-
-#Make into a dataframe for ggplot
-# thicknessdf<-testgrid1
-# for (jj in 1:length(thickness)) {
-#   thicknessdf[2+jj]<-as.vector(thickness[jj][[1]][[3]])
-#   names(thicknessdf)[2+jj]<-paste0("th",names(thickness)[jj])
-# }
-# gg96<-ggplot(data=thicknessdf,aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=th1996))
-# gg96
-#contour(testthickness['1988'][[1]][[1]],testthickness['1988'][[1]][[2]],testthickness['1988'][[1]][[3]])
-
-
 
 ######################################
 #5. Using loess and prediction.
 
 # Test Use of the loess model and linear models for TCCZ prediction
-pre3<-predict(TCCZ.loess1,newdata = testgrid1,se = TRUE ,na.action = na.omit)
-pre3b<-predict(TCCZ.loess1b,newdata = testgrid1,se = TRUE ,na.action = na.omit)
-pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE ,na.action = na.omit)
+pre3<-predict(TCCZ.loess1,newdata = testgrid1,se = TRUE)
+pre3b<-predict(TCCZ.loess1b,newdata = testgrid1,se = TRUE)
+pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE)
 
 wll.loess<-llply(wll2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1, span=0.75)})
 wl.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)})
@@ -253,79 +217,124 @@ inv5$TCCZsefit<-as.vector(pre3$se.fit)
 inv5$TCCZsefitb<-as.vector(pre3b$se.fit)
 inv5$TCCZsefitlm<-as.vector(pre3lm$se.fit)
 
-nbparam1<-5
+nbparam1<-6
 
 for (kk in 1:length(tritiuml2)) {
   t.loess<-loess(mean~EASTING+NORTHING, data=tritiuml2[[kk]],degree=1,span=0.5)
   logt.loess<-loess(logmean~EASTING+NORTHING, data=tritiuml2[[kk]],degree=1,span=0.5)
   predt<-predict(t.loess,newdata = testgrid1 ,se = TRUE)
   predlogt<-predict(logt.loess,newdata = testgrid1 ,se = TRUE)
-  inv5[nbparam1*(kk-1)+9]<-as.vector(predt$fit)
+  fullfit<-as.vector(predt$fit)
+  fullfit[fullfit<0]<-NA
+  #fullfit[fullfit<0]<-1
+  inv5[nbparam1*(kk-1)+9]<-fullfit
   names(inv5)[nbparam1*(kk-1)+9]<-paste0("T",names(tritiuml2)[kk])
-  inv5[nbparam1*(kk-1)+10]<-as.vector(predlogt$fit)
-  names(inv5)[nbparam1*(kk-1)+10]<-paste0("LogT",names(tritiuml2)[kk])
+  logfullfit<-as.vector(predlogt$fit)
+  Tfl<-exp(logfullfit)
+  inv5[nbparam1*(kk-1)+10]<-Tfl
+  names(inv5)[nbparam1*(kk-1)+10]<-paste0("Tfl",names(tritiuml2)[kk])
   #inv5[nbparam1*(kk-1)+10]<-pdret$se.fit
   #names(inv5)[nbparam1*(kk-1)+10]<-paste0("seT",names(tritiuml2)[kk])
   w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=0.5)
   predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE)
   inv5[nbparam1*(kk-1)+11]<-as.vector(predw$fit)
   names(inv5)[nbparam1*(kk-1)+11]<-paste0("w",names(wll2)[kk])
-  inv5[nbparam1*(kk-1)+12]<-as.vector(predw$fit)-inv5$TCCZfitb
+  height<-as.vector(predw$fit)-inv5$TCCZfitb
+  height[height<0]<-NA
+  inv5[nbparam1*(kk-1)+12]<-height
   names(inv5)[nbparam1*(kk-1)+12]<-paste0("h",names(wll2)[kk])
-  inv5[nbparam1*(kk-1)+12][inv5[nbparam1*(kk-1)+12]<1]<-NA
   inv5[nbparam1*(kk-1)+13]<-inv5[nbparam1*(kk-1)+9]*inv5[nbparam1*(kk-1)+12]
   names(inv5)[nbparam1*(kk-1)+13]<-paste0("ch",names(wll2)[kk])
+  inv5[nbparam1*(kk-1)+14]<-inv5[nbparam1*(kk-1)+10]*inv5[nbparam1*(kk-1)+12]
+  names(inv5)[nbparam1*(kk-1)+14]<-paste0("chfl",names(wll2)[kk])
 }
 
 
-
-
-
 # ggtest2<-ggplot(inv5, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=TCCZfitb))
-# ggtest2<-ggtest2+scale_colour_gradient(limits=range(inv5$TCCZfitb, na.rm = TRUE), low="red", high="white")
+# ggtest2<-ggtest2+scale_fill_gradient(limits=range(inv5$TCCZfitb, na.rm = TRUE), low="red", high="white")
 # print(ggtest2)
+# 
+# ggtest2a<-ggplot(inv5, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=T1996))
+# ggtest2a<-ggtest2a+scale_fill_gradient2()
+# print(ggtest2)
+# 
+# ggtest2b<-ggplot(inv5, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=h2003))
+# ggtest2b<-ggtest2b+scale_fill_gradient2()
+# print(ggtest2b)
 # 
 # ggtest3<-ggplot(inv5, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=TCCZfitb), colour = "white",linetype = 0) + scale_fill_gradient(low = "white",high = "red")
 # print(ggtest3)
 
-ggtest4<-ggplot(inv5, aes(x=EASTING,y=NORTHING, z=T1996)) + stat_contour(aes(colour = ..level..))
-#ggtest4<-ggtest4+scale_colour_gradient(limits=range(inv5$TCCZfitb, na.rm = TRUE), low="red", high="white")
-print(ggtest4)
+# ggtest4<-ggplot(inv5, aes(x=EASTING,y=NORTHING, z=T1996)) + stat_contour(aes(colour = ..level..),breaks=c(0,100000,1000000))
+# #ggtest4<-ggtest4+scale_colour_gradient(limits=range(inv5$TCCZfitb, na.rm = TRUE), low="red", high="white")
+# print(ggtest4)
+# 
+# ggtest5<-ggplot(inv5, aes(x=EASTING,y=NORTHING, z=Tfl1996)) + stat_contour(aes(colour = ..level..),breaks=c(.1,1,1000,100000,1000000))
+# #ggtest4<-ggtest4+scale_colour_gradient(limits=range(inv5$TCCZfitb, na.rm = TRUE), low="red", high="white")
+# print(ggtest5)
 
-qplot(x=h1994,y=T1994,data=inv5)
+#qplot(x=h1994,y=T1994,data=inv5)
 
 inventory5<-data.frame(MYEAR=seq(1988,2011,length=24))
 for (jj2 in 1:length(inventory5$MYEAR)) {
-  inventory5$meanch[jj2]<-mean(inv5[[nbparam1*(jj2-1)+12]], na.rm=TRUE)
-  inventory5$medianch[jj2]<-median(inv5[[nbparam1*(jj2-1)+12]], na.rm=TRUE)
-  inventory5$sdch[jj2]<-sd(inv5[[nbparam1*(jj2-1)+12]], na.rm=TRUE)
+  inventory5$meanch[jj2]<-mean(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
+  inventory5$medianch[jj2]<-median(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
+  inventory5$sdch[jj2]<-sd(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
+  inventory5$meanchfl[jj2]<-mean(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
+  inventory5$medianchfl[jj2]<-median(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
+  inventory5$sdchfl[jj2]<-sd(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
 }
 inventory5$t<-area.dom*porosity.mean*inventory5$meanch*1e-9*.3048
 inventory5$tmed<-area.dom*porosity.mean*inventory5$medianch*1e-9*.3048
+inventory5$tfl<-area.dom*porosity.mean*inventory5$meanchfl*1e-9*.3048
+inventory5$tmedfl<-area.dom*porosity.mean*inventory5$medianchfl*1e-9*.3048
 
 inventory.final<-merge(inventoryja, inventory5, by="MYEAR")
 
+# pdf(file="%GDRIVE%\test\testinv.pdf",paper="letter")
+# final.plot<-ggplot(data=inventory.final, aes(x=MYEAR))
+# final.plot<- final.plot +geom_line(aes(y=inventory1), colour='blue')
+# final.plot<- final.plot +geom_line(aes(y=inventory1b), colour='red')
+# final.plot<- final.plot +geom_line(aes(y=inventory1lm), colour='green')
+# final.plot<- final.plot +geom_line(aes(y=t), colour='orange')
+# #final.plot<- final.plot +geom_line(aes(y=tmed), colour='black')
+# final.plot<- final.plot + scale_y_log10()
+# #scale_y_continuous(trans=log2_trans())
+# final.plot<-final.plot+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+# print(final.plot)
+# dev.off()
 
-final.plot<-ggplot(data=inventory.final, aes(x=MYEAR))
-final.plot<- final.plot +geom_line(aes(y=inventory1), colour='blue')
-final.plot<- final.plot +geom_line(aes(y=inventory1b), colour='red')
-final.plot<- final.plot +geom_line(aes(y=inventory1lm), colour='green')
-final.plot<- final.plot +geom_line(aes(y=t), colour='orange')
-#final.plot<- final.plot +geom_line(aes(y=tmed), colour='black')
-final.plot<- final.plot + scale_y_log10()
-#scale_y_continuous(trans=log2_trans())
-final.plot<-final.plot+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
-print(final.plot)
+# final.plot2<-ggplot(data=inventory.final, aes(x=MYEAR))
+# final.plot2<- final.plot2 +geom_point(aes(y=inventory1), colour='blue')
+# final.plot2<- final.plot2 +geom_point(aes(y=inventory1b), colour='red')
+# final.plot2<- final.plot2 +geom_point(aes(y=inventory1lm), colour='green')
+# final.plot2<- final.plot2 +geom_point(aes(y=t), colour='orange')
+# final.plot2<- final.plot2 + scale_y_log10()
+# final.plot2<-final.plot2+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+# print(final.plot2)
 
-final.plot2<-ggplot(data=inventory.final, aes(x=MYEAR))
-final.plot2<- final.plot2 +geom_point(aes(y=inventory1), colour='blue')
-final.plot2<- final.plot2 +geom_point(aes(y=inventory1b), colour='red')
-final.plot2<- final.plot2 +geom_point(aes(y=inventory1lm), colour='green')
-final.plot2<- final.plot2 +geom_point(aes(y=t), colour='orange')
-final.plot2<- final.plot2 + scale_y_log10()
+final.plot3<-ggplot(data=inventory.final, aes(x=MYEAR))
+final.plot3<- final.plot3 +geom_point(aes(y=inventory1), colour='blue')
+final.plot3<- final.plot3 +geom_point(aes(y=inventory1b), colour='red')
+final.plot3<- final.plot3 +geom_point(aes(y=inventory1lm), colour='green')
+final.plot3<- final.plot3 +geom_point(aes(y=t), colour='orange')
+final.plot3<- final.plot3 +geom_point(aes(y=tfl), colour='black')
+final.plot3<- final.plot3 + scale_y_log10()
+final.plot3<-final.plot3+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+print(final.plot3)
 
-final.plot2<-final.plot2+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
-print(final.plot2)
+
+final.plot4<-ggplot(data=inventory.final, aes(x=MYEAR))
+final.plot4<- final.plot4 +geom_point(aes(y=inventory1), colour='blue')
+final.plot4<- final.plot4 +geom_point(aes(y=inventory1b), colour='red')
+final.plot4<- final.plot4 +geom_point(aes(y=inventory1lm), colour='green')
+final.plot4<- final.plot4 +geom_point(aes(y=t), colour='orange')
+# final.plot4<- final.plot4 +geom_point(aes(y=tfl), colour='black')
+final.plot4<- final.plot4 + scale_y_log10()
+final.plot4<-final.plot4+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+print(final.plot4)
+
+
 
 
 
@@ -432,6 +441,49 @@ print(final.plot2)
 # tz90<-rotate90.matrix(tz)
 #TCCZ.loess1.interp<-list(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
 #TCCZ.loess1b.interp<-list(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
+
+
+
+###################################
+#AKIMA version
+# 
+# #Define short hand for AKIMA interpolation functions without and with extrapolation
+# interp.peryear<- function(x) AKIMA::interp(x$EASTING, x$NORTHING, x$mean, xo=ea.v, yo=no.v, linear = TRUE, extrap=FALSE, duplicate = "mean");
+# interpext.peryear<- function(x) AKIMA::interp(x$EASTING, x$NORTHING, x$mean, xo=ea.v, yo=no.v, linear = FALSE, extrap=TRUE, duplicate = "mean");
+# 
+# #Interpolation for TCCZ
+# TCCZ.interp<-AKIMA::interp(TCCZe$EASTING, TCCZe$NORTHING, TCCZe$TCCZ_top, xo=ea.v, yo=no.v, linear = TRUE, duplicate = "error")
+# 
+# #Interpolation
+# wll.interp<-llply(wll, interp.peryear)
+# tritiuml.interp<-llply(tritiuml, interp.peryear)
+# #Extrapolation
+# wll.interpext<-llply(wll, interpext.peryear, .progress = "text")
+# tritiuml.interpext<-llply(tritiuml, interpext.peryear, .progress = "text")
+# 
+# #create aquifer thickness
+#  thickness<-llply(wll.interp,function(ll){list(x=ll$x, y=ll$y, z=as.matrix(0.3048*(ll$z-TCCZ.interp$z)))}, .progress = "text")
+
+# image.plot(TCCZ.interp)
+# image.plot(wll.interp['1996'][[1]],asp = 1)
+# image.plot(tritiuml.interp['1992'][[1]],asp = 1)
+# image.plot(wll.interpext['1988'][[1]],asp = 1)
+# image.plot(tritiuml.interpext['1992'][[1]],asp = 1)
+# contour(wll.interpext['1988'][[1]][[1]],wll.interpext['1988'][[1]][[2]],wll.interpext['1988'][[1]][[3]])
+# contour(wll.interp['1988'][[1]][[1]],wll.interp['1988'][[1]][[2]],wll.interp['1988'][[1]][[3]])
+#image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=thickness['1996'][[1]][[3]])
+
+#Make into a dataframe for ggplot
+# thicknessdf<-testgrid1
+# for (jj in 1:length(thickness)) {
+#   thicknessdf[2+jj]<-as.vector(thickness[jj][[1]][[3]])
+#   names(thicknessdf)[2+jj]<-paste0("th",names(thickness)[jj])
+# }
+# gg96<-ggplot(data=thicknessdf,aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=th1996))
+# gg96
+#contour(testthickness['1988'][[1]][[1]],testthickness['1988'][[1]][[2]],testthickness['1988'][[1]][[3]])
+
+
 
 
 # image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
