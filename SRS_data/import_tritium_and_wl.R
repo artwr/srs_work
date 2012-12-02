@@ -4,6 +4,7 @@ require(plyr)
 rm(list=ls())
 #read the data
 tritium.raw<-read.csv("tritium4R.csv")
+HSB143D<-read.csv("HSB143D_add.csv")
 wl.raw<-read.csv("wl4R.csv")
 
 #Remove FEX8 because of the 2 screens.
@@ -34,9 +35,9 @@ tritium.clean<-tritium.clean1[!is.na(tritium.clean1$RESULT),]
 #Using plyr
 tritium.plyr1<-ddply(tritium.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
 tritium.plyra<-ddply(tritium.clean, c('MYEAR'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
-
+HSB143D.plyr1<-ddply(HSB143D, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
 #
-
+tritium.final<-rbind(tritium.plyr1,HSB143D.plyr1)
 
 #For the water levels
 wl.plyr1<-ddply(wl.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$WATER_ELEV),median=median(x$WATER_ELEV),sd=sd(x$WATER_ELEV),mad=mad(x$WATER_ELEV),min=min(x$WATER_ELEV),max=max(x$WATER_ELEV)))
@@ -47,6 +48,7 @@ wl.plyra<-ddply(wl.clean, c('STATION_SEQ','STATION_ID','EASTING','NORTHING'), fu
 
 #Save as R datasets
 saveRDS(tritium.plyr1, file = "tritium.rdata")
+saveRDS(tritium.final, file = "tritiumf.rdata")
 saveRDS(tritium.plyra, file = "tritiumavg.rdata")
 saveRDS(wl.plyr1, file = "wl.rdata")
 saveRDS(wl.plyra, file = "wlavg.rdata")
