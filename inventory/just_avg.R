@@ -188,10 +188,10 @@ print(ja.plot)
 
 # log2 scaling of the y axis (with visually-equal spacing)
 ja.plotlog1<- ja.plot + scale_y_continuous(trans=log10_trans())
-ja.plotlog1
+print(ja.plotlog1)
 # log2 coordinate transformation (with visually-diminishing spacing)
 ja.plotlog2<- ja.plot + coord_trans(y="log2")
-ja.plotlog2
+print(ja.plotlog2)
 
 saveRDS(inventoryja, file = "inventoryja.rdata")
 
@@ -263,6 +263,31 @@ for (kk in 1:length(tritiuml2)) {
   names(inv5)[nbparam1*(kk-1)+14]<-paste0("chfl",names(wll2)[kk])
 }
 
+ nbparam1C<-4
+inv5C<-testgrid1
+for (kk2 in 1:length(tritiumCl2)) {
+  t.loess<-loess(mean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=0.5)
+  logt.loess<-loess(logmean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=0.5)
+  predt<-predict(t.loess,newdata = testgrid1 ,se = TRUE)
+  predlogt<-predict(logt.loess,newdata = testgrid1 ,se = TRUE)
+  fullfit<-as.vector(predt$fit)
+  fullfit[fullfit<0]<-NA
+  #fullfit[fullfit<0]<-1
+  inv5C[nbparam1C*(kk2-1)+3]<-fullfit
+  names(inv5C)[nbparam1C*(kk2-1)+3]<-paste0("T",names(tritiumCl2)[kk2])
+  logfullfit<-as.vector(predlogt$fit)
+  Tfl<-exp(logfullfit)
+  inv5C[nbparam1C*(kk2-1)+4]<-Tfl
+  names(inv5C)[nbparam1C*(kk2-1)+4]<-paste0("Tfl",names(tritiumCl2)[kk2])
+  #inv5C[nbparam1*(kk-1)+10]<-pdret$se.fit
+  #names(inv5C)[nbparam1*(kk-1)+10]<-paste0("seT",names(tritiuml2)[kk])
+  inv5C[nbparam1C*(kk2-1)+5]<-inv5C[nbparam1C*(kk2-1)+3]*Cth
+  names(inv5C)[nbparam1C*(kk2-1)+5]<-paste0("ch",names(tritiumCl2)[kk2])
+  inv5C[nbparam1C*(kk2-1)+6]<-inv5C[nbparam1C*(kk2-1)+4]*Cth
+  names(inv5C)[nbparam1C*(kk2-1)+6]<-paste0("chfl",names(tritiumCl2)[kk2])
+}
+
+
 
 # ggtest2<-ggplot(inv5, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=TCCZfitb))
 # ggtest2<-ggtest2+scale_fill_gradient(limits=range(inv5$TCCZfitb, na.rm = TRUE), low="red", high="white")
@@ -271,6 +296,10 @@ for (kk in 1:length(tritiuml2)) {
 # ggtest2a<-ggplot(inv5, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=T1996))
 # ggtest2a<-ggtest2a+scale_fill_gradient2()
 # print(ggtest2)
+# 
+ggtestC2a<-ggplot(inv5C, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=T1996))
+ggtestC2a<-ggtestC2a+scale_fill_gradient2()
+print(ggtestC2a)
 # 
 # ggtest2b<-ggplot(inv5, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=h2003))
 # ggtest2b<-ggtest2b+scale_fill_gradient2()
