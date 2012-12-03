@@ -1,0 +1,38 @@
+require(ggplot2)
+
+setwd("D:/work/Code/srs_work/exp_model")
+
+inventory.final<-readRDS("../inventory/inventoryfinal.rdata")
+sourceterm<-readRDS("../source_term/tritiumsource.rdata")
+comparison<-merge(sourceterm,inventory.final,by.x = "Year", by.y = "MYEAR")
+comparison$inventory1bCD<-comparison$inventory1b+comparison$inventoryC
+
+gwI.lm<-lm(log(gwInventory)~Year,data=comparison)
+inv1.lm<-lm(log(inventory1bCD)~Year,data=comparison)
+inv1loess.lm<-lm(log(tCD)~Year,data=comparison)
+
+years<-data.frame(Year=seq(from=1988,to=2061,by=1))
+gwI.pred<-predict(gwI.lm, newdata=years, se.fit=TRUE, interval = "prediction")
+inv1.pred<-predict(inv1.lm, newdata=years, se.fit=TRUE, interval = "prediction")
+inv1loess.pred<-predict(inv1loess.lm, newdata=years, se.fit=TRUE, interval = "prediction")
+
+png("tritium_comparison_w_clegend_log.png", width=860, height=720)
+fp5<-ggplot(data=comparison, aes(x=Year))
+fp5<- fp5 + theme_bw()
+fp5<- fp5 +geom_point(aes(y=gwInventory, colour="Mass Balance", shape="Mass Balance"),size=10)
+fp5<- fp5 +geom_point(aes(y=inventory1bCD, colour="Mean Estimate", shape="Mean Estimate"),size=10)
+fp5<- fp5 +geom_point(aes(y=tCD, colour="Loess Model", shape="Loess Model"),size=10)
+fp5<- fp5 + theme(plot.title=element_text(face="bold", colour="#000000", size=30))
+fp5<- fp5 + theme(axis.title.x = element_text(face="bold", colour="#000000", size=26))
+fp5<- fp5 + theme(axis.title.y = element_text(face="bold", colour="#000000", lineheight=1 , size=26))
+fp5<- fp5 + theme(axis.text.x  = element_text(size=22))
+fp5<- fp5 + theme(axis.text.y  = element_text(size=22))
+fp5<- fp5 + theme(legend.text  = element_text(size=22))
+fp5<- fp5 + theme(legend.title  = element_text(size=26))
+fp5<- fp5 + opts(legend.position  = c(0.7,0.8))
+fp5<-fp5+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+fp5<- fp5 + scale_colour_manual(name="Inventory Models", values=c("Mass Balance"="orange","Mean Estimate"="red","Loess Model"="green"))
+fp5<- fp5 + scale_shape_manual(name="Inventory Models", values=c("Mass Balance"=15,"Mean Estimate"=16,"Loess Model"=17))
+fp5<- fp5 + scale_y_log10(limits=c(1e3,1e5))
+print(fp5)
+dev.off()
