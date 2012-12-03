@@ -1,4 +1,6 @@
 #create ggplot of density effect
+require(ggplot2)
+
 nitrateFAW5<-readRDS("nitrateFAW5.rdata")
 
 #PNG format

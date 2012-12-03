@@ -17,6 +17,7 @@ options(na.action="na.exclude")
 #options(na.action="na.omit")
 #options("na.action")
 
+ptm1<-proc.time()
 ###################
 #0. Some needed functions
 #
@@ -125,14 +126,16 @@ thperyear<-wl
 # with standard error estimates
 pre2<-predict(TCCZ.loess1,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
 pre2b<-predict(TCCZ.loess1b,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
-pre2lm<-predict(TCCZ.lm,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
+pre2lm<-predict(TCCZ.lm,newdata = wl[,c("EASTING","NORTHING")],se = TRUE, interval = "prediction",level = 0.95)
 #
 thperyear$TCCZ.fit<-pre2$fit
 thperyear$TCCZ.se.fit<-pre2$se.fit
 thperyear$TCCZ.fitb<-pre2b$fit
 thperyear$TCCZ.se.fitb<-pre2b$se.fit
-thperyear$TCCZ.fitlm<-pre2lm$fit
+thperyear$TCCZ.fitlm<-pre2lm$fit[,1]
 thperyear$TCCZ.se.fitlm<-pre2lm$se.fit
+thperyear$TCCZ.fitlmupr<-pre2lm$fit[,2]
+thperyear$TCCZ.fitlmlwr<-pre2lm$fit[,3]
 
 #Compute the thickness in feet
 thperyear$h<-thperyear$mean-thperyear$TCCZ.fit
@@ -185,13 +188,13 @@ ja.plot<- ja.plot +geom_line(aes(y=inventoryC), colour='violet')
 ja.plot<-ja.plot+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
 print(ja.plot)
 
-
-# log2 scaling of the y axis (with visually-equal spacing)
-ja.plotlog1<- ja.plot + scale_y_continuous(trans=log10_trans())
-print(ja.plotlog1)
-# log2 coordinate transformation (with visually-diminishing spacing)
-ja.plotlog2<- ja.plot + coord_trans(y="log2")
-print(ja.plotlog2)
+# 
+# # log2 scaling of the y axis (with visually-equal spacing)
+# ja.plotlog1<- ja.plot + scale_y_continuous(trans=log10_trans())
+# print(ja.plotlog1)
+# # log2 coordinate transformation (with visually-diminishing spacing)
+# ja.plotlog2<- ja.plot + coord_trans(y="log2")
+# print(ja.plotlog2)
 
 saveRDS(inventoryja, file = "inventoryja.rdata")
 
@@ -271,8 +274,9 @@ for (kk2 in 1:length(tritiumCl2)) {
   predt<-predict(t.loess,newdata = testgrid1 ,se = TRUE)
   predlogt<-predict(logt.loess,newdata = testgrid1 ,se = TRUE)
   fullfit<-as.vector(predt$fit)
-  fullfit[fullfit<0]<-NA
+  #fullfit[fullfit<0]<-NA
   #fullfit[fullfit<0]<-1
+  fullfit[fullfit<0]<-0
   inv5C[nbparam1C*(kk2-1)+3]<-fullfit
   names(inv5C)[nbparam1C*(kk2-1)+3]<-paste0("T",names(tritiumCl2)[kk2])
   logfullfit<-as.vector(predlogt$fit)
@@ -297,9 +301,9 @@ for (kk2 in 1:length(tritiumCl2)) {
 # ggtest2a<-ggtest2a+scale_fill_gradient2()
 # print(ggtest2)
 # 
-ggtestC2a<-ggplot(inv5C, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=T1996))
-ggtestC2a<-ggtestC2a+scale_fill_gradient2()
-print(ggtestC2a)
+# ggtestC2a<-ggplot(inv5C, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=T1996))
+# ggtestC2a<-ggtestC2a+scale_fill_gradient2()
+# print(ggtestC2a)
 # 
 # ggtest2b<-ggplot(inv5, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=h2003))
 # ggtest2b<-ggtest2b+scale_fill_gradient2()
@@ -326,13 +330,16 @@ for (jj2 in 1:length(inventory5$MYEAR)) {
   inventory5$meanchfl[jj2]<-mean(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
   inventory5$medianchfl[jj2]<-median(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
   inventory5$sdchfl[jj2]<-sd(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
+  inventory5$meanchC[jj2]<-mean(inv5C[[nbparam1C*(jj2-1)+5]], na.rm=TRUE)
 }
 inventory5$t<-area.dom*porosity.mean*inventory5$meanch*1e-9*.3048
 inventory5$tmed<-area.dom*porosity.mean*inventory5$medianch*1e-9*.3048
 inventory5$tfl<-area.dom*porosity.mean*inventory5$meanchfl*1e-9*.3048
 inventory5$tmedfl<-area.dom*porosity.mean*inventory5$medianchfl*1e-9*.3048
+inventory5$tC<-area.dom*porosity.mean*inventory5$meanchC*1e-9
+inventory5$tCD<-inventory5$t+inventory5$tC
 
-inventory.final<-merge(inventoryja, inventory5, by="MYEAR")
+inventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
 
 # pdf(file="%GDRIVE%\test\testinv.pdf",paper="letter")
 # final.plot<-ggplot(data=inventory.final, aes(x=MYEAR))
@@ -356,34 +363,33 @@ inventory.final<-merge(inventoryja, inventory5, by="MYEAR")
 # final.plot2<-final.plot2+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
 # print(final.plot2)
 
-final.plot3<-ggplot(data=inventory.final, aes(x=MYEAR))
-final.plot3<- final.plot3 +geom_point(aes(y=inventory1), colour='blue')
-final.plot3<- final.plot3 +geom_point(aes(y=inventory1b), colour='red')
-final.plot3<- final.plot3 +geom_point(aes(y=inventory1lm), colour='green')
-final.plot3<- final.plot3 +geom_point(aes(y=t), colour='orange')
-final.plot3<- final.plot3 +geom_point(aes(y=tfl), colour='black')
-# final.plot3<- final.plot3 + scale_y_log10()
-final.plot3<-final.plot3+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
-print(final.plot3)
+# final.plot3<-ggplot(data=inventory.final, aes(x=MYEAR))
+# final.plot3<- final.plot3 +geom_point(aes(y=inventory1), colour='blue')
+# final.plot3<- final.plot3 +geom_point(aes(y=inventory1b), colour='red')
+# final.plot3<- final.plot3 +geom_point(aes(y=inventory1lm), colour='green')
+# final.plot3<- final.plot3 +geom_point(aes(y=t), colour='orange')
+# #final.plot3<- final.plot3 +geom_point(aes(y=tfl), colour='black')
+# final.plot3<- final.plot3 +geom_point(aes(y=tC), colour='violet')
+# final.plot3<- final.plot3 +geom_point(aes(y=tCD), colour='yellow')
+# # final.plot3<- final.plot3 + scale_y_log10()
+# final.plot3<-final.plot3+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+# print(final.plot3)
+# 
+# 
+# final.plot4<-ggplot(data=inventory.final, aes(x=MYEAR))
+# final.plot4<- final.plot4 +geom_point(aes(y=inventory1), colour='blue')
+# final.plot4<- final.plot4 +geom_point(aes(y=inventory1b), colour='red')
+# final.plot4<- final.plot4 +geom_point(aes(y=inventory1lm), colour='green')
+# final.plot4<- final.plot4 +geom_point(aes(y=t), colour='orange')
+# # final.plot4<- final.plot4 +geom_point(aes(y=tfl), colour='black')
+# final.plot4<- final.plot4 + scale_y_log10()
+# final.plot4<-final.plot4+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+# print(final.plot4)
 
 
-final.plot4<-ggplot(data=inventory.final, aes(x=MYEAR))
-final.plot4<- final.plot4 +geom_point(aes(y=inventory1), colour='blue')
-final.plot4<- final.plot4 +geom_point(aes(y=inventory1b), colour='red')
-final.plot4<- final.plot4 +geom_point(aes(y=inventory1lm), colour='green')
-final.plot4<- final.plot4 +geom_point(aes(y=t), colour='orange')
-# final.plot4<- final.plot4 +geom_point(aes(y=tfl), colour='black')
-final.plot4<- final.plot4 + scale_y_log10()
-final.plot4<-final.plot4+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
-print(final.plot4)
+saveRDS(inventory.final,"inventoryfinal.rdata")
 
-
-
-
-
-
-
-
+print(proc.time() - ptm1)
 
 
 

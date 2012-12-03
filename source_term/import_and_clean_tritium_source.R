@@ -1,7 +1,78 @@
 #Source term and Surface water data
-tritiumsource.raw<-read.csv("tritiumsource.csv")
-names(tritiumsource.raw)<-c("Year", "VolumeinL","H3input","CumulH3input", "NetH3afterevap", "CumulH3afterevap", "CumulH3afterevapdecayc", "HMigration", "HMigrationdecayc", "FMigration", "CumulH3frommigrationfromF", "CumulH3frommigrationfromFdecayc", "H3inventorydecayc", "Fmigrationdecayc","PossibleevolutionF", "Estimateinterp", "Lowerb","Upperb")
+setwd("D:/CodeProjects/R_SRS/source_term")
 
-tritiumsource<-tritiumsource.raw[,c("Year", "VolumeinL","H3input", "NetH3afterevap", "CumulH3afterevapdecayc", "HMigration", "HMigrationdecayc", "FMigration", "CumulH3frommigrationfromF", "CumulH3frommigrationfromFdecayc", "H3inventorydecayc", "Fmigrationdecayc","PossibleevolutionF", "Estimateinterp")]
-tritiumsource$cumulinputH3<-cumsum(tritiumsource$H3input))
-tritiumsource$cumulinputH3afterevap<-cumsum(tritiumsource$NetH3afterevap))
+require(ggplot2)
+require(scales)
+require(reshape2)
+
+tritiumsource.raw<-read.csv("tritiumsource.csv")
+tritiumsource.raw<-tritiumsource.raw[!is.na(tritiumsource.raw$Year),]
+# tritiumsource.raw2<-read.csv("tritiumsource.csv")
+names(tritiumsource.raw)<-c("Year", "VolumeinL","H3input", "CumulH3input",
+                            "NetH3afterevap", "CumulH3afterevap", "CumulH3afterevapdecayc", 
+                            "HMigration", "HMigrationdecayc", "FMigration", 
+                            "CumulH3frommigrationfromF", "CumulH3frommigrationfromFdecayc", 
+                            "H3inventorydecayc", "Fmigrationdecayc",
+                            "PossibleevolutionF", "Estimateinterp", "Lowerb","Upperb")
+
+tritiumsource<-tritiumsource.raw[,c("Year", "CumulH3afterevapdecayc","CumulH3frommigrationfromFdecayc", "H3inventorydecayc")]
+names(tritiumsource)<-c("Year", "sourceterm","TritiuminFMB", "gwInventory")
+
+tritiumsource.csv<-tritiumsource
+saveRDS(tritiumsource.csv,file="tritiumsource.rdata")
+
+tritiumsource.long<-melt(tritiumsource, id.vars=c("Year"), 
+                         measure.vars=c("sourceterm","TritiuminFMB", "gwInventory"),
+                         variable.name="Legend", value.name='value')
+tritiumsource.long$col1[tritiumsource.long$Legend=='sourceterm']<-"brown"
+tritiumsource.long$col1[tritiumsource.long$Legend=='TritiuminFMB']<-"blue"
+tritiumsource.long$col1[tritiumsource.long$Legend=='gwInventory']<-"orange"
+# tritiumsource$cumulinputH3<-cumsum(tritiumsource$H3input))
+# tritiumsource$cumulinputH3afterevap<-cumsum(tritiumsource$NetH3afterevap))
+# rightcolours<-c("brown","blue","orange")
+swgg3<-ggplot(data=tritiumsource.long,aes(x=Year, y=value, group=Legend, colour=col1)) + theme_bw()
+swgg3<- swgg3 + geom_line(size=2) + scale_colour_identity(guide = "legend")
+print(swgg3)
+# 
+# swgg3<- swgg3 + opts(panel.grid.major = none, panel.grid.minor = none)
+# swgg3<- swgg3 + opts(panel.background = none, panel.border = none)
+# swgg2<- swgg2 +geom_line(aes(y=CumulH3afterevapdecayc), size = 2, colour='brown')
+# swgg2<- swgg2 +geom_line(aes(y=CumulH3frommigrationfromFdecayc), size = 2, colour='blue')
+# swgg2<- swgg2 +geom_line(aes(y=H3inventorydecayc), size = 2, colour='orange')
+# swgg2<- swgg2 +geom_point(aes(y=t), colour='orange')
+# swgg2<- swgg2 +geom_point(aes(y=tfl), colour='black')
+# swgg2<- swgg2 + scale_y_log10()
+swgg2<-swgg2+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+print(swgg2)
+
+
+
+
+
+
+
+
+swgg<-ggplot(data=tritiumsource.raw,aes(x=Year))
+swgg<- swgg +geom_point(aes(y=CumulH3afterevapdecayc), colour='brown')
+swgg<- swgg +geom_point(aes(y=CumulH3frommigrationfromFdecayc), colour='blue')
+swgg<- swgg +geom_point(aes(y=H3inventorydecayc), colour='orange')
+# swgg<- swgg +geom_point(aes(y=t), colour='orange')
+# swgg<- swgg +geom_point(aes(y=tfl), colour='black')
+# swgg<- swgg + scale_y_log10()
+swgg<-swgg+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+print(swgg)
+
+none<-theme_blank()
+
+# png()
+swgg2<-ggplot(data=tritiumsource.raw,aes(x=Year)) + theme_bw()
+swgg2<- swgg2 + opts(panel.grid.major = none, panel.grid.minor = none)
+swgg2<- swgg2 + opts(panel.background = none, panel.border = none)
+swgg2<- swgg2 +geom_line(aes(y=CumulH3afterevapdecayc), size = 2, colour='brown')
+swgg2<- swgg2 +geom_line(aes(y=CumulH3frommigrationfromFdecayc), size = 2, colour='blue')
+swgg2<- swgg2 +geom_line(aes(y=H3inventorydecayc), size = 2, colour='orange')
+# swgg2<- swgg2 +geom_point(aes(y=t), colour='orange')
+# swgg2<- swgg2 +geom_point(aes(y=tfl), colour='black')
+# swgg2<- swgg2 + scale_y_log10()
+swgg2<-swgg2+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+print(swgg2)
