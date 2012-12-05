@@ -49,11 +49,7 @@ ptm1<-proc.time()
 #################################
 #1.
 #load data
-#tritium<-readRDS("../SRS_data/tritium.rdata")
-tritium<-readRDS("../SRS_data/tritiumf.rdata")
-tritiumC<-readRDS("../SRS_data/tritiumC.rdata")
-tritiumavg<-readRDS("../SRS_data/tritiumavg.rdata")
-tritiumCavg<-readRDS("../SRS_data/tritiumCavg.rdata")
+#nitrate<-readRDS("../SRS_data/nitrate.rdata")
 nitrate<-readRDS("../SRS_data/nitrate.rdata")
 nitrateC<-readRDS("../SRS_data/nitrateC.rdata")
 nitrateavg<-readRDS("../SRS_data/nitrateavg.rdata")
@@ -68,10 +64,6 @@ wlavg<-readRDS("../SRS_data/wlavg.rdata")
 #f3basin27<-readRDS("../basin_coords/f3basin27.rdata")
 
 #Add log transform
-tritium$logmean<-log(tritium$mean)
-tritium$log10mean<-log10(tritium$mean)
-tritiumC$logmean<-log(tritiumC$mean)
-tritiumC$log10mean<-log10(tritiumC$mean)
 nitrate$logmean<-log(nitrate$mean)
 nitrate$log10mean<-log10(nitrate$mean)
 nitrateC$logmean<-log(nitrateC$mean)
@@ -80,13 +72,13 @@ nitrateC$log10mean<-log10(nitrateC$mean)
 
 #Split per measurement year
 wll<-split(wl,wl$MYEAR)
-tritiuml<-split(tritium,tritium$MYEAR)
-tritiumCl<-split(tritiumC,tritiumC$MYEAR)
+nitratel<-split(nitrate,nitrate$MYEAR)
+nitrateCl<-split(nitrateC,nitrateC$MYEAR)
 #Select 1988 and after
 wll2<-wll[5:length(wll)]
-tritiuml2<-tritiuml[10:length(tritiuml)]
-tritiumCl2<-tritiumCl[3:length(tritiumCl)]
-# names(tritiuml2)
+nitratel2<-nitratel[4:length(nitratel)]
+nitrateCl2<-nitrateCl[4:length(nitrateCl)]
+# names(nitrateCl2)
 #########################################################
 #2.
 #Define interpolation domain and compute area, define other parameters
@@ -166,17 +158,17 @@ th.avg.peryearhb<-ddply(thperyear.cleanhb, c('MYEAR'), function(x) c(counthb=nro
 th.avg.peryearhlm<-ddply(thperyear.cleanhlm, c('MYEAR'), function(x) c(counthlm=nrow(x),hlm.mean=mean(x$hlm),hlm.median=median(x$hlm),hlm.sd=sd(x$hlm),hlm.mad=mad(x$hlm),hlm.min=min(x$hlm),hlm.max=max(x$hlm)))
 
 #Create inventory df
-inventoryja<-merge(tritiumavg[tritiumavg$MYEAR>=1984,],th.avg.peryearh,by="MYEAR")
+inventoryja<-merge(nitrateavg[nitrateavg$MYEAR>=1984,],th.avg.peryearh,by="MYEAR")
 inventoryja<-merge(inventoryja,th.avg.peryearhb,by="MYEAR")
 inventoryja<-merge(inventoryja,th.avg.peryearhlm,by="MYEAR")
 
-inventoryCja<-data.frame(MYEAR=tritiumCavg[,c("MYEAR")])
-inventoryCja$inventoryC<-area.dom*porosity.mean*Cth*tritiumCavg$mean*1e-9
+inventoryCja<-data.frame(MYEAR=nitrateCavg[,c("MYEAR")])
+inventoryCja$inventoryC<-area.dom*porosity.mean*Cth*nitrateCavg$mean*1e-6
 
 #Compute the inventory
-inventoryja$inventory1<-area.dom*porosity.mean*inventoryja$h.mean*inventoryja$mean*.3048*1e-9
-inventoryja$inventory1b<-area.dom*porosity.mean*inventoryja$hb.mean*inventoryja$mean*.3048*1e-9
-inventoryja$inventory1lm<-area.dom*porosity.mean*inventoryja$hlm.mean*inventoryja$mean*.3048*1e-9
+inventoryja$inventory1<-area.dom*porosity.mean*inventoryja$h.mean*inventoryja$mean*.3048*1e-6
+inventoryja$inventory1b<-area.dom*porosity.mean*inventoryja$hb.mean*inventoryja$mean*.3048*1e-6
+inventoryja$inventory1lm<-area.dom*porosity.mean*inventoryja$hlm.mean*inventoryja$mean*.3048*1e-6
 inventoryja<-merge(inventoryja,inventoryCja,by="MYEAR")
 
 rm(thperyear)
@@ -194,7 +186,7 @@ ja.plot<- ja.plot +geom_line(aes(y=inventory1), colour='blue')
 ja.plot<- ja.plot +geom_line(aes(y=inventory1b), colour='red')
 ja.plot<- ja.plot +geom_line(aes(y=inventory1lm), colour='green')
 ja.plot<- ja.plot +geom_line(aes(y=inventoryC), colour='violet')
-ja.plot<-ja.plot+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+ja.plot<-ja.plot+labs(title="Nitrate Inventory")+xlab("Year")+ylab("nitrate (kg)")
 print(ja.plot)
 
 # 
@@ -207,8 +199,8 @@ print(ja.plot)
 
 saveRDS(inventoryja, file = "inventoryja.rdata")
 
-inventoryja.csv<-inventoryja[,c("MYEAR","inventory1","inventory1b","inventory1lm","inventoryC")]
-write.csv(inventoryja.csv, file="inventoryja.csv")
+inventoryjaN.csv<-inventoryja[,c("MYEAR","inventory1","inventory1b","inventory1lm","inventoryC")]
+write.csv(inventoryjaN.csv, file="inventoryja.csv")
 
 ########################################
 #4. Do the calculation again, this time with interpolation on a regular grid.
@@ -232,8 +224,8 @@ pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE)
 wll.loess<-llply(wll2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1, span=0.75)})
 wl.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)})
 
-tritiuml.loess<-llply(tritiuml2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1,span=0.75)})
-tritium.pred<-llply(tritiuml.loess, function(m) {predict(m,newdata=testgrid1,se =TRUE)})
+nitratel.loess<-llply(nitratel2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1,span=0.75)})
+nitrate.pred<-llply(nitratel.loess, function(m) {predict(m,newdata=testgrid1,se =TRUE)})
 
 inv5<-testgrid1
 inv5$TCCZfit<-as.vector(pre3$fit)
@@ -245,22 +237,22 @@ inv5$TCCZsefitlm<-as.vector(pre3lm$se.fit)
 
 nbparam1<-6
 
-for (kk in 1:length(tritiuml2)) {
-  t.loess<-loess(mean~EASTING+NORTHING, data=tritiuml2[[kk]],degree=1,span=0.5)
-  logt.loess<-loess(logmean~EASTING+NORTHING, data=tritiuml2[[kk]],degree=1,span=0.5)
-  predt<-predict(t.loess,newdata = testgrid1 ,se = TRUE)
-  predlogt<-predict(logt.loess,newdata = testgrid1 ,se = TRUE)
-  fullfit<-as.vector(predt$fit)
+for (kk in 1:length(nitratel2)) {
+  N.loess<-loess(mean~EASTING+NORTHING, data=nitratel2[[kk]],degree=1,span=0.5)
+  logN.loess<-loess(logmean~EASTING+NORTHING, data=nitratel2[[kk]],degree=1,span=0.5)
+  predN<-predict(N.loess,newdata = testgrid1 ,se = TRUE)
+  predlogN<-predict(logN.loess,newdata = testgrid1 ,se = TRUE)
+  fullfit<-as.vector(predN$fit)
   fullfit[fullfit<0]<-NA
   #fullfit[fullfit<0]<-1
   inv5[nbparam1*(kk-1)+9]<-fullfit
-  names(inv5)[nbparam1*(kk-1)+9]<-paste0("T",names(tritiuml2)[kk])
-  logfullfit<-as.vector(predlogt$fit)
-  Tfl<-exp(logfullfit)
-  inv5[nbparam1*(kk-1)+10]<-Tfl
-  names(inv5)[nbparam1*(kk-1)+10]<-paste0("Tfl",names(tritiuml2)[kk])
+  names(inv5)[nbparam1*(kk-1)+9]<-paste0("N",names(nitratel2)[kk])
+  logfullfit<-as.vector(predlogN$fit)
+  Nfl<-exp(logfullfit)
+  inv5[nbparam1*(kk-1)+10]<-Nfl
+  names(inv5)[nbparam1*(kk-1)+10]<-paste0("Nfl",names(nitratel2)[kk])
   #inv5[nbparam1*(kk-1)+10]<-pdret$se.fit
-  #names(inv5)[nbparam1*(kk-1)+10]<-paste0("seT",names(tritiuml2)[kk])
+  #names(inv5)[nbparam1*(kk-1)+10]<-paste0("seT",names(nitratel2)[kk])
   w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=0.5)
   predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE)
   inv5[nbparam1*(kk-1)+11]<-as.vector(predw$fit)
@@ -277,27 +269,27 @@ for (kk in 1:length(tritiuml2)) {
 
  nbparam1C<-4
 inv5C<-testgrid1
-for (kk2 in 1:length(tritiumCl2)) {
-  t.loess<-loess(mean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=0.5)
-  logt.loess<-loess(logmean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=0.5)
-  predt<-predict(t.loess,newdata = testgrid1 ,se = TRUE)
-  predlogt<-predict(logt.loess,newdata = testgrid1 ,se = TRUE)
-  fullfit<-as.vector(predt$fit)
+for (kk2 in 1:length(nitrateCl2)) {
+  N.loess<-loess(mean~EASTING+NORTHING, data=nitrateCl2[[kk2]],degree=1,span=0.5)
+  logN.loess<-loess(logmean~EASTING+NORTHING, data=nitrateCl2[[kk2]],degree=1,span=0.5)
+  predN<-predict(N.loess,newdata = testgrid1 ,se = TRUE)
+  predlogN<-predict(logN.loess,newdata = testgrid1 ,se = TRUE)
+  fullfit<-as.vector(predN$fit)
   #fullfit[fullfit<0]<-NA
   #fullfit[fullfit<0]<-1
   fullfit[fullfit<0]<-0
   inv5C[nbparam1C*(kk2-1)+3]<-fullfit
-  names(inv5C)[nbparam1C*(kk2-1)+3]<-paste0("T",names(tritiumCl2)[kk2])
-  logfullfit<-as.vector(predlogt$fit)
+  names(inv5C)[nbparam1C*(kk2-1)+3]<-paste0("N",names(nitrateCl2)[kk2])
+  logfullfit<-as.vector(predlogN$fit)
   Tfl<-exp(logfullfit)
   inv5C[nbparam1C*(kk2-1)+4]<-Tfl
-  names(inv5C)[nbparam1C*(kk2-1)+4]<-paste0("Tfl",names(tritiumCl2)[kk2])
+  names(inv5C)[nbparam1C*(kk2-1)+4]<-paste0("Nfl",names(nitrateCl2)[kk2])
   #inv5C[nbparam1*(kk-1)+10]<-pdret$se.fit
-  #names(inv5C)[nbparam1*(kk-1)+10]<-paste0("seT",names(tritiuml2)[kk])
+  #names(inv5C)[nbparam1*(kk-1)+10]<-paste0("seT",names(nitratel2)[kk])
   inv5C[nbparam1C*(kk2-1)+5]<-inv5C[nbparam1C*(kk2-1)+3]*Cth
-  names(inv5C)[nbparam1C*(kk2-1)+5]<-paste0("ch",names(tritiumCl2)[kk2])
+  names(inv5C)[nbparam1C*(kk2-1)+5]<-paste0("ch",names(nitrateCl2)[kk2])
   inv5C[nbparam1C*(kk2-1)+6]<-inv5C[nbparam1C*(kk2-1)+4]*Cth
-  names(inv5C)[nbparam1C*(kk2-1)+6]<-paste0("chfl",names(tritiumCl2)[kk2])
+  names(inv5C)[nbparam1C*(kk2-1)+6]<-paste0("chfl",names(nitrateCl2)[kk2])
 }
 
 
@@ -336,19 +328,22 @@ for (jj2 in 1:length(inventory5$MYEAR)) {
   inventory5$meanch[jj2]<-mean(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
   inventory5$medianch[jj2]<-median(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
   inventory5$sdch[jj2]<-sd(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
+#   print("invOK")
   inventory5$meanchfl[jj2]<-mean(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
   inventory5$medianchfl[jj2]<-median(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
   inventory5$sdchfl[jj2]<-sd(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
   inventory5$meanchC[jj2]<-mean(inv5C[[nbparam1C*(jj2-1)+5]], na.rm=TRUE)
+#   print("Cok")
+#   print(jj2)
 }
-inventory5$t<-area.dom*porosity.mean*inventory5$meanch*1e-9*.3048
-inventory5$tmed<-area.dom*porosity.mean*inventory5$medianch*1e-9*.3048
-inventory5$tfl<-area.dom*porosity.mean*inventory5$meanchfl*1e-9*.3048
-inventory5$tmedfl<-area.dom*porosity.mean*inventory5$medianchfl*1e-9*.3048
-inventory5$tC<-area.dom*porosity.mean*inventory5$meanchC*1e-9
-inventory5$tCD<-inventory5$t+inventory5$tC
+inventory5$N<-area.dom*porosity.mean*inventory5$meanch*1e-6*.3048
+inventory5$Nmed<-area.dom*porosity.mean*inventory5$medianch*1e-6*.3048
+inventory5$Nfl<-area.dom*porosity.mean*inventory5$meanchfl*1e-6*.3048
+inventory5$Nmedfl<-area.dom*porosity.mean*inventory5$medianchfl*1e-6*.3048
+inventory5$NC<-area.dom*porosity.mean*inventory5$meanchC*1e-12
+inventory5$NCD<-inventory5$N+inventory5$NC
 
-inventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
+inventoryN.final<-merge(inventoryjaN.csv, inventory5, by="MYEAR")
 
 # pdf(file="%GDRIVE%\test\testinv.pdf",paper="letter")
 # final.plot<-ggplot(data=inventory.final, aes(x=MYEAR))
@@ -359,7 +354,7 @@ inventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
 # #final.plot<- final.plot +geom_line(aes(y=tmed), colour='black')
 # final.plot<- final.plot + scale_y_log10()
 # #scale_y_continuous(trans=log2_trans())
-# final.plot<-final.plot+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+# final.plot<-final.plot+labs(title="nitrate Inventory")+xlab("Year")+ylab("nitrate (Ci)")
 # print(final.plot)
 # dev.off()
 
@@ -369,7 +364,7 @@ inventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
 # final.plot2<- final.plot2 +geom_point(aes(y=inventory1lm), colour='green')
 # final.plot2<- final.plot2 +geom_point(aes(y=t), colour='orange')
 # final.plot2<- final.plot2 + scale_y_log10()
-# final.plot2<-final.plot2+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+# final.plot2<-final.plot2+labs(title="nitrate Inventory")+xlab("Year")+ylab("nitrate (Ci)")
 # print(final.plot2)
 
 # final.plot3<-ggplot(data=inventory.final, aes(x=MYEAR))
@@ -381,7 +376,7 @@ inventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
 # final.plot3<- final.plot3 +geom_point(aes(y=tC), colour='violet')
 # final.plot3<- final.plot3 +geom_point(aes(y=tCD), colour='yellow')
 # # final.plot3<- final.plot3 + scale_y_log10()
-# final.plot3<-final.plot3+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+# final.plot3<-final.plot3+labs(title="nitrate Inventory")+xlab("Year")+ylab("nitrate (Ci)")
 # print(final.plot3)
 # 
 # 
@@ -392,11 +387,11 @@ inventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
 # final.plot4<- final.plot4 +geom_point(aes(y=t), colour='orange')
 # # final.plot4<- final.plot4 +geom_point(aes(y=tfl), colour='black')
 # final.plot4<- final.plot4 + scale_y_log10()
-# final.plot4<-final.plot4+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+# final.plot4<-final.plot4+labs(title="nitrate Inventory")+xlab("Year")+ylab("nitrate (Ci)")
 # print(final.plot4)
 
 
-saveRDS(inventory.final,"inventoryfinal.rdata")
+saveRDS(inventoryN.final,"inventoryfinalN.rdata")
 
 print(proc.time() - ptm1)
 
@@ -445,8 +440,8 @@ print(proc.time() - ptm1)
 
 
 #Early inventory calculations
-#inventoryjahb<-merge(tritiumavg[tritiumavg$MYEAR>=1984,],th.avg.peryearhb,by="MYEAR")
-#inventoryjahlm<-merge(tritiumavg[tritiumavg$MYEAR>=1984,],th.avg.peryearhlm,by="MYEAR")
+#inventoryjahb<-merge(nitrateavg[nitrateavg$MYEAR>=1984,],th.avg.peryearhb,by="MYEAR")
+#inventoryjahlm<-merge(nitrateavg[nitrateavg$MYEAR>=1984,],th.avg.peryearhlm,by="MYEAR")
 #inventoryja[,c("count","h.mean","h.median","h.sd","h.mad","h.min","h.max")]<-th.avg.peryear[, c("count","h.mean","h.median","h.sd","h.mad","h.min","h.max")]
 #inventoryjah$inventory<-area.dom*porosity.mean*inventoryjah$h.mean*inventoryjah$mean*.3048*1e-9
 #inventoryjahb$inventory<-area.dom*porosity.mean*inventoryjahb$hb.mean*inventoryjahb$mean*.3048*1e-9
@@ -456,9 +451,9 @@ print(proc.time() - ptm1)
 
 #
 #selectyear<-function (x,y) {subset(x, x$MYEAR == y)}
-#tritium.1984<-selectyear(tritium, 1984)
+#nitrate.1984<-selectyear(nitrate, 1984)
 #TCCZ.lm<-lm(TCCZ_top~UTM_E+UTM_N,data=TCCZe,na.action=na.omit)
-#tritium.interp<-interp(tritium$EASTING, tritium$NORTHING, tritium$mean, xo=seq(ea.min, ea.max, length = ea.b), yo=seq(no.min, no.max, length = no.b), linear = TRUE, extrap=FALSE, duplicate = "mean")
+#nitrate.interp<-interp(nitrate$EASTING, nitrate$NORTHING, nitrate$mean, xo=seq(ea.min, ea.max, length = ea.b), yo=seq(no.min, no.max, length = no.b), linear = TRUE, extrap=FALSE, duplicate = "mean")
 #wlavg.lm<-lm(mean~EASTING+NORTHING, data =wlavg)
 #prewllm<-predict(wlavg.lm,newdata = testgrid1,se = TRUE ,na.action = na.omit)
 
@@ -514,19 +509,19 @@ print(proc.time() - ptm1)
 # 
 # #Interpolation
 # wll.interp<-llply(wll, interp.peryear)
-# tritiuml.interp<-llply(tritiuml, interp.peryear)
+# nitratel.interp<-llply(nitratel, interp.peryear)
 # #Extrapolation
 # wll.interpext<-llply(wll, interpext.peryear, .progress = "text")
-# tritiuml.interpext<-llply(tritiuml, interpext.peryear, .progress = "text")
+# nitratel.interpext<-llply(nitratel, interpext.peryear, .progress = "text")
 # 
 # #create aquifer thickness
 #  thickness<-llply(wll.interp,function(ll){list(x=ll$x, y=ll$y, z=as.matrix(0.3048*(ll$z-TCCZ.interp$z)))}, .progress = "text")
 
 # image.plot(TCCZ.interp)
 # image.plot(wll.interp['1996'][[1]],asp = 1)
-# image.plot(tritiuml.interp['1992'][[1]],asp = 1)
+# image.plot(nitratel.interp['1992'][[1]],asp = 1)
 # image.plot(wll.interpext['1988'][[1]],asp = 1)
-# image.plot(tritiuml.interpext['1992'][[1]],asp = 1)
+# image.plot(nitratel.interpext['1992'][[1]],asp = 1)
 # contour(wll.interpext['1988'][[1]][[1]],wll.interpext['1988'][[1]][[2]],wll.interpext['1988'][[1]][[3]])
 # contour(wll.interp['1988'][[1]][[1]],wll.interp['1988'][[1]][[2]],wll.interp['1988'][[1]][[3]])
 #image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=thickness['1996'][[1]][[3]])
@@ -569,8 +564,8 @@ print(proc.time() - ptm1)
 #Loop test
 #
 # 
-# t.loess<-loess(mean~EASTING+NORTHING, data=tritiuml2[['1996']],degree=1,span=0.5)
-# logt.loess<-loess(logmean~EASTING+NORTHING, data=tritiuml2[['1996']],degree=1,span=0.5)
+# t.loess<-loess(mean~EASTING+NORTHING, data=nitratel2[['1996']],degree=1,span=0.5)
+# logt.loess<-loess(logmean~EASTING+NORTHING, data=nitratel2[['1996']],degree=1,span=0.5)
 # predt<-predict(t.loess,newdata = testgrid1 ,se = TRUE)
 # predlogt<-predict(logt.loess,newdata = testgrid1 ,se = TRUE)
 # T1996<-as.vector(predt$fit)

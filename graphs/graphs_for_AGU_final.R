@@ -1,7 +1,5 @@
 #Graphs for AGU
 require(ggplot2)
-#require()
-
 
 inventory.final<-readRDS("../inventory/inventoryfinal.rdata")
 sourceterm<-readRDS("../source_term/tritiumsource.rdata")
@@ -9,26 +7,8 @@ sourceterm<-readRDS("../source_term/tritiumsource.rdata")
 comparison<-merge(sourceterm,inventory.final,by.x = "Year", by.y = "MYEAR")
 comparison$inventory1bCD<-comparison$inventory1b+comparison$inventoryC
 
-png("test.png", width=720, height=960)
-final.plot3<-ggplot(data=inventory.final, aes(x=MYEAR, size=3))
-final.plot3<- final.plot3 + theme_bw()
-# final.plot3<- final.plot3 +geom_point(aes(y=inventory1), colour='blue', size=2)
-final.plot3<- final.plot3 +geom_point(aes(y=inventory1b), colour='red')
-# final.plot3<- final.plot3 +geom_point(aes(y=inventory1lm), colour='green', size=2)
-final.plot3<- final.plot3 +geom_point(aes(y=t), colour='orange')
-#final.plot3<- final.plot3 +geom_point(aes(y=tfl), colour='black')
-final.plot3<- final.plot3 +geom_point(aes(y=tC), colour='violet')
-final.plot3<- final.plot3 +geom_point(aes(y=tCD), colour='yellow')
-final.plot3<- final.plot3 + theme(plot.title=element_text(face="bold", colour="#000000", size=30))
-final.plot3<- final.plot3 + theme(axis.title.x = element_text(face="bold", colour="#000000", size=26))
-final.plot3<- final.plot3 + theme(axis.title.y = element_text(face="bold", colour="#000000", lineheight=1 , size=26))
-final.plot3<- final.plot3 + theme(axis.text.x  = element_text(size=22))
-final.plot3<- final.plot3 + theme(axis.text.y  = element_text(size=22))
-# final.plot3<- final.plot3 + scale_y_log10()
-final.plot3<-final.plot3+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
-print(final.plot3)
-dev.off()
-
+plotdf1<-comparison[,c("Year","gwInventory","tCD","inventory1bCD")]
+plotdf1$ratio<-plotdf1$gwInventory/plotdf1$tCD
 
 fp4<-ggplot(data=inventory.final, aes(x=MYEAR,size=3))
 fp4<- fp4 +geom_point(aes(y=inventory1), colour='blue')

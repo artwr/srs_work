@@ -1,4 +1,5 @@
 require(ggplot2)
+require(lubridate)
 
 setwd("D:/work/Code/srs_work/exp_model")
 # setwd("D:/CodeProjects/R_SRS/exp_model")
@@ -6,20 +7,52 @@ setwd("D:/work/Code/srs_work/exp_model")
 #params
 ptsize<-8
 
+tritium.raw<-read.csv("../SRS_data/tritium4R.csv")
+tritium.raw$RESULT[tritium.raw$RESULT<0]<-NA
+#tritium.see<-tritium.raw[tritium.raw$RESULT<0,]
+tritium.clean<-tritium.raw[!is.na(tritium.raw$RESULT),]
+tritium.clean$Year<-decimal_date(strptime(tritium.clean$MDATE,"%Y-%m-%d %H:%M:%S"))
 
-inventory.final<-readRDS("../inventory/inventoryfinal.rdata")
-sourceterm<-readRDS("../source_term/tritiumsource.rdata")
-comparison<-merge(sourceterm,inventory.final,by.x = "Year", by.y = "MYEAR")
-comparison$inventory1bCD<-comparison$inventory1b+comparison$inventoryC
+tritiumforlm<-tritium.clean[,c("STATION_ID","RESULT","Year")]
+names(tritiumforlm)<-c("well","Tritium","Year")
 
-gwI.lm<-lm(log(gwInventory)~Year,data=comparison)
-inv1.lm<-lm(log(inventory1bCD)~Year,data=comparison)
-inv1loess.lm<-lm(log(tCD)~Year,data=comparison)
+tritiumlpw<-split(tritiumforlm,tritiumforlm$well)
 
-years<-data.frame(Year=seq(from=1988,to=2061,by=1))
-gwI.pred<-predict(gwI.lm, newdata=years, se.fit=TRUE, interval = "prediction")
-inv1.pred<-predict(inv1.lm, newdata=years, se.fit=TRUE, interval = "prediction")
-inv1loess.pred<-predict(inv1loess.lm, newdata=years, se.fit=TRUE, interval = "prediction")
+
+tritiuml.lm<-llply(tritiumlpw, function(zzl) {lm(Tritium~Year, data=zzl)})
+
+summary(tritiuml.lm[[1]])
+
+test
+
+
+tritum.pred<-llply(nitratel.loess, function(m) {predict(m,newdata=testgrid1,se =TRUE)})
+
+
+fsb78<-tritium.clean[tritium.clean$STATION_ID=='FSB 78',]
+fsb78$Year<-decimal_date(strptime(fsb78$MDATE,"%Y-%m-%d %H:%M:%S"))
+
+
+fsb78.lm<-lm(log(RESULT)~Year,data=fsb78, se=TRUE)
+
+summary(fsb78.lm)
+predictdf<-years
+
+
+
+# inventory.final<-readRDS("../inventory/inventoryfinal.rdata")
+# sourceterm<-readRDS("../source_term/tritiumsource.rdata")
+# comparison<-merge(sourceterm,inventory.final,by.x = "Year", by.y = "MYEAR")
+# comparison$inventory1bCD<-comparison$inventory1b+comparison$inventoryC
+# 
+# gwI.lm<-lm(log(gwInventory)~Year,data=comparison)
+# inv1.lm<-lm(log(inventory1bCD)~Year,data=comparison)
+# inv1loess.lm<-lm(log(tCD)~Year,data=comparison)
+# 
+# years<-data.frame(Year=seq(from=1988,to=2061,by=1))
+# gwI.pred<-predict(gwI.lm, newdata=years, se.fit=TRUE, interval = "prediction")
+# inv1.pred<-predict(inv1.lm, newdata=years, se.fit=TRUE, interval = "prediction")
+# inv1loess.pred<-predict(inv1loess.lm, newdata=years, se.fit=TRUE, interval = "prediction")
 
 # predictdf<-years
 # predictdf$lip1<-gwI.pred$fit[,1]
