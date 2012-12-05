@@ -9,8 +9,6 @@ wl.raw<-read.csv("wl4R.csv")
 
 tritiumC.raw<-read.csv("tritiumC4R.csv")
 
-nitrate.raw<-read.csv("nitrate4R.csv")
-nitrateC.raw<-read.csv("nitrateC4R.csv")
 # seeextent <- ggplot(data=tritiumC.raw) + geom_point(aes(x=EASTING,y=NORTHING))
 # print(seeextent)
 
@@ -19,8 +17,6 @@ wl.clean<-wl.raw[!wl.raw$STATION_ID=='FEX  8' & !wl.raw$STATION_ID=='FEX  9',]
 #wl.clean<-wl.raw[!wl.raw$STATION_ID=='FEX  9',]
 tritium.clean1<-tritium.raw[!tritium.raw$STATION_ID=='FEX  8',]
 tritiumC.clean1<-tritiumC.raw[!tritiumC.raw$STATION_ID=='FEX  8',]
-nitrate.clean1<-nitrate.raw[!nitrate.raw$STATION_ID=='FEX  8',]
-nitrateC.clean1<-nitrateC.raw[!nitrateC.raw$STATION_ID=='FEX  8',]
 
 #Replace Negative values with NA
 tritium.clean1[tritium.clean1$RESULT<0,]$RESULT<-NA
