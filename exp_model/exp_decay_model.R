@@ -1,6 +1,11 @@
 require(ggplot2)
 
-setwd("D:/work/Code/srs_work/exp_model")
+#setwd("D:/work/Code/srs_work/exp_model")
+setwd("D:/CodeProjects/R_SRS/exp_model")
+
+#params
+ptsize<-8
+
 
 inventory.final<-readRDS("../inventory/inventoryfinal.rdata")
 sourceterm<-readRDS("../source_term/tritiumsource.rdata")
@@ -16,12 +21,26 @@ gwI.pred<-predict(gwI.lm, newdata=years, se.fit=TRUE, interval = "prediction")
 inv1.pred<-predict(inv1.lm, newdata=years, se.fit=TRUE, interval = "prediction")
 inv1loess.pred<-predict(inv1loess.lm, newdata=years, se.fit=TRUE, interval = "prediction")
 
+predictdf<-years
+predictdf$lip1<-gwI.pred$fit[,1]
+predictdf$lup1<-gwI.pred$fit[,2]
+predictdf$llo1<-gwI.pred$fit[,3]
+predictdf$ip1<-exp(gwI.pred$fit[,1])
+predictdf$up1<-exp(gwI.pred$fit[,2])
+predictdf$lo1<-exp(gwI.pred$fit[,3])
+# predictdf$tmcl<-20
+# + geom_line(aes(y=tmcl))
+qplot(Year, ip1, data = predictdf) + geom_smooth(aes(ymin=lo1,ymax=up1), stat="identity") + scale_y_log10()
+
+ggplot(data=predictf)
+
+
 png("tritium_comparison_w_clegend_log.png", width=860, height=720)
 fp5<-ggplot(data=comparison, aes(x=Year))
 fp5<- fp5 + theme_bw()
-fp5<- fp5 +geom_point(aes(y=gwInventory, colour="Mass Balance", shape="Mass Balance"),size=10)
-fp5<- fp5 +geom_point(aes(y=inventory1bCD, colour="Mean Estimate", shape="Mean Estimate"),size=10)
-fp5<- fp5 +geom_point(aes(y=tCD, colour="Loess Model", shape="Loess Model"),size=10)
+fp5<- fp5 +geom_point(aes(y=gwInventory, colour="Mass Balance", shape="Mass Balance"),size=ptsize)
+fp5<- fp5 +geom_point(aes(y=inventory1bCD, colour="Mean Estimate", shape="Mean Estimate"),size=ptsize)
+fp5<- fp5 +geom_point(aes(y=tCD, colour="Loess Model", shape="Loess Model"),size=ptsize)
 fp5<- fp5 + theme(plot.title=element_text(face="bold", colour="#000000", size=30))
 fp5<- fp5 + theme(axis.title.x = element_text(face="bold", colour="#000000", size=26))
 fp5<- fp5 + theme(axis.title.y = element_text(face="bold", colour="#000000", lineheight=1 , size=26))
