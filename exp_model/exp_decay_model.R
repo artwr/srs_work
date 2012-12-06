@@ -8,13 +8,39 @@ ptsize<-8
 
 
 inventory.final<-readRDS("../inventory/inventoryfinal.rdata")
+inventoryN.final<-readRDS("../inventory/inventoryfinalN.rdata")
+names(inventoryN.final)[1]<-"Year"
+names(inventoryN.final)
 sourceterm<-readRDS("../source_term/tritiumsource.rdata")
 comparison<-merge(sourceterm,inventory.final,by.x = "Year", by.y = "MYEAR")
 comparison$inventory1bCD<-comparison$inventory1b+comparison$inventoryC
 
 gwI.lm<-lm(log(gwInventory)~Year,data=comparison)
-inv1.lm<-lm(log(inventory1bCD)~Year,data=comparison)
-inv1loess.lm<-lm(log(tCD)~Year,data=comparison)
+inv1all.lm<-lm(log(inventory1bCD)~Year,data=comparison)
+inv1UAZ.lm<-lm(log(inventory1b)~Year,data=comparison)
+inv1LAZ.lm<-lm(log(inventoryC)~Year,data=comparison)
+inv1loessall.lm<-lm(log(tCD)~Year,data=comparison)
+inv1loessUAZ.lm<-lm(log(t)~Year,data=comparison)
+inv1loessLAZ.lm<-lm(log(tC)~Year,data=comparison)
+inv1loessNall.lm<-lm(log(NCD)~Year,data=inventoryN.final)
+inv1loessNUAZ.lm<-lm(log(N)~Year,data=inventoryN.final)
+inv1loessNLAZ.lm<-lm(log(NC)~Year,data=inventoryN.final)
+
+
+
+
+
+gwI.lm$coefficients[2]
+inv1all.lm$coefficients[2]
+inv1UAZ.lm$coefficients[2]
+inv1LAZ.lm$coefficients[2]
+inv1loessall.lm$coefficients[2]
+inv1loessUAZ.lm$coefficients[2]
+inv1loessLAZ.lm$coefficients[2]
+inv1loessNall.lm$coefficients[2]
+inv1loessNUAZ.lm$coefficients[2]
+inv1loessNLAZ.lm$coefficients[2]
+
 
 years<-data.frame(Year=seq(from=1988,to=2061,by=1))
 gwI.pred<-predict(gwI.lm, newdata=years, se.fit=TRUE, interval = "prediction")
