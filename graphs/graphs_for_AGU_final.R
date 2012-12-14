@@ -2,6 +2,9 @@
 require(ggplot2)
 
 inventory.final<-readRDS("../inventory/inventoryfinal.rdata")
+inventory.finalN<-readRDS("../inventory/inventoryfinalN.rdata")
+names(inventory.finalN)[1]<-"Year"
+# names(inventory.finalN)
 sourceterm<-readRDS("../source_term/tritiumsource.rdata")
 
 comparison<-merge(sourceterm,inventory.final,by.x = "Year", by.y = "MYEAR")
@@ -140,3 +143,23 @@ fp5<- fp5 + scale_shape_manual(name="Inventory Models", values=c("Mass Balance"=
 fp5<- fp5 + scale_y_log10(limits=c(1e3,1e5))
 print(fp5)
 dev.off()
+
+png("nitrate_final.png", width=860, height=720)
+fp5<-ggplot(data=inventory.finalN, aes(x=Year))
+fp5<- fp5 + theme_bw()
+fp5<- fp5 +geom_point(aes(y=NCD), colour="black", shape=17,size=10)
+fp5<- fp5 + theme(plot.title=element_text(face="bold", colour="#000000", size=30))
+fp5<- fp5 + theme(axis.title.x = element_text(face="bold", colour="#000000", size=26))
+fp5<- fp5 + theme(axis.title.y = element_text(face="bold", colour="#000000", lineheight=1 , size=26))
+fp5<- fp5 + theme(axis.text.x  = element_text(size=22))
+fp5<- fp5 + theme(axis.text.y  = element_text(size=22))
+fp5<- fp5 + theme(legend.text  = element_text(size=22))
+fp5<- fp5 + theme(legend.title  = element_text(size=26))
+# fp5<- fp5 + theme(legend.position  = c(0.7,0.8))
+fp5<-fp5+labs(title="Nitrate Inventory")+xlab("Year")+ylab("Nitrate (kg)")
+# fp5<- fp5 + scale_colour_manual(name="Inventory Models", values=c("Mass Balance"="orange","Loess Model"="green"))
+# fp5<- fp5 + scale_shape_manual(name="Inventory Models", values=c("Mass Balance"=15,"Loess Model"=17))
+fp5<- fp5 + scale_y_log10(limits=c(1e4,1e6))
+print(fp5)
+dev.off()
+

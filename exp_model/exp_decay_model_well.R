@@ -1,11 +1,9 @@
 require(ggplot2)
 require(lubridate)
+require(plyr)
 
-setwd("D:/work/Code/srs_work/exp_model")
-# setwd("D:/CodeProjects/R_SRS/exp_model")
-
-#params
-ptsize<-8
+# setwd("D:/work/Code/srs_work/exp_model")
+setwd("D:/CodeProjects/R_SRS/exp_model")
 
 tritium.raw<-read.csv("../SRS_data/tritium4R.csv")
 tritium.raw$RESULT[tritium.raw$RESULT<0]<-NA
@@ -13,30 +11,92 @@ tritium.raw$RESULT[tritium.raw$RESULT<0]<-NA
 tritium.clean<-tritium.raw[!is.na(tritium.raw$RESULT),]
 tritium.clean$Year<-decimal_date(strptime(tritium.clean$MDATE,"%Y-%m-%d %H:%M:%S"))
 
-tritiumforlm<-tritium.clean[,c("STATION_ID","RESULT","Year")]
-names(tritiumforlm)<-c("well","Tritium","Year")
+# tritiumforlm<-tritium.clean[,c("STATION_ID","RESULT","Year")]
+# names(tritiumforlm)<-c("well","Tritium","Year")
+# 
+# tritiumlpw<-split(tritiumforlm,tritiumforlm$well)
+# 
+# 
+# tritiuml.lm<-llply(tritiumlpw, function(zzl) {lm(log(Tritium)~Year, data=zzl)})
 
-tritiumlpw<-split(tritiumforlm,tritiumforlm$well)
+# summary(tritiuml.lm[[1]])
+# names(tritiuml.lm)
 
-
-tritiuml.lm<-llply(tritiumlpw, function(zzl) {lm(Tritium~Year, data=zzl)})
-
-summary(tritiuml.lm[[1]])
-
-test
-
-
-tritum.pred<-llply(nitratel.loess, function(m) {predict(m,newdata=testgrid1,se =TRUE)})
+# wells1<-names(tritiuml.lm)[substring(names(tritiuml.lm),1,3)=="FSB"]
+# wells1.lm<-tritiuml.lm[wells1]
+# # substring(names(tritiuml.lm),1,3)
+# 
+# # wells1.lm[[1]]$coefficients
+# 
+# decayc<-as.data.frame(wells1)
+# 
+# for (ii in 1:length(wells1.lm)) {
+#   decayc$k<-wells1.lm[[1]]$coefficients[2]
+# }
 
 
 fsb78<-tritium.clean[tritium.clean$STATION_ID=='FSB 78',]
-fsb78$Year<-decimal_date(strptime(fsb78$MDATE,"%Y-%m-%d %H:%M:%S"))
+fsb79<-tritium.clean[tritium.clean$STATION_ID=='FSB 79',]
+fsb87D<-tritium.clean[tritium.clean$STATION_ID=='FSB 87D',]
+fsb98D<-tritium.clean[tritium.clean$STATION_ID=='FSB 98D',]
+# fsb110<-tritium.clean[tritium.clean$STATION_ID=='FSB 110',]
+# fsb78$Year<-decimal_date(strptime(fsb78$MDATE,"%Y-%m-%d %H:%M:%S"))
+
+qplot(Year,RESULT,data=fsb79) + scale_y_log10()
 
 
-fsb78.lm<-lm(log(RESULT)~Year,data=fsb78, se=TRUE)
+fsb78a.lm<-lm(log(RESULT)~Year,data=fsb78)
+fsb79a.lm<-lm(log(RESULT)~Year,data=fsb79)
+fsb87Da.lm<-lm(log(RESULT)~Year,data=fsb87D)
+fsb98Da.lm<-lm(log(RESULT)~Year,data=fsb98D)
+# fsb110.lm<-lm(log(RESULT)~Year,data=fsb110)
+
+fsb78.lm<-lm(log(RESULT)~Year,data=fsb78,subset= fsb78$Year>1999)
+fsb79.lm<-lm(log(RESULT)~Year,data=fsb79,subset= fsb79$Year>1999)
+fsb87D.lm<-lm(log(RESULT)~Year,data=fsb87D,subset= fsb87D$Year>1999)
+fsb98D.lm<-lm(log(RESULT)~Year,data=fsb98D,subset= fsb98D$Year>1999)
 
 summary(fsb78.lm)
-predictdf<-years
+summary(fsb79.lm)
+summary(fsb87D.lm)
+summary(fsb98D.lm)
+
+fsb78.lm$coefficients[2]
+fsb79.lm$coefficients[2]
+fsb87D.lm$coefficients[2]
+fsb98D.lm$coefficients[2]
+
+fsb98Dp<-fsb98D[,c("Year","RESULT")]
+names(fsb98Dp)<-c("Year","Tritium")
+
+predf<-rbind(fsb98Dp,data.frame(Year=seq(from=1992,to=2061,by=1),Tritium=NA))
+predf$logT<-log(predf$Tritium)
+
+# years<-data.frame(Year=seq(from=1991,to=2061,by=1))
+fsb98D.pred<-predict(fsb98D.lm,newdata=predf, se.fit=TRUE, interval = "prediction")
+
+# predictdf<-years
+predf$lip1<-fsb98D.pred$fit[,1]
+predf$lup1<-fsb98D.pred$fit[,2]
+predf$llo1<-fsb98D.pred$fit[,3]
+predf$ip1<-exp(fsb98D.pred$fit[,1])
+predf$up1<-exp(fsb98D.pred$fit[,2])
+predf$lo1<-exp(fsb98D.pred$fit[,3])
+predf$tmcl<-20
+
+
+g1<-ggplot(data=predf,aes(x=Year,y=Tritium))
+g1<-g1 + geom_point(size=4)
+g1<-g1 + geom_line(aes(y=tmcl)) 
+g1<-g1 + geom_line(aes(y=ip1))
+g1<-g1 + geom_smooth(aes(ymin=lo1,ymax=up1), stat="identity")
+g1<-g1 + scale_y_log10()
+print(g1)
+
+
+g2<-ggplot(data=predf,aes(x=Year,y=logT))
+g2<-g2 + stat_smooth(method=lm, fullrange = TRUE) + geom_point()
+g2<-g2 + geom_line(aes(y=tmcl))
 
 
 
@@ -87,3 +147,11 @@ predictdf<-years
 # fp5<- fp5 + scale_y_log10(limits=c(1e3,1e5))
 # print(fp5)
 # dev.off()
+
+
+# + geom_line(aes(y=tmcl))
+# qplot(Year, ip1, data = predf) 
+# + geom_smooth(aes(ymin=lo1,ymax=up1), stat="identity")
+# +geom_point(aes(),)
+# + geom_line(aes(y=tmcl)) 
+# + scale_y_log10()
