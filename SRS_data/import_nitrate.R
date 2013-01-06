@@ -27,8 +27,8 @@ nitrateC.clean1$RESULT[nitrateC.clean1$RESULT<0]<-NA
 nitrate.clean<-nitrate.clean1[!is.na(nitrate.clean1$RESULT),]
 nitrateC.clean<-nitrateC.clean1[!is.na(nitrateC.clean1$RESULT),]
 
-nitrate.clean1$RESULT[nitrate.clean1$RESULT<0]<-NA
-nitrate.clean<-nitrate.clean1[!is.na(nitrate.clean1$RESULT),]
+# nitrate.clean1$RESULT[nitrate.clean1$RESULT<0]<-NA
+# nitrate.clean<-nitrate.clean1[!is.na(nitrate.clean1$RESULT),]
 
 iodine.clean1$RESULT[iodine.clean1$RESULT<0]<-NA
 iodine.clean<-iodine.clean1[!is.na(iodine.clean1$RESULT),]
