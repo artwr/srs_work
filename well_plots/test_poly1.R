@@ -1,7 +1,3 @@
-#Create a plot including selected wells as points
-#and the basins as polygons
-
-library(ggplot2)
 
 ids <- letters[1:2]
 
