@@ -7,6 +7,15 @@ require(sqldf)
 corr.raw<-read.csv("../SRS_data/corr4R.csv")
 corrC.raw<-read.csv("../SRS_data/corrC4R.csv")
 
+inventory.final<-readRDS("../inventory/inventoryfinal.rdata")
+inventory.finalN<-readRDS("../inventory/inventoryfinalN.rdata")
+names(inventory.finalN)[1]<-"Year"
+
+sourceterm<-readRDS("../source_term/tritiumsource.rdata")
+
+comparison<-merge(sourceterm,inventory.final,by.x = "Year", by.y = "MYEAR")
+comparison$inventory1bCD<-comparison$inventory1b+comparison$inventoryC
+
 # FSB 78
 FSB78.raw<-corr.raw[corr.raw$STATION_ID=='FSB 78',c("STATION_ID","MDATE","MYEAR","TRITIUM","NITRATE.NITRITE.AS.NITROGEN")]
 

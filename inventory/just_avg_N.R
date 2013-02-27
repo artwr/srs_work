@@ -340,7 +340,8 @@ inventory5$N<-area.dom*porosity.mean*inventory5$meanch*1e-6*.3048
 inventory5$Nmed<-area.dom*porosity.mean*inventory5$medianch*1e-6*.3048
 inventory5$Nfl<-area.dom*porosity.mean*inventory5$meanchfl*1e-6*.3048
 inventory5$Nmedfl<-area.dom*porosity.mean*inventory5$medianchfl*1e-6*.3048
-inventory5$NC<-area.dom*porosity.mean*inventory5$meanchC*1e-12
+# inventory5$NC<-area.dom*porosity.mean*inventory5$meanchC*1e-12
+inventory5$NC<-area.dom*porosity.mean*inventory5$meanchC*1e-6
 inventory5$NCD<-inventory5$N+inventory5$NC
 
 inventoryN.final<-merge(inventoryjaN.csv, inventory5, by="MYEAR")
@@ -391,7 +392,7 @@ inventoryN.final<-merge(inventoryjaN.csv, inventory5, by="MYEAR")
 # print(final.plot4)
 
 
-saveRDS(inventoryN.final,"inventoryfinalN.rdata")
+saveRDS(inventoryN.final,"inventoryfinalN_alt.rdata")
 
 print(proc.time() - ptm1)
 

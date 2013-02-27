@@ -8,7 +8,8 @@ ptsize<-12
 
 
 inventory.final<-readRDS("../inventory/inventoryfinal.rdata")
-inventoryN.final<-readRDS("../inventory/inventoryfinalN.rdata")
+#inventoryN.final<-readRDS("../inventory/inventoryfinalN.rdata")
+inventoryN.final<-readRDS("../inventory/inventoryfinalN_alt.rdata")
 names(inventoryN.final)[1]<-"Year"
 names(inventoryN.final)
 sourceterm<-readRDS("../source_term/tritiumsource.rdata")
@@ -26,7 +27,39 @@ inv1loessNall.lm<-lm(log(NCD)~Year,data=inventoryN.final)
 inv1loessNUAZ.lm<-lm(log(N)~Year,data=inventoryN.final)
 inv1loessNLAZ.lm<-lm(log(NC)~Year,data=inventoryN.final)
 
+final.plot3<-ggplot(data=inventoryN.final, aes(x=Year, size=12))
+final.plot3<- final.plot3 + theme_bw()
+# final.plot3<- final.plot3 +geom_point(aes(y=inventory1b), colour='red')
+final.plot3<- final.plot3 +geom_point(aes(y=N), colour='orange')
+final.plot3<- final.plot3 +geom_point(aes(y=NC), colour='violet')
+final.plot3<- final.plot3 +geom_point(aes(y=NCD), colour='yellow')
+final.plot3<- final.plot3 + theme(plot.title=element_text(face="bold", colour="#000000", size=30))
+final.plot3<- final.plot3 + theme(axis.title.x = element_text(face="bold", colour="#000000", size=26))
+final.plot3<- final.plot3 + theme(axis.title.y = element_text(face="bold", colour="#000000", lineheight=1 , size=26))
+final.plot3<- final.plot3 + theme(axis.text.x  = element_text(size=22))
+final.plot3<- final.plot3 + theme(axis.text.y  = element_text(size=22))
+final.plot3<- final.plot3 + scale_y_log10()
+final.plot3<-final.plot3+labs(title="Nitrate Inventory")+xlab("Year")+ylab("Nitrate")
+print(final.plot3)
 
+final.plot4<-ggplot(data=comparison, aes(x=Year, size=3))
+final.plot4<- final.plot4 + theme_bw()
+# final.plot4<- final.plot4 +geom_point(aes(y=inventory1), colour='blue', size=2)
+final.plot4<- final.plot4 +geom_point(aes(y=inventory1b), colour='red')
+# final.plot4<- final.plot4 +geom_point(aes(y=inventory1lm), colour='green', size=2)
+final.plot4<- final.plot4 +geom_point(aes(y=t), colour='orange')
+final.plot4<- final.plot4 +geom_point(aes(y=gwInventory), colour='black')
+#final.plot4<- final.plot4 +geom_point(aes(y=tfl), colour='black')
+final.plot4<- final.plot4 +geom_point(aes(y=tC), colour='violet')
+final.plot4<- final.plot4 +geom_point(aes(y=tCD), colour='yellow')
+final.plot4<- final.plot4 + theme(plot.title=element_text(face="bold", colour="#000000", size=30))
+final.plot4<- final.plot4 + theme(axis.title.x = element_text(face="bold", colour="#000000", size=26))
+final.plot4<- final.plot4 + theme(axis.title.y = element_text(face="bold", colour="#000000", lineheight=1 , size=26))
+final.plot4<- final.plot4 + theme(axis.text.x  = element_text(size=22))
+final.plot4<- final.plot4 + theme(axis.text.y  = element_text(size=22))
+final.plot4<- final.plot4 + scale_y_log10()
+final.plot4<-final.plot4+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+print(final.plot4)
 
 
 
@@ -40,6 +73,8 @@ inv1loessLAZ.lm$coefficients[2]
 inv1loessNall.lm$coefficients[2]
 inv1loessNUAZ.lm$coefficients[2]
 inv1loessNLAZ.lm$coefficients[2]
+
+summary(inv1loessNLAZ.lm)
 
 
 years<-data.frame(Year=seq(from=1988,to=2061,by=1))
