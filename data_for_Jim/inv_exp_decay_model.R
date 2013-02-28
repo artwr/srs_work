@@ -16,6 +16,9 @@ sourceterm<-readRDS("../source_term/tritiumsource.rdata")
 comparison<-merge(sourceterm,inventory.final,by.x = "Year", by.y = "MYEAR")
 comparison$inventory1bCD<-comparison$inventory1b+comparison$inventoryC
 
+comparison2<-comparison[comparison$Year>2000,]
+inventoryN.final2<-inventoryN.final[inventoryN.final$Year>2000,]
+
 gwI.lm<-lm(log(gwInventory)~Year,data=comparison)
 inv1all.lm<-lm(log(inventory1bCD)~Year,data=comparison)
 inv1UAZ.lm<-lm(log(inventory1b)~Year,data=comparison)
@@ -26,6 +29,20 @@ inv1loessLAZ.lm<-lm(log(tC)~Year,data=comparison)
 inv1loessNall.lm<-lm(log(NCD)~Year,data=inventoryN.final)
 inv1loessNUAZ.lm<-lm(log(N)~Year,data=inventoryN.final)
 inv1loessNLAZ.lm<-lm(log(NC)~Year,data=inventoryN.final)
+
+gwI.lm2<-lm(log(gwInventory)~Year,data=comparison2)
+inv1all.lm2<-lm(log(inventory1bCD)~Year,data=comparison2)
+inv1UAZ.lm2<-lm(log(inventory1b)~Year,data=comparison2)
+inv1LAZ.lm2<-lm(log(inventoryC)~Year,data=comparison2)
+inv1loessall.lm2<-lm(log(tCD)~Year,data=comparison2)
+inv1loessUAZ.lm2<-lm(log(t)~Year,data=comparison2)
+inv1loessLAZ.lm2<-lm(log(tC)~Year,data=comparison2)
+inv1loessNall.lm2<-lm(log(NCD)~Year,data=inventoryN.final2)
+inv1loessNUAZ.lm2<-lm(log(N)~Year,data=inventoryN.final2)
+inv1loessNLAZ.lm2<-lm(log(NC)~Year,data=inventoryN.final2)
+
+
+
 
 final.plot3<-ggplot(data=inventoryN.final, aes(x=Year, size=12))
 final.plot3<- final.plot3 + theme_bw()
@@ -74,8 +91,25 @@ inv1loessNall.lm$coefficients[2]
 inv1loessNUAZ.lm$coefficients[2]
 inv1loessNLAZ.lm$coefficients[2]
 
-summary(inv1loessNLAZ.lm)
 
+gwI.lm2$coefficients[2]
+inv1all.lm2$coefficients[2]
+inv1UAZ.lm2$coefficients[2]
+inv1LAZ.lm2$coefficients[2]
+inv1loessall.lm2$coefficients[2]
+inv1loessUAZ.lm2$coefficients[2]
+inv1loessLAZ.lm2$coefficients[2]
+inv1loessNall.lm2$coefficients[2]
+inv1loessNUAZ.lm2$coefficients[2]
+inv1loessNLAZ.lm2$coefficients[2]
+
+summary(inv1all.lm2)
+summary(inv1UAZ.lm2)
+summary(inv1LAZ.lm2)
+
+summary(inv1all.lm)
+summary(inv1UAZ.lm)
+summary(inv1LAZ.lm)
 
 years<-data.frame(Year=seq(from=1988,to=2061,by=1))
 gwI.pred<-predict(gwI.lm, newdata=years, se.fit=TRUE, interval = "prediction")
