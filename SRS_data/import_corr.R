@@ -5,7 +5,7 @@ rm(list=ls())
 #read the data
 corr.raw<-read.csv("corr4R.csv")
 
-
+head(corr.raw)
 
 #c("STATION_SEQ","STATION_ID","EASTING","NORTHING","LATITUDE","LONGITUDE","GROUND_ELEVATION","REFERENCE_ELEVATION","TOP_ELEV","BOTTOM_ELEV","MDATE","MYEAR","MMONTH","MDAY","MQUARTER")
 
