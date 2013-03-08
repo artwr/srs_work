@@ -1,6 +1,6 @@
 #Simple Computation
-require(geoR)
-require(geoRglm)
+# require(geoR)
+# require(geoRglm)
 require(fields)
 require(akima)
 require(splancs)
@@ -105,7 +105,7 @@ no.v<-seq(no.min, no.max, length = no.b)
 #Create the expandgrid df for predictions
 testgrid1<-expand.grid(EASTING=ea.v, NORTHING=no.v)
 
-#Create polygon to compute area.
+#Create polygon to compute area. Needs splancs lib for more complex polygons
 d.ea<-c(ea.min,ea.min,ea.max,ea.max,ea.min)
 d.no<-c(no.min,no.max,no.max,no.min,no.min)
 pp<-cbind(d.ea,d.no)
@@ -114,9 +114,10 @@ area.dom<-areapl(pp)
 
 #Define porosity value
 porosity.mean<-.3
-porosity.sd<-.03
+#porosity.sd<-.03
 
-#C thickness in m
+# LAZ Aquifer C assumed thickness in m 
+# (corresponds to the screen interval for the C wells)
 Cth<-10*.3048
 
 #########################################################
@@ -131,11 +132,12 @@ TCCZ.lm<-lm(TCCZ_top~EASTING+NORTHING,data=TCCZe)
 
 #Create the aquifer thickness data frame
 thperyear<-wl
-#Add the TCCZ values predicted by the linear models
+#Add the TCCZ values predicted by the linear models at the wells coordinates
 # with standard error estimates
 pre2<-predict(TCCZ.loess1,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
 pre2b<-predict(TCCZ.loess1b,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
 pre2lm<-predict(TCCZ.lm,newdata = wl[,c("EASTING","NORTHING")],se = TRUE, interval = "prediction",level = 0.95)
+# summary(pre2)
 #
 thperyear$TCCZ.fit<-pre2$fit
 thperyear$TCCZ.se.fit<-pre2$se.fit
@@ -151,6 +153,15 @@ thperyear$h<-thperyear$mean-thperyear$TCCZ.fit
 thperyear$hb<-thperyear$mean-thperyear$TCCZ.fitb
 thperyear$hlm<-thperyear$mean-thperyear$TCCZ.fitlm
 
+# #Diagnostics on the thickness
+# summary(thperyear$hlm)
+# #ggplot
+# ph <- ggplot(thperyear, aes(x=EASTING,y=NORTHING)) + geom_point(aes(colour=hlm), size = 10) + scale_colour_gradient2(low="red", high="blue") 
+# print(ph)
+# #Close up in the area + 100m margin to the interpolation domain.
+# ph2 <- ph + xlim(ea.min-100,ea.max+100) + ylim(no.min-100,no.max+100)
+# print(ph2)
+#In this case, I am removing points that are attributed a negative aq thickness. They will not be taken into account for the inventory
 # Replace negative values with NA
 thperyear$h[thperyear$h<=0]<-NA
 thperyear$hb[thperyear$hb<=0]<-NA

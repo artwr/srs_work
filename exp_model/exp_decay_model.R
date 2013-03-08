@@ -1,6 +1,6 @@
 require(ggplot2)
 
-setwd("D:/work/Code/srs_work/exp_model")
+# setwd("D:/work/Code/srs_work/exp_model")
 # setwd("D:/CodeProjects/R_SRS/exp_model")
 
 #params
@@ -47,16 +47,17 @@ gwI.pred<-predict(gwI.lm, newdata=years, se.fit=TRUE, interval = "prediction")
 inv1.pred<-predict(inv1.lm, newdata=years, se.fit=TRUE, interval = "prediction")
 inv1loess.pred<-predict(inv1loess.lm, newdata=years, se.fit=TRUE, interval = "prediction")
 
-# predictdf<-years
-# predictdf$lip1<-gwI.pred$fit[,1]
-# predictdf$lup1<-gwI.pred$fit[,2]
-# predictdf$llo1<-gwI.pred$fit[,3]
-# predictdf$ip1<-exp(gwI.pred$fit[,1])
-# predictdf$up1<-exp(gwI.pred$fit[,2])
-# predictdf$lo1<-exp(gwI.pred$fit[,3])
+predictdf<-years
+predictdf$lip1<-gwI.pred$fit[,1]
+predictdf$lup1<-gwI.pred$fit[,2]
+predictdf$llo1<-gwI.pred$fit[,3]
+predictdf$ip1<-exp(gwI.pred$fit[,1])
+predictdf$up1<-exp(gwI.pred$fit[,2])
+predictdf$lo1<-exp(gwI.pred$fit[,3])
 # # predictdf$tmcl<-20
 # # + geom_line(aes(y=tmcl))
-# qplot(Year, ip1, data = predictdf) + geom_smooth(aes(ymin=lo1,ymax=up1), stat="identity") + scale_y_log10()
+qplot(Year, ip1, data = predictdf) + geom_smooth(aes(ymin=lo1,ymax=up1), stat="identity") + scale_y_log10() + geom_point(data=comparison)
+
 # ggplot(data=predictf)
 
 
