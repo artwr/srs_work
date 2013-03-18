@@ -21,6 +21,7 @@ plot(f3basinmap)
 
 #All the basins
 basins<-readRDS("../basin_coords/basins.rdata")
+basins27<-readRDS("../basin_coords/basins27.rdata")
 
 bnames <- data.frame(
   id = c("F3","F2","F1"),
@@ -28,8 +29,10 @@ bnames <- data.frame(
 )
 
 basins$id<-rep(bnames$id, each = 5)
+basins27$id<-rep(bnames$id, each = 5)
 
-datapoly <- merge(basins, bnames, by=c("id"))
+basinspoly <- merge(basins, bnames, by=c("id"))
+basins27poly <- merge(basins, bnames, by=c("id"))
 
 #Extent of the interpolation domain
 no.min<-3680930
@@ -39,7 +42,7 @@ ea.max<-437155
 
 
 #Plot that identifies the basins with colours
-basinsmap<-ggplot(datapoly, aes(x=UTM_E, y=UTM_N)) + 
+basinsmap<-ggplot(basinspoly, aes(x=UTM_E, y=UTM_N)) + 
   geom_polygon(aes(group=id, fill=factor(value))) +
   scale_fill_discrete("Key")
 
@@ -49,7 +52,7 @@ plot(basinsmap)
 
 #Plot with black basins and axis labels
 
-basinsmap2<-ggplot(datapoly, aes(x=UTM_E, y=UTM_N)) + 
+basinsmap2<-ggplot(basinspoly, aes(x=UTM_E, y=UTM_N)) + 
   geom_polygon(aes(group=id), fill="black") +
   scale_fill_discrete("Key") +
   labs(list(title = "Plot of the basins", x = "UTM Easting (m)", y = "UTM Northing (m)"))
@@ -70,7 +73,7 @@ names(allwells)
 
 #Create a plot with the basins + the wells
 
-basinsmap3<-ggplot(datapoly, aes(x=UTM_E, y=UTM_N)) + 
+basinsmap3<-ggplot(basins27poly, aes(x=UTM_E, y=UTM_N)) + 
   geom_polygon(aes(group=id), fill="black") +
   scale_fill_discrete("Key") +
   labs(list(title = "Plot of the basins with wells", x = "UTM Easting (m)", y = "UTM Northing (m)"))
@@ -87,7 +90,7 @@ basinsmap4 <- basinsmap3 + geom_polygon(data=interp.dom, fill = "orange", colour
 plot(basinsmap4)
 
 #same but with less fill on basins
-basinsmap5<-ggplot(datapoly, aes(x=UTM_E, y=UTM_N)) + 
+basinsmap5<-ggplot(basins27poly, aes(x=UTM_E, y=UTM_N)) + 
   geom_polygon(aes(group=id), fill="light grey", colour = "blue", alpha = 1/3) +
   scale_fill_discrete("Key") +
   labs(list(title = "Plot of the basins with wells", x = "UTM Easting (m)", y = "UTM Northing (m)"))
