@@ -1,16 +1,19 @@
+#Importing CSV into R and doing the aggregation per year.
+
 #require(doBy)
 require(plyr)
 
 rm(list=ls())
 #read the data
 tritium.raw<-read.csv("tritium4R.csv")
+#H well that's close enough to the east of the basins for a good boundary condition.
 HSB143D<-read.csv("HSB143D_add.csv")
 wl.raw<-read.csv("wl4R.csv")
 
 tritiumC.raw<-read.csv("tritiumC4R.csv")
 
-# seeextent <- ggplot(data=tritiumC.raw) + geom_point(aes(x=EASTING,y=NORTHING))
-# print(seeextent)
+# extentdomC <- ggplot(data=tritiumC.raw) + geom_point(aes(x=EASTING,y=NORTHING))
+# print(extentdomC)
 
 #Remove FEX8 because of the 2 screens.
 wl.clean<-wl.raw[!wl.raw$STATION_ID=='FEX  8' & !wl.raw$STATION_ID=='FEX  9',]
