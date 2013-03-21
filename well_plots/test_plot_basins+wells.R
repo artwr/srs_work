@@ -32,17 +32,17 @@ basins$id<-rep(bnames$id, each = 5)
 basins27$id<-rep(bnames$id, each = 5)
 
 basinspoly <- merge(basins, bnames, by=c("id"))
-basins27poly <- merge(basins, bnames, by=c("id"))
+basins27poly <- merge(basins27, bnames, by=c("id"))
 
-#Extent of the interpolation domain
-no.min<-3680930
-no.max<-3682110
-ea.min<-436175
-ea.max<-437155
+# #Extent of the interpolation domain
+# no.min<-3680930
+# no.max<-3682110
+# ea.min<-436175
+# ea.max<-437155
 
 
 #Plot that identifies the basins with colours
-basinsmap<-ggplot(basinspoly, aes(x=UTM_E, y=UTM_N)) + 
+basinsmap<-ggplot(basins27poly, aes(x=UTM_E, y=UTM_N)) + 
   geom_polygon(aes(group=id, fill=factor(value))) +
   scale_fill_discrete("Key")
 
@@ -52,7 +52,7 @@ plot(basinsmap)
 
 #Plot with black basins and axis labels
 
-basinsmap2<-ggplot(basinspoly, aes(x=UTM_E, y=UTM_N)) + 
+basinsmap2<-ggplot(basins27poly, aes(x=UTM_E, y=UTM_N)) + 
   geom_polygon(aes(group=id), fill="black") +
   scale_fill_discrete("Key") +
   labs(list(title = "Plot of the basins", x = "UTM Easting (m)", y = "UTM Northing (m)"))
