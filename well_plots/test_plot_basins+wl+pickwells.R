@@ -62,6 +62,14 @@ basinsmap2<- basinsmap2 + expand_limits(x = c(ea.min+50,ea.max+50), y = c(no.min
 plot(basinsmap2)
 
 
+#Import the water level data
+wl<-readRDS("../SRS_data/wl.rdata")
+wlavg<-readRDS("../SRS_data/wlavg.rdata")
+#Import picks for the TCCZ
+TCCZe_all<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
+TCCZe<-TCCZe_all[!is.na(TCCZe_all$TCCZ_top),]
+rm(TCCZe_all)
+
 
 #Add tritium data
 tritium<-readRDS("../SRS_data/tritiumf.rdata")

@@ -69,11 +69,13 @@ TCCZ.lm<-lm(TCCZ_top~EASTING+NORTHING,data=TCCZe)
 
 #Create the aquifer thickness data frame
 thperyear<-wl
-#Add the TCCZ values predicted by the linear models at the wells coordinates
+#Add the TCCZ values predicted by the linear models 
+# at the wells coordinates
 # with standard error estimates
 pre2<-predict(TCCZ.loess1,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
 pre2b<-predict(TCCZ.loess1b,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
 pre2lm<-predict(TCCZ.lm,newdata = wl[,c("EASTING","NORTHING")],se = TRUE, interval = "prediction",level = 0.95)
+
 # summary(pre2)
 #
 thperyear$TCCZ.fit<-pre2$fit
@@ -100,7 +102,9 @@ thperyear$hlm<-thperyear$mean-thperyear$TCCZ.fitlm
 # #Close up in the area + 100m margin to the interpolation domain.
 # ph2 <- ph + xlim(ea.min-100,ea.max+100) + ylim(no.min-100,no.max+100)
 # print(ph2)
-#In this case, I am removing points that are attributed a negative aq thickness. They will not be taken into account for the inventory
+
+# In this case, I am removing points that are attributed a negative aq thickness. 
+# They will not be taken into account for the inventory
 # Replace negative values with NA
 thperyear$h[thperyear$h<=0]<-NA
 thperyear$hb[thperyear$hb<=0]<-NA
@@ -115,4 +119,49 @@ th.avg.peryearh<-ddply(thperyear.cleanh, c('MYEAR'), function(x) c(counth=nrow(x
 th.avg.peryearhb<-ddply(thperyear.cleanhb, c('MYEAR'), function(x) c(counthb=nrow(x),hb.mean=mean(x$hb),hb.median=median(x$hb),hb.sd=sd(x$hb),hb.mad=mad(x$hb),hb.min=min(x$hb),hb.max=max(x$hb)))
 th.avg.peryearhlm<-ddply(thperyear.cleanhlm, c('MYEAR'), function(x) c(counthlm=nrow(x),hlm.mean=mean(x$hlm),hlm.median=median(x$hlm),hlm.sd=sd(x$hlm),hlm.mad=mad(x$hlm),hlm.min=min(x$hlm),hlm.max=max(x$hlm)))
 
+
+
+#We could also 
+pre3<-predict(TCCZ.loess1,newdata = testgrid1,se = TRUE)
+pre3b<-predict(TCCZ.loess1b,newdata = testgrid1,se = TRUE)
+pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE, interval = "prediction",level = 0.95)
+
+# summary(pre2)
+ploterrorTCCZ<-testgrid1
+#
+ploterrorTCCZ$TCCZ.fit<-as.vector(pre3$fit)
+ploterrorTCCZ$TCCZ.se.fit<-as.vector(pre3$se.fit)
+ploterrorTCCZ$TCCZ.fitb<-pre3b$fit
+ploterrorTCCZ$TCCZ.se.fitb<-pre3b$se.fit
+ploterrorTCCZ$TCCZ.fitlm<-pre3lm$fit[,1]
+ploterrorTCCZ$TCCZ.se.fitlm<-pre3lm$se.fit
+#Upper
+ploterrorTCCZ$TCCZ.fitlmupr<-pre3lm$fit[,2]
+#Lower Bound
+ploterrorTCCZ$TCCZ.fitlmlwr<-pre3lm$fit[,3]
+
+# #ggplot to be fixed...
+# plotTCCZerror <- ggplot(ploterrorTCCZ, aes(x=EASTING,y=NORTHING)) 
+# + geom_tile(aes(fill=TCCZ.fit)) 
+# + scale_fill_gradient(low="green", high="red")
+
+#image.plots in the mean time
+image.plot(ea.v,no.v,pre3$fit)
+image.plot(ea.v,no.v,pre3$se.fit)
+image.plot(ea.v,no.v,pre3b$fit)
+image.plot(ea.v,no.v,pre3b$se.fit)
+lmfit<-pre3lm$fit[,1]
+lmfitse<-pre3lm$se.fit
+dim(lmfit) <- c(50,60)
+dim(lmfitse) <- c(50,60)
+image.plot(ea.v,no.v,lmfit)
+image.plot(ea.v,no.v,lmfitse)
+
+# + geom_point(data=TCCZe, coulour= "black" , size = 4) 
+print(plotTCCZerror)
+# + scale_colour_gradient2(low="red", high="blue") 
+# print(ph)
+# #Close up in the area + 100m margin to the interpolation domain.
+# ph2 <- ph + xlim(ea.min-100,ea.max+100) + ylim(no.min-100,no.max+100)
+# print(ph2)
 
