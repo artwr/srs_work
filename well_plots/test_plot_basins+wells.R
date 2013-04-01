@@ -10,6 +10,8 @@ source('../inventory/interpolation_domain.R')
 
 # rm(list=ls())
 
+##########################################################
+
 #Add basin 3 coordinates
 f3basin<-readRDS("../basin_coords/f3basin.rdata")
 f3basin27<-readRDS("../basin_coords/f3basin27.rdata")
@@ -23,6 +25,8 @@ plot(f3basinmap)
 basins<-readRDS("../basin_coords/basins.rdata")
 basins27<-readRDS("../basin_coords/basins27.rdata")
 
+
+## Necessary trick to be able to identofy each of the basins
 bnames <- data.frame(
   id = c("F3","F2","F1"),
   value = c(4,5,6)
@@ -59,17 +63,26 @@ basinsmap2<-ggplot(basins27poly, aes(x=UTM_E, y=UTM_N)) +
 
 basinsmap2<- basinsmap2 + expand_limits(x = c(ea.min+50,ea.max+50), y = c(no.min+50,no.max+50))
 
+basinsmap2 <- basinsmap2 + theme_bw() + theme(aspect.ratio =1)
+
 plot(basinsmap2)
 
-
+############################################################
 
 #Add tritium data
 tritium<-readRDS("../SRS_data/tritiumf.rdata")
-
-#create all the wells of interest
+names(tritium)
+#create a dataset of all unique wells of interest
 allwells<-unique(tritium[,c("STATION_ID","EASTING","NORTHING")])
 names(allwells)<-c("STATION_ID","UTM_E","UTM_N")
 names(allwells)
+
+#Create Dataframe with selected years
+yoi<-c(1979,1984,1988,1995,2000,2011)
+tritiumwellsyoi<-subset(tritium[,c("STATION_ID","EASTING","NORTHING","MYEAR")], MYEAR %in% yoi)
+names(tritiumwellsyoi)<-c("STATION_ID","UTM_E","UTM_N","Year")
+
+###############################################
 
 #Create a plot with the basins + the wells
 
@@ -105,6 +118,59 @@ basinsmap5<- basinsmap5 + geom_polygon(data=f3basin27, fill = "light grey", colo
 
 plot(basinsmap5)
 
+
+
+
+
+##
+
+basins27poly2 <- basins27poly
+basins27poly2$Year <- NULL
+
+interp.dom2 <- interp.dom
+interp.dom2$Year <- NULL
+
+wellsmap1<-ggplot(tritiumwellsyoi, aes(x=UTM_E, y=UTM_N)) + geom_point(data = tritiumwellsyoi, aes(x=UTM_E, y=UTM_N)) + facet_wrap(~ Year, nrow = 2)
+# + geom_polygon(data=interp.dom, fill = "orange", colour = "red", alpha = 1/3) 
+
+wellsmap1<- wellsmap1 + theme_bw() + labs(title="Active wells")
+
+wellsmap1<- wellsmap1 + labs(x = "UTM Easting (m)", y= "UTM Northing (m)")
+
+plot(wellsmap1)
+
+
+wellsmap2<-ggplot(tritiumwellsyoi, aes(x=UTM_E, y=UTM_N)) + geom_point(data = tritiumwellsyoi, aes(x=UTM_E, y=UTM_N)) 
+# + geom_polygon(data=interp.dom, fill = "orange", colour = "red", alpha = 1/3) 
+
+wellsmap2<- wellsmap2 + theme_bw() + labs(title="Active wells per year with respect to D")
+
+wellsmap2<- wellsmap2 + labs(x = "UTM Easting (m)", y= "UTM Northing (m)")
+
+wellsmap2<- wellsmap2 + geom_polygon(data=basins27poly2,aes(group=id), fill="black")
+  
+wellsmap2<- wellsmap2 + geom_polygon(data=interp.dom2, fill = "orange", colour = "red", alpha = 1/3)
+
+wellsmap2<- wellsmap2 + facet_wrap(~ Year, nrow = 2)
+
+wellsmap2<- wellsmap2  + scale_x_continuous(breaks=c(435000,436000,437000))
+
+plot(wellsmap2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## playing with geoR as.geodata etc...
 #Split per measurement year
 tritiuml<-split(tritium,tritium$MYEAR)
 
