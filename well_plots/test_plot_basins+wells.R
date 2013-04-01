@@ -157,9 +157,29 @@ wellsmap2<- wellsmap2  + scale_x_continuous(breaks=c(435000,436000,437000))
 
 plot(wellsmap2)
 
+##
 
 
+pdf(file="tritiumwellsperyear_test.pdf", width=7, height=10,family="Courier")
 
+wellsmap3<-ggplot(tritiumwellsyoi, aes(x=UTM_E, y=UTM_N)) + geom_point(data = tritiumwellsyoi, aes(x=UTM_E, y=UTM_N)) 
+# + geom_polygon(data=interp.dom, fill = "orange", colour = "red", alpha = 1/3) 
+
+wellsmap3<- wellsmap3 + theme_bw() + labs(title="Active wells per year with respect to D")
+
+wellsmap3<- wellsmap3 + labs(x = "UTM Easting (m)", y= "UTM Northing (m)")
+
+wellsmap3<- wellsmap3 + geom_polygon(data=basins27poly2,aes(group=id), fill="black")
+
+wellsmap3<- wellsmap3 + geom_polygon(data=interp.dom2, fill = "orange", colour = "red", alpha = 1/3)
+
+wellsmap3<- wellsmap3 + facet_wrap(~ Year, ncol = 2)
+
+wellsmap3<- wellsmap3  + scale_x_continuous(breaks=c(435000,436000,437000))
+
+print(wellsmap3)
+
+dev.off()
 
 
 
