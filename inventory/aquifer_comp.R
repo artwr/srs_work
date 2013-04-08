@@ -5,54 +5,41 @@
 require(fields)
 require(splancs)
 require(plyr)
-require(ggplot2)
-require(scales)
 
 #Clean if necessary
 # rm(list=ls())
 
-#Import the water level data
-wl<-readRDS("../SRS_data/wl.rdata")
-wlavg<-readRDS("../SRS_data/wlavg.rdata")
+#################
+# 0. Import the need data TCCZ and Water levels
+#
+#
+
+
 #Import picks for the TCCZ
 TCCZe_all<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
 TCCZe<-TCCZe_all[!is.na(TCCZe_all$TCCZ_top),]
 rm(TCCZe_all)
 
-#basin coords for plotting if needed
-#f3basin<-readRDS("../basin_coords/f3basin.rdata")
-#f3basin27<-readRDS("../basin_coords/f3basin27.rdata")
+#Import the water level data
+wl<-readRDS("../SRS_data/wl.rdata")
+wlavg<-readRDS("../SRS_data/wlavg.rdata")
 
 #Split per measurement year
 wll<-split(wl,wl$MYEAR)
 #Select 1988 and after
 wll2<-wll[5:length(wll)]
 
+#basin coords for plotting if needed
+#f3basin<-readRDS("../basin_coords/f3basin.rdata")
+#f3basin27<-readRDS("../basin_coords/f3basin27.rdata")
+
+
+
 #########################################################
-#2.
+#1.
 #Define interpolation domain and compute area, define other parameters
 
-#Boundaries
-no.min<-3680930
-no.max<-3682110
-ea.min<-436175
-ea.max<-437155
-#number of breaks ~ 20 m apart
-ea.b<-1+(ea.max-ea.min)/20
-no.b<-1+(no.max-no.min)/20
-#Create the vectors
-ea.v<-seq(ea.min, ea.max, length = ea.b)
-no.v<-seq(no.min, no.max, length = no.b)
-#Create the expandgrid df for predictions
-testgrid1<-expand.grid(EASTING=ea.v, NORTHING=no.v)
-
-# Create polygon to compute area. 
-# Needs splancs lib for more complex polygons
-d.ea<-c(ea.min,ea.min,ea.max,ea.max,ea.min)
-d.no<-c(no.min,no.max,no.max,no.min,no.min)
-pp<-cbind(d.ea,d.no)
-#plot(pp, type="b")
-area.dom<-areapl(pp)
+source('interpolation_domain.R')
 
 #Define porosity value
 porosity.mean<-.3
@@ -62,10 +49,22 @@ porosity.mean<-.3
 # (corresponds to the screen interval for the C wells)
 Cth<-10*.3048
 
+#Alpha loess
+alphaloess1<-0.25
+alphaloess2<-0.4
+alphaloesswl<-0.25
+
 #Local polynomial fit (1st order) and linear model
-TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1, span= 0.25)
-TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1,span= 0.4)
+TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1, span= alphaloess1)
+TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1,span= alphaloess2)
 TCCZ.lm<-lm(TCCZ_top~EASTING+NORTHING,data=TCCZe)
+
+####################
+# 2. Computation of thickness on the water level points
+#
+#
+####################
+
 
 #Create the aquifer thickness data frame
 thperyear<-wl
@@ -94,6 +93,11 @@ thperyear$h<-thperyear$mean-thperyear$TCCZ.fit
 thperyear$hb<-thperyear$mean-thperyear$TCCZ.fitb
 thperyear$hlm<-thperyear$mean-thperyear$TCCZ.fitlm
 
+#Compute the santadard error of that estimate
+thperyear$hse<-sqrt(max(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fit^2)
+thperyear$hbse<-sqrt(max(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fitb^2)
+thperyear$hlmse<-sqrt(max(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fitlm^2)
+
 # #Diagnostics on the thickness
 # summary(thperyear$hlm)
 # #ggplot
@@ -114,54 +118,65 @@ thperyear.cleanh<-thperyear[!is.na(thperyear$h),]
 thperyear.cleanhb<-thperyear[!is.na(thperyear$hb),]
 thperyear.cleanhlm<-thperyear[!is.na(thperyear$hlm),]
 
-#Compute the avg per year
+thperyear.cleanh$hserel<-thperyear.cleanh$hse/thperyear.cleanh$h
+thperyear.cleanhb$hbserel<-thperyear.cleanhb$hbse/thperyear.cleanh$hb
+thperyear.cleanhlm$hlmserel<-thperyear.cleanhlm$hlmse/thperyear.cleanh$hlm
+
+#Compute the avg per year Careful does not take into account
+#The previous computation of error. To keep on the side for other computation
 th.avg.peryearh<-ddply(thperyear.cleanh, c('MYEAR'), function(x) c(counth=nrow(x),h.mean=mean(x$h),h.median=median(x$h),h.sd=sd(x$h),h.mad=mad(x$h),h.min=min(x$h),h.max=max(x$h)))
 th.avg.peryearhb<-ddply(thperyear.cleanhb, c('MYEAR'), function(x) c(counthb=nrow(x),hb.mean=mean(x$hb),hb.median=median(x$hb),hb.sd=sd(x$hb),hb.mad=mad(x$hb),hb.min=min(x$hb),hb.max=max(x$hb)))
 th.avg.peryearhlm<-ddply(thperyear.cleanhlm, c('MYEAR'), function(x) c(counthlm=nrow(x),hlm.mean=mean(x$hlm),hlm.median=median(x$hlm),hlm.sd=sd(x$hlm),hlm.mad=mad(x$hlm),hlm.min=min(x$hlm),hlm.max=max(x$hlm)))
 
 
+####################
+# 3. Computation of thickness on the regular grid
+#
+#
+####################
 
-#We could also 
+#Look at the representation of the error on the regularly spaced grid
 pre3<-predict(TCCZ.loess1,newdata = testgrid1,se = TRUE)
 pre3b<-predict(TCCZ.loess1b,newdata = testgrid1,se = TRUE)
 pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE, interval = "prediction",level = 0.95)
 
-# summary(pre2)
-ploterrorTCCZ<-testgrid1
-#
-ploterrorTCCZ$TCCZ.fit<-as.vector(pre3$fit)
-ploterrorTCCZ$TCCZ.se.fit<-as.vector(pre3$se.fit)
-ploterrorTCCZ$TCCZ.fitb<-pre3b$fit
-ploterrorTCCZ$TCCZ.se.fitb<-pre3b$se.fit
-ploterrorTCCZ$TCCZ.fitlm<-pre3lm$fit[,1]
-ploterrorTCCZ$TCCZ.se.fitlm<-pre3lm$se.fit
-#Upper
-ploterrorTCCZ$TCCZ.fitlmupr<-pre3lm$fit[,2]
-#Lower Bound
-ploterrorTCCZ$TCCZ.fitlmlwr<-pre3lm$fit[,3]
+wll.loess<-llply(wll2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1, span=alphaloesswl)})
+wll.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)})
 
-# #ggplot to be fixed...
-# plotTCCZerror <- ggplot(ploterrorTCCZ, aes(x=EASTING,y=NORTHING)) 
-# + geom_tile(aes(fill=TCCZ.fit)) 
-# + scale_fill_gradient(low="green", high="red")
+thicknessaq<-testgrid1
+thicknessaq$TCCZfit<-as.vector(pre3$fit)
+thicknessaq$TCCZfitb<-as.vector(pre3b$fit)
+thicknessaq$TCCZfitlm<-as.vector(pre3lm$fit)
+thicknessaq$TCCZsefit<-as.vector(pre3$se.fit)
+thicknessaq$TCCZsefitb<-as.vector(pre3b$se.fit)
+thicknessaq$TCCZsefitlm<-as.vector(pre3lm$se.fit)
 
-#image.plots in the mean time
-image.plot(ea.v,no.v,pre3$fit)
-image.plot(ea.v,no.v,pre3$se.fit)
-image.plot(ea.v,no.v,pre3b$fit)
-image.plot(ea.v,no.v,pre3b$se.fit)
-lmfit<-pre3lm$fit[,1]
-lmfitse<-pre3lm$se.fit
-dim(lmfit) <- c(50,60)
-dim(lmfitse) <- c(50,60)
-image.plot(ea.v,no.v,lmfit)
-image.plot(ea.v,no.v,lmfitse)
+nbparam1<-6
 
-# + geom_point(data=TCCZe, coulour= "black" , size = 4) 
-print(plotTCCZerror)
-# + scale_colour_gradient2(low="red", high="blue") 
-# print(ph)
-# #Close up in the area + 100m margin to the interpolation domain.
-# ph2 <- ph + xlim(ea.min-100,ea.max+100) + ylim(no.min-100,no.max+100)
-# print(ph2)
+# dimpredgrid<-dim(testgrid1)
+
+for (kk in 1:length(wll2)) {
+  inv5[nbparam1*(kk-1)+9]<-fullfit
+  names(inv5)[nbparam1*(kk-1)+9]<-paste0("T",names(tritiuml2)[kk])
+  logfullfit<-as.vector(predlogt$fit)
+  Tfl<-exp(logfullfit)
+  inv5[nbparam1*(kk-1)+10]<-Tfl
+  names(inv5)[nbparam1*(kk-1)+10]<-paste0("Tfl",names(tritiuml2)[kk])
+  #inv5[nbparam1*(kk-1)+10]<-predt$se.fit
+  #names(inv5)[nbparam1*(kk-1)+10]<-paste0("seT",names(tritiuml2)[kk])
+  w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=0.5)
+  predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE)
+  inv5[nbparam1*(kk-1)+11]<-as.vector(predw$fit)
+  names(inv5)[nbparam1*(kk-1)+11]<-paste0("w",names(wll2)[kk])
+  height<-as.vector(predw$fit)-inv5$TCCZfitb
+  height[height<0]<-NA
+  inv5[nbparam1*(kk-1)+12]<-height
+  names(inv5)[nbparam1*(kk-1)+12]<-paste0("h",names(wll2)[kk])
+  inv5[nbparam1*(kk-1)+13]<-inv5[nbparam1*(kk-1)+9]*inv5[nbparam1*(kk-1)+12]
+  names(inv5)[nbparam1*(kk-1)+13]<-paste0("ch",names(wll2)[kk])
+  inv5[nbparam1*(kk-1)+14]<-inv5[nbparam1*(kk-1)+10]*inv5[nbparam1*(kk-1)+12]
+  names(inv5)[nbparam1*(kk-1)+14]<-paste0("chfl",names(wll2)[kk])
+}
+
+
 

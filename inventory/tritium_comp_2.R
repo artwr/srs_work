@@ -131,7 +131,7 @@ inv5$TCCZsefitlm<-as.vector(pre3lm$se.fit)
 
 nbparam1<-6
 
-dimpredgrid<-dim(testgrid1)
+# dimpredgrid<-dim(testgrid1)
 
 for (kk in 1:length(tritiuml2)) {
   t.loess<-loess(mean~EASTING+NORTHING, data=tritiuml2[[kk]],degree=1,span=alphaloessconc)

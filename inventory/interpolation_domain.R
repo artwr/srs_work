@@ -1,6 +1,20 @@
 #Define interpolation domain and compute area, define other parameters
 require(splancs)
-#Boundaries
+
+
+getexpandgridb<- function(xd.min,xd.max,yd.min,yd.max,nb.xbreaks,nb.ybreaks) {
+  xd.v<-seq(xd.min, xd.max, length = xd.b)
+  yd.v<-seq(yd.min, yd.max, length = yd.b)
+  expand.grid(EASTING=ea.v, NORTHING=no.v)
+}
+
+getexpandgridd<- function(xd.min,xd.max,yd.min,yd.max,ybreaks.d,xbreaksd) {
+  xd.v<-seq(xd.min, xd.max, length = xd.b)
+  yd.v<-seq(yd.min, yd.max, length = yd.b)
+  expand.grid(EASTING=ea.v, NORTHING=no.v)
+}
+
+#Boundaries of the rectangular domain
 no.min<-3680930
 no.max<-3682110
 ea.min<-436175
