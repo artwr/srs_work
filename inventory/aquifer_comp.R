@@ -2,7 +2,7 @@
 #Source the file at the beginning of each analysis for a contaminant.
 
 #Load packages
-require(fields)
+# require(fields)
 require(splancs)
 require(plyr)
 
@@ -12,11 +12,12 @@ require(plyr)
 #################
 # 0. Import the need data TCCZ and Water levels
 #
-#
+#################
 
 
 #Import picks for the TCCZ
 TCCZe_all<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
+# Remove the points with no TCCZ pick. 
 TCCZe<-TCCZe_all[!is.na(TCCZe_all$TCCZ_top),]
 rm(TCCZe_all)
 
@@ -39,7 +40,7 @@ wll2<-wll[5:length(wll)]
 #1.
 #Define interpolation domain and compute area, define other parameters
 
-source('interpolation_domain.R')
+# source('interpolation_domain.R')
 
 #Define porosity value
 porosity.mean<-.3
@@ -60,7 +61,7 @@ TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1,span= alphalo
 TCCZ.lm<-lm(TCCZ_top~EASTING+NORTHING,data=TCCZe)
 
 ####################
-# 2. Computation of thickness on the water level points
+# 2. Computation of thickness on the water level points for aggregate/average computation
 #
 #
 ####################
@@ -93,7 +94,7 @@ thperyear$h<-thperyear$mean-thperyear$TCCZ.fit
 thperyear$hb<-thperyear$mean-thperyear$TCCZ.fitb
 thperyear$hlm<-thperyear$mean-thperyear$TCCZ.fitlm
 
-#Compute the santadard error of that estimate
+#Compute the standard error of that estimate
 thperyear$hse<-sqrt(max(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fit^2)
 thperyear$hbse<-sqrt(max(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fitb^2)
 thperyear$hlmse<-sqrt(max(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fitlm^2)
@@ -146,30 +147,42 @@ wll.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)})
 thicknessaq<-testgrid1
 thicknessaq$TCCZfit<-as.vector(pre3$fit)
 thicknessaq$TCCZfitb<-as.vector(pre3b$fit)
-thicknessaq$TCCZfitlm<-as.vector(pre3lm$fit)
+thicknessaq$TCCZfitlm<-as.vector(pre3lm$fit[,1])
 thicknessaq$TCCZsefit<-as.vector(pre3$se.fit)
 thicknessaq$TCCZsefitb<-as.vector(pre3b$se.fit)
 thicknessaq$TCCZsefitlm<-as.vector(pre3lm$se.fit)
 
-nbparam1<-6
+ov <- dim(thicknessaq)[2]
+nbparam1<-3
 
 # dimpredgrid<-dim(testgrid1)
 
+nbparam1*(kk-1)+ov+1
+nbparam1*(kk-1)+ov+2
+
+nbnegthickvals<-vector(mode = "integer", length = length(wll2))
+
 for (kk in 1:length(wll2)) {
-  inv5[nbparam1*(kk-1)+9]<-fullfit
-  names(inv5)[nbparam1*(kk-1)+9]<-paste0("T",names(tritiuml2)[kk])
-  logfullfit<-as.vector(predlogt$fit)
-  Tfl<-exp(logfullfit)
-  inv5[nbparam1*(kk-1)+10]<-Tfl
-  names(inv5)[nbparam1*(kk-1)+10]<-paste0("Tfl",names(tritiuml2)[kk])
-  #inv5[nbparam1*(kk-1)+10]<-predt$se.fit
-  #names(inv5)[nbparam1*(kk-1)+10]<-paste0("seT",names(tritiuml2)[kk])
-  w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=0.5)
+  # Compute the locally weighted regression model
+  w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=alphaloesswl)
+  # Predict on the regular grid in the interpolation domain
   predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE)
-  inv5[nbparam1*(kk-1)+11]<-as.vector(predw$fit)
-  names(inv5)[nbparam1*(kk-1)+11]<-paste0("w",names(wll2)[kk])
-  height<-as.vector(predw$fit)-inv5$TCCZfitb
-  height[height<0]<-NA
+  # Store the fit
+  thicknessaq[nbparam1*(kk-1)+ov+1]<-as.vector(predw$fit)
+  names(thicknessaq)[nbparam1*(kk-1)+ov+1]<-paste0("wl",names(wll2)[kk])
+  # Store the standard error
+  thicknessaq[nbparam1*(kk-1)+ov+2]<-predt$se.fit
+  names(thicknessaq)[nbparam1*(kk-1)+ov+2]<-paste0("se.wl",names(tritiuml2)[kk])
+  # Compute the thickness
+  thickness<-as.vector(predw$fit)-inv5$TCCZfitb
+  # Count neg values for diagnostics purposes
+  nbnegthickvals[kk]<-sum(thickness<0)
+  # Replace negative values with NA
+  thickness[thickness<0]<-NA
+  
+  thicknessaq[nbparam1*(kk-1)+ov+3]<-thickness
+  names(thicknessaq)[nbparam1*(kk-1)+ov+3]<-paste0("e",names(wll2)[kk])
+  
   inv5[nbparam1*(kk-1)+12]<-height
   names(inv5)[nbparam1*(kk-1)+12]<-paste0("h",names(wll2)[kk])
   inv5[nbparam1*(kk-1)+13]<-inv5[nbparam1*(kk-1)+9]*inv5[nbparam1*(kk-1)+12]

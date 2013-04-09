@@ -1,1 +1,13 @@
 # File to use to perform the whole analysis
+
+require(plyr)
+require(ggplot2)
+
+
+#Define rectangle used for interpolation.
+# This was select as the max min coordinates 
+# on tritium well network measurement
+source('interpolation_domain.R')
+
+# Compute the aquifer thickness on an average and per year basis
+source('aquifer_comp.R')
