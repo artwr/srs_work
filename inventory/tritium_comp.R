@@ -8,24 +8,19 @@
 # require(ggplot2)
 # require(scales)
 
-# setwd("D:/CodeProjects/R/R_srs/inventory")
-# setwd("D:/work/Code/srs_work/inventory")
-
 #set na.exclude
 options(na.action="na.exclude")
 #options(na.action="na.omit")
 #options("na.action")
 
 # Import the aquifer thickness computation
-source('./aquifer_comp.R')
+# source('./aquifer_comp.R')
 
 # Alpha.loess
 #
 alphaloessconch<-0.75
 alphaloessconc<-0.5
 alphaloessconcl<-0.3
-
-ptm1<-proc.time()
 
 #################################
 #1.
@@ -121,17 +116,20 @@ write.csv(inventoryja.csv, file="inventoryja.csv")
 tritiuml.loess<-llply(tritiuml2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1,span=alphaloessconc)})
 tritium.pred<-llply(tritiuml.loess, function(m) {predict(m,newdata=testgrid1,se =TRUE)})
 
-inv5<-testgrid1
-inv5$TCCZfit<-as.vector(pre3$fit)
-inv5$TCCZfitb<-as.vector(pre3b$fit)
-inv5$TCCZfitlm<-as.vector(pre3lm$fit)
-inv5$TCCZsefit<-as.vector(pre3$se.fit)
-inv5$TCCZsefitb<-as.vector(pre3b$se.fit)
-inv5$TCCZsefitlm<-as.vector(pre3lm$se.fit)
+# inv5<-testgrid1
+# inv5$TCCZfit<-as.vector(pre3$fit)
+# inv5$TCCZfitb<-as.vector(pre3b$fit)
+# inv5$TCCZfitlm<-as.vector(pre3lm$fit)
+# inv5$TCCZsefit<-as.vector(pre3$se.fit)
+# inv5$TCCZsefitb<-as.vector(pre3b$se.fit)
+# inv5$TCCZsefitlm<-as.vector(pre3lm$se.fit)
 
-nbparam1<-6
+Tinventory<-thicknessUAZ
 
 dimpredgrid<-dim(testgrid1)
+nbnegtritiumvals<-vector(mode = "integer", length = length(tritiuml2))
+
+nbparamT1<-6
 
 for (kk in 1:length(tritiuml2)) {
   t.loess<-loess(mean~EASTING+NORTHING, data=tritiuml2[[kk]],degree=1,span=alphaloessconc)
@@ -142,6 +140,7 @@ for (kk in 1:length(tritiuml2)) {
   dimpredictions<-dim(predt$fit)
   fullfit<-as.vector(predt$fit)
   #Remove negative values as we will just consider them null
+  nbnegtritiumvals[kk]<-sum(fullfit<0)
   fullfit[fullfit<0]<-NA
   #fullfit[fullfit<0]<-1
   inv5[nbparam1*(kk-1)+9]<-fullfit
