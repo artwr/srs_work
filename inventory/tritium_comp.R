@@ -25,31 +25,19 @@ alphaloessconcl<-0.3
 #################################
 #1.
 #load data
+#Just the F wells
 #tritium<-readRDS("../SRS_data/tritium.rdata")
+#Added HSB 143 D which provides a BC on the eastern site of the interpolation domain
 tritium<-readRDS("../SRS_data/tritiumf.rdata")
 tritiumC<-readRDS("../SRS_data/tritiumC.rdata")
 tritiumavg<-readRDS("../SRS_data/tritiumavg.rdata")
 tritiumCavg<-readRDS("../SRS_data/tritiumCavg.rdata")
-# #Nitrate
-# nitrate<-readRDS("../SRS_data/nitrate.rdata")
-# nitrateC<-readRDS("../SRS_data/nitrateC.rdata")
-# nitrateavg<-readRDS("../SRS_data/nitrateavg.rdata")
-# nitrateCavg<-readRDS("../SRS_data/nitrateCavg.rdata")
-
-#basin coords for plotting if needed
-#f3basin<-readRDS("../basin_coords/f3basin.rdata")
-#f3basin27<-readRDS("../basin_coords/f3basin27.rdata")
 
 #Add log transform
 tritium$logmean<-log(tritium$mean)
 tritium$log10mean<-log10(tritium$mean)
 tritiumC$logmean<-log(tritiumC$mean)
 tritiumC$log10mean<-log10(tritiumC$mean)
-# #Nitrate
-# nitrate$logmean<-log(nitrate$mean)
-# nitrate$log10mean<-log10(nitrate$mean)
-# nitrateC$logmean<-log(nitrateC$mean)
-# nitrateC$log10mean<-log10(nitrateC$mean)
 
 #Split per measurement year
 tritiuml<-split(tritium,tritium$MYEAR)
@@ -82,6 +70,9 @@ inventoryja$inventory1<-area.dom*porosity.mean*inventoryja$h.mean*inventoryja$me
 inventoryja$inventory1b<-area.dom*porosity.mean*inventoryja$hb.mean*inventoryja$mean*.3048*1e-9
 inventoryja$inventory1lm<-area.dom*porosity.mean*inventoryja$hlm.mean*inventoryja$mean*.3048*1e-9
 inventoryja<-merge(inventoryja,inventoryCja,by="MYEAR")
+
+# An error analysis on this one would be great.
+# Can just do a bootstrap to sample the joint distribution
 
 #Remove unused data.frames
 rm(thperyear)
@@ -125,7 +116,7 @@ tritium.pred<-llply(tritiuml.loess, function(m) {predict(m,newdata=testgrid1,se 
 # inv5$TCCZsefitlm<-as.vector(pre3lm$se.fit)
 
 Tinventory<-thicknessUAZ
-
+thvn<-dim(thicknessUAZ)[2]
 dimpredgrid<-dim(testgrid1)
 nbnegtritiumvals<-vector(mode = "integer", length = length(tritiuml2))
 
@@ -139,56 +130,110 @@ for (kk in 1:length(tritiuml2)) {
   #The prediction is given as a matrix, convert to vector
   dimpredictions<-dim(predt$fit)
   fullfit<-as.vector(predt$fit)
-  #Remove negative values as we will just consider them null
+  #Remove negative values as we will just consider them NULL
   nbnegtritiumvals[kk]<-sum(fullfit<0)
   fullfit[fullfit<0]<-NA
-  #fullfit[fullfit<0]<-1
-  inv5[nbparam1*(kk-1)+9]<-fullfit
-  names(inv5)[nbparam1*(kk-1)+9]<-paste0("T",names(tritiuml2)[kk])
+  #fullfit[fullfit<0]<-0
+  #Store in Tyear
+  Tinventory[nbparamT1*(kk-1)+thvn+1]<-fullfit
+  names(Tinventory)[nbparamT1*(kk-1)+thvn+1]<-paste0("T",names(tritiuml2)[kk])
+  Tinventory[nbparamT1*(kk-1)+thvn+2]<-as.vector(predt$se.fit)
+  names(Tinventory)[nbparamT1*(kk-1)+thvn+2]<-paste0("se.T",names(tritiuml2)[kk])
+  #logreg
   logfullfit<-as.vector(predlogt$fit)
   Tfl<-exp(logfullfit)
-  inv5[nbparam1*(kk-1)+10]<-Tfl
-  names(inv5)[nbparam1*(kk-1)+10]<-paste0("Tfl",names(tritiuml2)[kk])
-  #inv5[nbparam1*(kk-1)+10]<-predt$se.fit
-  #names(inv5)[nbparam1*(kk-1)+10]<-paste0("seT",names(tritiuml2)[kk])
-  w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=0.5)
-  predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE)
-  inv5[nbparam1*(kk-1)+11]<-as.vector(predw$fit)
-  names(inv5)[nbparam1*(kk-1)+11]<-paste0("w",names(wll2)[kk])
-  height<-as.vector(predw$fit)-inv5$TCCZfitb
-  height[height<0]<-NA
-  inv5[nbparam1*(kk-1)+12]<-height
-  names(inv5)[nbparam1*(kk-1)+12]<-paste0("h",names(wll2)[kk])
-  inv5[nbparam1*(kk-1)+13]<-inv5[nbparam1*(kk-1)+9]*inv5[nbparam1*(kk-1)+12]
-  names(inv5)[nbparam1*(kk-1)+13]<-paste0("ch",names(wll2)[kk])
-  inv5[nbparam1*(kk-1)+14]<-inv5[nbparam1*(kk-1)+10]*inv5[nbparam1*(kk-1)+12]
-  names(inv5)[nbparam1*(kk-1)+14]<-paste0("chfl",names(wll2)[kk])
+  Tinventory[nbparamT1*(kk-1)+thvn+3]<-Tfl
+  names(Tinventory)[nbparamT1*(kk-1)+thvn+3]<-paste0("Tfl",names(tritiuml2)[kk])
+  # Compute C*e
+  Tinventory[nbparamT1*(kk-1)+thvn+4]<-Tinventory[nbparamT1*(kk-1)+thvn+1]*Tinventory[nbparamUAZ*(kk-1)+ov+3]
+  names(Tinventory)[nbparamT1*(kk-1)+thvn+4]<-paste0("ch",names(tritiuml2)[kk])
+  # And the standard error
+  Tinventory[nbparamT1*(kk-1)+thvn+5]<-Tinventory[nbparamT1*(kk-1)+thvn+4] * sqrt((Tinventory[nbparamT1*(kk-1)+thvn+2]/Tinventory[nbparamT1*(kk-1)+thvn+1])^2+(Tinventory[nbparamUAZ*(kk-1)+ov+3]/Tinventory[nbparamUAZ*(kk-1)+ov+4])^2)
+  names(Tinventory)[nbparamT1*(kk-1)+thvn+5]<-paste0("se.ch",names(tritiuml2)[kk])
+  # The the log
+  Tinventory[nbparamT1*(kk-1)+thvn+6]<-Tinventory[nbparamT1*(kk-1)+thvn+3]*Tinventory[nbparamUAZ*(kk-1)+ov+3]
+  names(Tinventory)[nbparamT1*(kk-1)+thvn+6]<-paste0("chfl",names(tritiuml2)[kk])
 }
 
- nbparam1C<-4
-inv5C<-testgrid1
+nbnegtritiumCvals<-vector(mode = "integer", length = length(tritiumCl2))
+nbNAtritiumCvals<-vector(mode = "integer", length = length(tritiumCl2))
+thCvn<-dim(thicknessLAZ)[2]
+ nbparamT1C<-6
+
+Tinv5C<-thicknessLAZ
 for (kk2 in 1:length(tritiumCl2)) {
-  t.loess<-loess(mean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=0.5)
-  logt.loess<-loess(logmean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=0.5)
-  predt<-predict(t.loess,newdata = testgrid1 ,se = TRUE)
-  predlogt<-predict(logt.loess,newdata = testgrid1 ,se = TRUE)
-  fullfit<-as.vector(predt$fit)
-  #fullfit[fullfit<0]<-NA
+  tC.loess<-loess(mean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=alphaloessconc)
+  logtC.loess<-loess(logmean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=alphaloessconc)
+  predtC<-predict(tC.loess,newdata = testgrid1 ,se = TRUE)
+  predlogtC<-predict(logtC.loess,newdata = testgrid1 ,se = TRUE)
+  fullfit<-as.vector(predtC$fit)
+  fullfit[fullfit<0]<-NA
   #fullfit[fullfit<0]<-1
-  fullfit[fullfit<0]<-0
-  inv5C[nbparam1C*(kk2-1)+3]<-fullfit
-  names(inv5C)[nbparam1C*(kk2-1)+3]<-paste0("T",names(tritiumCl2)[kk2])
-  logfullfit<-as.vector(predlogt$fit)
-  Tfl<-exp(logfullfit)
-  inv5C[nbparam1C*(kk2-1)+4]<-Tfl
-  names(inv5C)[nbparam1C*(kk2-1)+4]<-paste0("Tfl",names(tritiumCl2)[kk2])
-  #inv5C[nbparam1*(kk-1)+10]<-pdret$se.fit
-  #names(inv5C)[nbparam1*(kk-1)+10]<-paste0("seT",names(tritiuml2)[kk])
-  inv5C[nbparam1C*(kk2-1)+5]<-inv5C[nbparam1C*(kk2-1)+3]*Cth
-  names(inv5C)[nbparam1C*(kk2-1)+5]<-paste0("ch",names(tritiumCl2)[kk2])
-  inv5C[nbparam1C*(kk2-1)+6]<-inv5C[nbparam1C*(kk2-1)+4]*Cth
-  names(inv5C)[nbparam1C*(kk2-1)+6]<-paste0("chfl",names(tritiumCl2)[kk2])
+  #fullfit[fullfit<0]<-0
+  Tinv5C[nbparamT1C*(kk2-1)+thCvn+1]<-fullfit
+  names(Tinv5C)[nbparamT1C*(kk2-1)+thCvn+1]<-paste0("TC",names(tritiumCl2)[kk2])
+  logfullfit<-as.vector(predlogtC$fit)
+  TCfl<-exp(logfullfit)
+  Tinv5C[nbparamT1C*(kk2-1)+thCvn+2]<-TCfl
+  names(Tinv5C)[nbparamT1C*(kk2-1)+thCvn+2]<-paste0("TCfl",names(tritiumCl2)[kk2])
+  Tinv5C[nbparamT1*(kk2-1)+thCvn+3]<-as.vector(predtC$se.fit)
+  names(Tinv5C)[nbparamT1*(kk2-1)+thCvn+3]<-paste0("se.TC",names(tritiumCl2)[kk2])
+  Tinv5C[nbparamT1C*(kk2-1)+thCvn+4]<-Tinv5C[nbparamT1C*(kk2-1)+thCvn+1]*Tinv5C[thCvn]
+  names(Tinv5C)[nbparamT1C*(kk2-1)+thCvn+4]<-paste0("ch",names(tritiumCl2)[kk2])
+  Tinv5C[nbparamT1C*(kk2-1)+thCvn+5]<-Tinv5C[nbparamT1*(kk2-1)+thCvn+3]*Tinv5C[thCvn]
+  names(Tinv5C)[nbparamT1C*(kk2-1)+thCvn+5]<-paste0("se.ch",names(tritiumCl2)[kk2])
+  Tinv5C[nbparamT1C*(kk2-1)+thCvn+6]<-Tinv5C[nbparamT1C*(kk2-1)+thCvn+2]*Tinv5C[thCvn]
+  names(Tinv5C)[nbparamT1C*(kk2-1)+thCvn+6]<-paste0("chfl",names(tritiumCl2)[kk2])
 }
+
+#Now for the averaging
+weightarea<-400/area.dom
+inventory5<-data.frame(MYEAR=seq(1988,2011,length=24))
+for (jj2 in 1:length(inventory5$MYEAR)) {
+  inventory5$mean.ch[jj2]<-sum(weightarea*Tinventory[[nbparamT1*(jj2-1)+thvn+4]], na.rm=TRUE)
+  inventory5$median.ch[jj2]<-median(weightarea*Tinventory[[nbparamT1*(jj2-1)+thvn+4]], na.rm=TRUE)
+  inventory5$se.ch[jj2]<-sum(weightarea*Tinventory[[nbparamT1*(jj2-1)+thvn+5]], na.rm=TRUE)
+  inventory5$meanchfl[jj2]<-sum(weightarea*Tinventory[[nbparamT1*(jj2-1)+thvn+6]], na.rm=TRUE)
+  inventory5$medianchfl[jj2]<-median(Tinventory[[nbparamT1*(jj2-1)+thvn+6]], na.rm=TRUE)
+  inventory5$sdchfl[jj2]<-sd(Tinventory[[nbparamT1*(jj2-1)+thvn+6]], na.rm=TRUE)
+  inventory5$meanchC[jj2]<-mean(Tinv5C[[nbparamT1C*(jj2-1)+5]], na.rm=TRUE)
+}
+inventory5$t<-area.dom*porosity.mean*inventory5$meanch*1e-9*.3048
+inventory5$tmed<-area.dom*porosity.mean*inventory5$medianch*1e-9*.3048
+inventory5$tfl<-area.dom*porosity.mean*inventory5$meanchfl*1e-9*.3048
+inventory5$tmedfl<-area.dom*porosity.mean*inventory5$medianchfl*1e-9*.3048
+inventory5$tC<-area.dom*porosity.mean*inventory5$meanchC*1e-9
+inventory5$tCD<-inventory5$t+inventory5$tC
+
+
+# inventory5<-data.frame(MYEAR=seq(1988,2011,length=24))
+# for (jj2 in 1:length(inventory5$MYEAR)) {
+#   inventory5$meanch[jj2]<-mean(inv5[[nbparamT1*(jj2-1)+13]], na.rm=TRUE)
+#   inventory5$medianch[jj2]<-median(inv5[[nbparamT1*(jj2-1)+13]], na.rm=TRUE)
+#   inventory5$sdch[jj2]<-sd(inv5[[nbparamT1*(jj2-1)+13]], na.rm=TRUE)
+#   inventory5$meanchfl[jj2]<-mean(inv5[[nbparamT1*(jj2-1)+14]], na.rm=TRUE)
+#   inventory5$medianchfl[jj2]<-median(inv5[[nbparamT1*(jj2-1)+14]], na.rm=TRUE)
+#   inventory5$sdchfl[jj2]<-sd(inv5[[nbparamT1*(jj2-1)+14]], na.rm=TRUE)
+#   inventory5$meanchC[jj2]<-mean(Tinv5C[[nbparamT1C*(jj2-1)+5]], na.rm=TRUE)
+# }
+# inventory5$t<-area.dom*porosity.mean*inventory5$meanch*1e-9*.3048
+# inventory5$tmed<-area.dom*porosity.mean*inventory5$medianch*1e-9*.3048
+# inventory5$tfl<-area.dom*porosity.mean*inventory5$meanchfl*1e-9*.3048
+# inventory5$tmedfl<-area.dom*porosity.mean*inventory5$medianchfl*1e-9*.3048
+# inventory5$tC<-area.dom*porosity.mean*inventory5$meanchC*1e-9
+# inventory5$tCD<-inventory5$t+inventory5$tC
+
+inventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
+
+
+saveRDS(inventory.final,"inventoryfinal.rdata")
+
+print(proc.time() - ptm1)
+
+
+
+
+
 
 
 
@@ -200,7 +245,7 @@ for (kk2 in 1:length(tritiumCl2)) {
 # ggtest2a<-ggtest2a+scale_fill_gradient2()
 # print(ggtest2)
 # 
-# ggtestC2a<-ggplot(inv5C, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=T1996))
+# ggtestC2a<-ggplot(Tinv5C, aes(x=EASTING,y=NORTHING)) + geom_tile(aes(fill=T1996))
 # ggtestC2a<-ggtestC2a+scale_fill_gradient2()
 # print(ggtestC2a)
 # 
@@ -220,25 +265,6 @@ for (kk2 in 1:length(tritiumCl2)) {
 # print(ggtest5)
 
 #qplot(x=h1994,y=T1994,data=inv5)
-
-inventory5<-data.frame(MYEAR=seq(1988,2011,length=24))
-for (jj2 in 1:length(inventory5$MYEAR)) {
-  inventory5$meanch[jj2]<-mean(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
-  inventory5$medianch[jj2]<-median(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
-  inventory5$sdch[jj2]<-sd(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
-  inventory5$meanchfl[jj2]<-mean(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
-  inventory5$medianchfl[jj2]<-median(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
-  inventory5$sdchfl[jj2]<-sd(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
-  inventory5$meanchC[jj2]<-mean(inv5C[[nbparam1C*(jj2-1)+5]], na.rm=TRUE)
-}
-inventory5$t<-area.dom*porosity.mean*inventory5$meanch*1e-9*.3048
-inventory5$tmed<-area.dom*porosity.mean*inventory5$medianch*1e-9*.3048
-inventory5$tfl<-area.dom*porosity.mean*inventory5$meanchfl*1e-9*.3048
-inventory5$tmedfl<-area.dom*porosity.mean*inventory5$medianchfl*1e-9*.3048
-inventory5$tC<-area.dom*porosity.mean*inventory5$meanchC*1e-9
-inventory5$tCD<-inventory5$t+inventory5$tC
-
-inventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
 
 # pdf(file="%GDRIVE%\test\testinv.pdf",paper="letter")
 # final.plot<-ggplot(data=inventory.final, aes(x=MYEAR))
@@ -284,16 +310,6 @@ inventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
 # final.plot4<- final.plot4 + scale_y_log10()
 # final.plot4<-final.plot4+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
 # print(final.plot4)
-
-
-saveRDS(inventory.final,"inventoryfinal.rdata")
-
-print(proc.time() - ptm1)
-
-
-
-
-
 
 
 

@@ -14,7 +14,7 @@ source('interpolation_domain.R')
 source('aquifer_comp.R')
 
 # Compute the inventory for tritium
-
+source('tritium_comp.R')
 # Compute the inventory for nitrate
 
 # Compute the inventory for strontium

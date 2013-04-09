@@ -137,56 +137,60 @@ th.avg.peryearhlm<-ddply(thperyear.cleanhlm, c('MYEAR'), function(x) c(counthlm=
 ####################
 
 #Look at the representation of the error on the regularly spaced grid
-pre3<-predict(TCCZ.loess1,newdata = testgrid1,se = TRUE)
-pre3b<-predict(TCCZ.loess1b,newdata = testgrid1,se = TRUE)
-pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE, interval = "prediction",level = 0.95)
+pre3<-predict(TCCZ.loess1,newdata = testgrid1,se = TRUE);
+pre3b<-predict(TCCZ.loess1b,newdata = testgrid1,se = TRUE);
+pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE, interval = "prediction",level = 0.95);
 
-wll.loess<-llply(wll2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1, span=alphaloesswl)})
-wll.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)})
+wll.loess<-llply(wll2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1, span=alphaloesswl)});
+wll.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)});
 
-thicknessUAZ<-testgrid1
-thicknessUAZ$TCCZfit<-as.vector(pre3$fit)
-thicknessUAZ$TCCZfitb<-as.vector(pre3b$fit)
-thicknessUAZ$TCCZfitlm<-as.vector(pre3lm$fit[,1])
-thicknessUAZ$TCCZsefit<-as.vector(pre3$se.fit)
-thicknessUAZ$TCCZsefitb<-as.vector(pre3b$se.fit)
-thicknessUAZ$TCCZsefitlm<-as.vector(pre3lm$se.fit)
+thicknessUAZ<-testgrid1;
+thicknessUAZ$TCCZfit<-as.vector(pre3$fit);
+thicknessUAZ$TCCZfitb<-as.vector(pre3b$fit);
+thicknessUAZ$TCCZfitlm<-as.vector(pre3lm$fit[,1]);
+thicknessUAZ$TCCZsefit<-as.vector(pre3$se.fit);
+thicknessUAZ$TCCZsefitb<-as.vector(pre3b$se.fit);
+thicknessUAZ$TCCZsefitlm<-as.vector(pre3lm$se.fit);
 
-ov <- dim(thicknessUAZ)[2]
-nbparam1<-4
+ov <- dim(thicknessUAZ)[2];
+nbparamUAZ<-4;
 
 # dimpredgrid<-dim(testgrid1)
 
-nbnegthickvals<-vector(mode = "integer", length = length(wll2))
+nbnegthickvals<-vector(mode = "integer", length = length(wll2));
+nbNAthickvals<-vector(mode = "integer", length = length(wll2));
 
 for (kk in 1:length(wll2)) {
   # Compute the locally weighted regression model
-  w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=alphaloesswl)
+  w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=alphaloesswl);
   # Predict on the regular grid in the interpolation domain
-  predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE)
+  predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE);
   # Store the fit
-  thicknessUAZ[nbparam1*(kk-1)+ov+1]<-as.vector(predw$fit)
-  names(thicknessUAZ)[nbparam1*(kk-1)+ov+1]<-paste0("wl",names(wll2)[kk])
+  thicknessUAZ[nbparamUAZ*(kk-1)+ov+1]<-as.vector(predw$fit);
+  names(thicknessUAZ)[nbparamUAZ*(kk-1)+ov+1]<-paste0("wl",names(wll2)[kk]);
   # Store the standard error
-  thicknessUAZ[nbparam1*(kk-1)+ov+2]<-as.vector(predw$se.fit)
-  names(thicknessUAZ)[nbparam1*(kk-1)+ov+2]<-paste0("se.wl",names(wll2)[kk])
+  thicknessUAZ[nbparamUAZ*(kk-1)+ov+2]<-as.vector(predw$se.fit);
+  names(thicknessUAZ)[nbparamUAZ*(kk-1)+ov+2]<-paste0("se.wl",names(wll2)[kk]);
   # Compute the thickness
-  thickness<-as.vector(predw$fit)-thicknessUAZ$TCCZfitb
+  thickness<-as.vector(predw$fit)-thicknessUAZ$TCCZfitb;
   # Count neg values for diagnostics purposes
-  nbnegthickvals[kk]<-sum(thickness<0)
+  nbnegthickvals[kk]<-sum(!is.na(thickness)<0);
   # Replace negative values with NA
   thickness[thickness<0]<-NA
+  nbNAthickvals[kk]<-sum(is.na(thickness));
   # Store the thickness
-  thicknessUAZ[nbparam1*(kk-1)+ov+3]<-thickness
-  names(thicknessUAZ)[nbparam1*(kk-1)+ov+3]<-paste0("e",names(wll2)[kk])
+  thicknessUAZ[nbparamUAZ*(kk-1)+ov+3]<-thickness;
+  names(thicknessUAZ)[nbparamUAZ*(kk-1)+ov+3]<-paste0("e",names(wll2)[kk]);
   #Compute the standard error
-  thicknessUAZ[nbparam1*(kk-1)+ov+4]<-sqrt(thicknessUAZ[nbparam1*(kk-1)+ov+2]^2 + thicknessUAZ$TCCZsefitb^2)
-  names(thicknessUAZ)[nbparam1*(kk-1)+ov+4]<-paste0("se.e",names(wll2)[kk])
+  thicknessUAZ[nbparamUAZ*(kk-1)+ov+4]<-sqrt(thicknessUAZ[nbparamUAZ*(kk-1)+ov+2]^2 + thicknessUAZ$TCCZsefitb^2);
+  names(thicknessUAZ)[nbparamUAZ*(kk-1)+ov+4]<-paste0("se.e",names(wll2)[kk]);
 }
 
-testgrid1C<-testgrid1
-thicknessLAZ<-testgrid1
-thicknessLAZ$e.in.m<-Cth
+testgrid1C<-testgrid1;
+thicknessLAZ<-testgrid1C;
+thicknessLAZ$e.in.m<-Cth;
+
+rm(testgrid1C)
 
 
 
