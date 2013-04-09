@@ -120,8 +120,8 @@ thperyear.cleanhb<-thperyear[!is.na(thperyear$hb),]
 thperyear.cleanhlm<-thperyear[!is.na(thperyear$hlm),]
 
 thperyear.cleanh$hserel<-thperyear.cleanh$hse/thperyear.cleanh$h
-thperyear.cleanhb$hbserel<-thperyear.cleanhb$hbse/thperyear.cleanh$hb
-thperyear.cleanhlm$hlmserel<-thperyear.cleanhlm$hlmse/thperyear.cleanh$hlm
+thperyear.cleanhb$hbserel<-thperyear.cleanhb$hbse/thperyear.cleanhb$hb
+thperyear.cleanhlm$hlmserel<-thperyear.cleanhlm$hlmse/thperyear.cleanhlm$hlm
 
 #Compute the avg per year Careful does not take into account
 #The previous computation of error. To keep on the side for other computation
@@ -144,21 +144,18 @@ pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE, interval = "prediction",l
 wll.loess<-llply(wll2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1, span=alphaloesswl)})
 wll.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)})
 
-thicknessaq<-testgrid1
-thicknessaq$TCCZfit<-as.vector(pre3$fit)
-thicknessaq$TCCZfitb<-as.vector(pre3b$fit)
-thicknessaq$TCCZfitlm<-as.vector(pre3lm$fit[,1])
-thicknessaq$TCCZsefit<-as.vector(pre3$se.fit)
-thicknessaq$TCCZsefitb<-as.vector(pre3b$se.fit)
-thicknessaq$TCCZsefitlm<-as.vector(pre3lm$se.fit)
+thicknessUAZ<-testgrid1
+thicknessUAZ$TCCZfit<-as.vector(pre3$fit)
+thicknessUAZ$TCCZfitb<-as.vector(pre3b$fit)
+thicknessUAZ$TCCZfitlm<-as.vector(pre3lm$fit[,1])
+thicknessUAZ$TCCZsefit<-as.vector(pre3$se.fit)
+thicknessUAZ$TCCZsefitb<-as.vector(pre3b$se.fit)
+thicknessUAZ$TCCZsefitlm<-as.vector(pre3lm$se.fit)
 
-ov <- dim(thicknessaq)[2]
-nbparam1<-3
+ov <- dim(thicknessUAZ)[2]
+nbparam1<-4
 
 # dimpredgrid<-dim(testgrid1)
-
-nbparam1*(kk-1)+ov+1
-nbparam1*(kk-1)+ov+2
 
 nbnegthickvals<-vector(mode = "integer", length = length(wll2))
 
@@ -168,28 +165,35 @@ for (kk in 1:length(wll2)) {
   # Predict on the regular grid in the interpolation domain
   predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE)
   # Store the fit
-  thicknessaq[nbparam1*(kk-1)+ov+1]<-as.vector(predw$fit)
-  names(thicknessaq)[nbparam1*(kk-1)+ov+1]<-paste0("wl",names(wll2)[kk])
+  thicknessUAZ[nbparam1*(kk-1)+ov+1]<-as.vector(predw$fit)
+  names(thicknessUAZ)[nbparam1*(kk-1)+ov+1]<-paste0("wl",names(wll2)[kk])
   # Store the standard error
-  thicknessaq[nbparam1*(kk-1)+ov+2]<-predt$se.fit
-  names(thicknessaq)[nbparam1*(kk-1)+ov+2]<-paste0("se.wl",names(tritiuml2)[kk])
+  thicknessUAZ[nbparam1*(kk-1)+ov+2]<-as.vector(predw$se.fit)
+  names(thicknessUAZ)[nbparam1*(kk-1)+ov+2]<-paste0("se.wl",names(wll2)[kk])
   # Compute the thickness
-  thickness<-as.vector(predw$fit)-inv5$TCCZfitb
+  thickness<-as.vector(predw$fit)-thicknessUAZ$TCCZfitb
   # Count neg values for diagnostics purposes
   nbnegthickvals[kk]<-sum(thickness<0)
   # Replace negative values with NA
   thickness[thickness<0]<-NA
-  
-  thicknessaq[nbparam1*(kk-1)+ov+3]<-thickness
-  names(thicknessaq)[nbparam1*(kk-1)+ov+3]<-paste0("e",names(wll2)[kk])
-  
-  inv5[nbparam1*(kk-1)+12]<-height
-  names(inv5)[nbparam1*(kk-1)+12]<-paste0("h",names(wll2)[kk])
-  inv5[nbparam1*(kk-1)+13]<-inv5[nbparam1*(kk-1)+9]*inv5[nbparam1*(kk-1)+12]
-  names(inv5)[nbparam1*(kk-1)+13]<-paste0("ch",names(wll2)[kk])
-  inv5[nbparam1*(kk-1)+14]<-inv5[nbparam1*(kk-1)+10]*inv5[nbparam1*(kk-1)+12]
-  names(inv5)[nbparam1*(kk-1)+14]<-paste0("chfl",names(wll2)[kk])
+  # Store the thickness
+  thicknessUAZ[nbparam1*(kk-1)+ov+3]<-thickness
+  names(thicknessUAZ)[nbparam1*(kk-1)+ov+3]<-paste0("e",names(wll2)[kk])
+  #Compute the standard error
+  thicknessUAZ[nbparam1*(kk-1)+ov+4]<-sqrt(thicknessUAZ[nbparam1*(kk-1)+ov+2]^2 + thicknessUAZ$TCCZsefitb^2)
+  names(thicknessUAZ)[nbparam1*(kk-1)+ov+4]<-paste0("se.e",names(wll2)[kk])
 }
+
+testgrid1C<-testgrid1
+thicknessLAZ<-testgrid1
+thicknessLAZ$e.in.m<-Cth
+
+
+
+
+
+saveRDS(thicknessUAZ, file = "thicknessUAZ.rdata")
+saveRDS(thicknessLAZ, file = "thicknessLAZ.rdata")
 
 
 
