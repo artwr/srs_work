@@ -141,8 +141,8 @@ pre3<-predict(TCCZ.loess1,newdata = testgrid1,se = TRUE);
 pre3b<-predict(TCCZ.loess1b,newdata = testgrid1,se = TRUE);
 pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE, interval = "prediction",level = 0.95);
 
-wll.loess<-llply(wll2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1, span=alphaloesswl)});
-wll.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)});
+# wll.loess<-llply(wll2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1, span=alphaloesswl)});
+# wll.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)});
 
 thicknessUAZ<-testgrid1;
 thicknessUAZ$TCCZfit<-as.vector(pre3$fit);
@@ -160,6 +160,8 @@ nbparamUAZ<-4;
 nbnegthickvals<-vector(mode = "integer", length = length(wll2));
 nbNAthickvals<-vector(mode = "integer", length = length(wll2));
 
+
+
 for (kk in 1:length(wll2)) {
   # Compute the locally weighted regression model
   w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=alphaloesswl);
@@ -174,7 +176,7 @@ for (kk in 1:length(wll2)) {
   # Compute the thickness
   thickness<-as.vector(predw$fit)-thicknessUAZ$TCCZfitb;
   # Count neg values for diagnostics purposes
-  nbnegthickvals[kk]<-sum(!is.na(thickness)<0);
+  nbnegthickvals[kk]<-sum(thickness<0, na.rm=TRUE);
   # Replace negative values with NA
   thickness[thickness<0]<-NA
   nbNAthickvals[kk]<-sum(is.na(thickness));
@@ -192,12 +194,13 @@ thicknessLAZ$e.in.m<-Cth;
 
 rm(testgrid1C)
 
+thickness.regression.diagnostics<-as.data.frame(cbind(nbnegthickvals,nbNAthickvals))
 
 
-
-
+#Save the datasets
 saveRDS(thicknessUAZ, file = "thicknessUAZ.rdata")
 saveRDS(thicknessLAZ, file = "thicknessLAZ.rdata")
+saveRDS(thickness.regression.diagnostics, file = "thickness.regression.diagnostics.rdata")
 
 
 
