@@ -1,19 +1,6 @@
 #Define interpolation domain and compute area, define other parameters
 require(splancs)
 
-
-# getexpandgridb<- function(xd.min,xd.max,yd.min,yd.max,nb.xbreaks,nb.ybreaks) {
-#   xd.v<-seq(xd.min, xd.max, length = xd.b)
-#   yd.v<-seq(yd.min, yd.max, length = yd.b)
-#   expand.grid(EASTING=ea.v, NORTHING=no.v)
-# }
-# 
-# getexpandgridd<- function(xd.min,xd.max,yd.min,yd.max,ybreaks.d,xbreaksd) {
-#   xd.v<-seq(xd.min, xd.max, length = xd.b)
-#   yd.v<-seq(yd.min, yd.max, length = yd.b)
-#   expand.grid(EASTING=ea.v, NORTHING=no.v)
-# }
-
 #
 break.size<-20;
 break.size.ea<-break.size
