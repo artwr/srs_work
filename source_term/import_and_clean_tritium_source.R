@@ -1,5 +1,4 @@
 #Source term and Surface water data
-setwd("D:/CodeProjects/R_SRS/source_term")
 
 require(ggplot2)
 require(scales)
@@ -15,24 +14,35 @@ names(tritiumsource.raw)<-c("Year", "VolumeinL","H3input", "CumulH3input",
                             "H3inventorydecayc", "Fmigrationdecayc",
                             "PossibleevolutionF", "Estimateinterp", "Lowerb","Upperb")
 
+#bbb<-cumsumdecaycorrected(tritiumsource.raw$NetH3afterevap,12.3)
+
 tritiumsource<-tritiumsource.raw[,c("Year", "CumulH3afterevapdecayc","CumulH3frommigrationfromFdecayc", "H3inventorydecayc")]
-names(tritiumsource)<-c("Year", "sourceterm","TritiuminFMB", "gwInventory")
+tritiumsource$sourceterm2<-cumsumdecaycorrected(tritiumsource.raw$NetH3afterevap,12)
+names(tritiumsource)<-c("Year", "sourceterm","TritiuminFMB", "gwInventory","sourceterm2")
 
 tritiumsource.csv<-tritiumsource
 saveRDS(tritiumsource.csv,file="tritiumsource.rdata")
 
 tritiumsource.long<-melt(tritiumsource, id.vars=c("Year"), 
-                         measure.vars=c("sourceterm","TritiuminFMB", "gwInventory"),
+                         measure.vars=c("sourceterm","TritiuminFMB", "gwInventory","sourceterm2"),
                          variable.name="Legend", value.name='value')
 tritiumsource.long$col1[tritiumsource.long$Legend=='sourceterm']<-"brown"
 tritiumsource.long$col1[tritiumsource.long$Legend=='TritiuminFMB']<-"blue"
 tritiumsource.long$col1[tritiumsource.long$Legend=='gwInventory']<-"orange"
+tritiumsource.long$col1[tritiumsource.long$Legend=='sourceterm2']<-"red"
 # tritiumsource$cumulinputH3<-cumsum(tritiumsource$H3input))
 # tritiumsource$cumulinputH3afterevap<-cumsum(tritiumsource$NetH3afterevap))
 # rightcolours<-c("brown","blue","orange")
 swgg3<-ggplot(data=tritiumsource.long,aes(x=Year, y=value, group=Legend, colour=col1)) + theme_bw()
-swgg3<- swgg3 + geom_line(size=2) + scale_colour_identity(guide = "legend")
+swgg3<- swgg3 + geom_line(size=2) 
+swgg3<- swgg3 + scale_colour_identity(guide = "legend")
 print(swgg3)
+
+swgg4<-ggplot(data=tritiumsource.long,aes(x=Year, y=value, group=Legend, colour=Legend)) + theme_bw()
+swgg4<- swgg4 + geom_line(size=2) 
+# swgg4<- swgg4 + scale_y_log10()
+# swgg4<- swgg4 + scale_colour_identity(guide = "legend")
+print(swgg4)
 # 
 # swgg3<- swgg3 + opts(panel.grid.major = none, panel.grid.minor = none)
 # swgg3<- swgg3 + opts(panel.background = none, panel.border = none)
