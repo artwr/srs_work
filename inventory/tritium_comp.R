@@ -72,13 +72,13 @@ inventoryja<-merge(inventoryja,inventoryCja,by="MYEAR")
 # Can just do a bootstrap to sample the joint distribution
 
 #Remove unused data.frames
-rm(thperyear)
-rm(thperyear.cleanh)
-rm(thperyear.cleanhb)
-rm(thperyear.cleanhlm)
-rm(th.avg.peryearh)
-rm(th.avg.peryearhb)
-rm(th.avg.peryearhlm)
+# rm(thperyear)
+# rm(thperyear.cleanh)
+# rm(thperyear.cleanhb)
+# rm(thperyear.cleanhlm)
+# rm(th.avg.peryearh)
+# rm(th.avg.peryearhb)
+# rm(th.avg.peryearhlm)
 
 # Save R object
 saveRDS(inventoryja, file = "inventoryja.rdata")
@@ -230,13 +230,15 @@ inventory5$tC.mean<-area.dom*porosity.mean*inventory5$mean.chC*1e-9
 inventory5$tC.dint<-area.dom*porosity.mean*inventory5$dint.chC*1e-9
 inventory5$tC.se<-area.dom*porosity.mean*inventory5$se.chC*1e-9
 inventory5$tCD.mean<-inventory5$t.mean+inventory5$tC.mean
+inventory5$tCD.sd<-inventory5$t.sd+inventory5$tC.se
 inventory5$tCD.dint<-inventory5$t.dint+inventory5$tC.dint
+inventory5$tCD.se<-inventory5$t.se+inventory5$tC.se
 
 saveRDS(inventory5,"inventoryloesswithuncertaintyfinal.rdata")
 
-inventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
+Tinventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
 
-saveRDS(inventory.final,"inventoryfinal.rdata")
+saveRDS(Tinventory.final,"Tinventoryfinal.rdata")
 
 rm(TCfl)
 rm(Tfl)
