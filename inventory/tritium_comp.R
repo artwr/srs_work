@@ -13,9 +13,6 @@ options(na.action="na.exclude")
 #options(na.action="na.omit")
 #options("na.action")
 
-# Import the aquifer thickness computation
-# source('./aquifer_comp.R')
-
 # Alpha.loess
 #
 alphaloessconch<-0.75
@@ -171,7 +168,7 @@ for (kk2 in 1:length(tritiumCl2)) {
   fullfit<-as.vector(predtC$fit)
   nbnegtritiumCvals[kk2]<-sum(fullfit<0, na.rm=TRUE)
   fullfit[fullfit<0]<-NA
-  nbNAtritiumCvals[kk2]<-sum(is.na(thickness));
+  nbNAtritiumCvals[kk2]<-sum(is.na(fullfit));
   #fullfit[fullfit<0]<-1
   #fullfit[fullfit<0]<-0
   TinventoryC[nbparamT1C*(kk2-1)+thCvn+1]<-fullfit

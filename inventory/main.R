@@ -2,6 +2,7 @@
 
 require(plyr)
 require(ggplot2)
+require(splancs)
 
 
 ptm1<-proc.time()
