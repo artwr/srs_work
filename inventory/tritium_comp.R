@@ -215,7 +215,7 @@ for (jj2 in 1:length(inventory5$MYEAR)) {
   inventory5$sd.chfl[jj2]<-sd(Tinventory[[nbparamT1*(jj2-1)+thvn+6]], na.rm=TRUE)
   inventory5$mean.chC[jj2]<-mean(TinventoryC[[nbparamT1C*(jj2-1)+5]], na.rm=TRUE)
   inventory5$dint.chC[jj2]<-sum(weightarea*TinventoryC[[nbparamT1C*(jj2-1)+5]], na.rm=TRUE)
-  inventory5$se.chC[jj2]<-sum(weightarea*TinventoryC[nbparamT1C*(kk2-1)+thCvn+5])
+  inventory5$se.chC[jj2]<-sum(weightarea*TinventoryC[nbparamT1C*(kk2-1)+thCvn+5], na.rm=TRUE)
 }
 inventory5$t.mean<-area.dom*porosity.mean*inventory5$mean.ch*1e-9*.3048
 inventory5$t.med<-area.dom*porosity.mean*inventory5$median.ch*1e-9*.3048

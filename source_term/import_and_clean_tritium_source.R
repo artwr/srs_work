@@ -4,7 +4,7 @@ require(ggplot2)
 require(scales)
 require(reshape2)
 
-tritiumsource.raw<-read.csv("tritiumsource.csv")
+tritiumsource.raw<-read.csv("../source_term/tritiumsource.csv")
 tritiumsource.raw<-tritiumsource.raw[!is.na(tritiumsource.raw$Year),]
 # tritiumsource.raw2<-read.csv("tritiumsource.csv")
 names(tritiumsource.raw)<-c("Year", "VolumeinL","H3input", "CumulH3input",
@@ -17,11 +17,11 @@ names(tritiumsource.raw)<-c("Year", "VolumeinL","H3input", "CumulH3input",
 #bbb<-cumsumdecaycorrected(tritiumsource.raw$NetH3afterevap,12.3)
 
 tritiumsource<-tritiumsource.raw[,c("Year", "CumulH3afterevapdecayc","CumulH3frommigrationfromFdecayc", "H3inventorydecayc")]
-tritiumsource$sourceterm2<-cumsumdecaycorrected(tritiumsource.raw$NetH3afterevap,12)
+tritiumsource$sourceterm2<-cumsumdecaycorrected(tritiumsource.raw$NetH3afterevap,12.3)
 names(tritiumsource)<-c("Year", "sourceterm","TritiuminFMB", "gwInventory","sourceterm2")
 
 tritiumsource.csv<-tritiumsource
-saveRDS(tritiumsource.csv,file="tritiumsource.rdata")
+saveRDS(tritiumsource.csv,file="../source_term/tritiumsource.rdata")
 
 tritiumsource.long<-melt(tritiumsource, id.vars=c("Year"), 
                          measure.vars=c("sourceterm","TritiuminFMB", "gwInventory","sourceterm2"),
@@ -37,6 +37,11 @@ swgg3<-ggplot(data=tritiumsource.long,aes(x=Year, y=value, group=Legend, colour=
 swgg3<- swgg3 + geom_line(size=2) 
 swgg3<- swgg3 + scale_colour_identity(guide = "legend")
 print(swgg3)
+
+
+swgg5 <- swgg3
+swgg5 <- swgg5 +coord_cartesian(xlim = c(1954,1968), ylim = c(-1,80000))
+print(swgg5)
 
 swgg4<-ggplot(data=tritiumsource.long,aes(x=Year, y=value, group=Legend, colour=Legend)) + theme_bw()
 swgg4<- swgg4 + geom_line(size=2) 

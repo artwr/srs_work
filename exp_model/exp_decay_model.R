@@ -56,7 +56,7 @@ predictdf$up1<-exp(gwI.pred$fit[,2])
 predictdf$lo1<-exp(gwI.pred$fit[,3])
 # # predictdf$tmcl<-20
 # # + geom_line(aes(y=tmcl))
-qplot(Year, y=ip1, data = predictdf) + geom_smooth(aes(ymin=lo1,ymax=up1), stat="identity") + scale_y_log10() + geom_point(data=comparison)
+ggplot(aes(x=Year, y=ip1), data = predictdf) + geom_smooth(aes(ymin=lo1,ymax=up1), stat="identity") + scale_y_log10() + geom_point(data=comparison)
 
 # ggplot(data=predictf)
 
