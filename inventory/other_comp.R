@@ -48,6 +48,7 @@ iodinel2<-iodinel[3:length(iodinel)]
 strontiuml2<-strontiuml[4:length(strontiuml)]
 #After 1989
 cesium137l2<-cesium137l[5:length(cesium137l)]
+#Data after 1993
 technetiuml2<-technetiuml[3:length(technetiuml)]
 # tritiumCl2<-tritiumCl[3:length(tritiumCl)]
 # names(tritiuml2)
@@ -55,6 +56,7 @@ names(iodinel2)
 names(strontiuml2)
 names(cesium137l2)
 names(technetiuml2)
+names(thicknessUAZ)
 
 
 #########################################################
@@ -134,17 +136,22 @@ names(technetiuml2)
 
 Iinventory<-thicknessUAZ
 Srinventory<-thicknessUAZ
-Csinventory<-thicknessUAZ
 thvn<-dim(thicknessUAZ)[2]
 dimpredgrid<-dim(testgrid1)
 nbnegIvals<-vector(mode = "integer", length = length(iodinel2));
 nbNAIvals<-vector(mode = "integer", length = length(iodinel2));
 nbnegSrvals<-vector(mode = "integer", length = length(strontiuml2));
 nbNASrvals<-vector(mode = "integer", length = length(strontiuml2));
-nbnegCsvals<-vector(mode = "integer", length = length(cesium137l2));
-nbNACsvals<-vector(mode = "integer", length = length(cesium137l2));
+
 
 nbparamT1<-4
+
+#lag to match the years, the aquifer thickness data.frame starts in 1988 
+# when the usable iodine record starts in 1993
+# the min year
+minyearI<-as.numeric(names(iodinel2)[1])
+indexlagI<-ov+(minyearI-1988)*4
+#names(thicknessUAZ)[11]
 
 for (kkI in 1:length(iodinel2)) {
   I.loess<-loess(mean~EASTING+NORTHING, data=iodinel2[[kkI]],degree=1,span=alphaloessconc)
@@ -163,13 +170,16 @@ for (kkI in 1:length(iodinel2)) {
   Iinventory[nbparamT1*(kkI-1)+thvn+2]<-as.vector(predI$se.fit)
   names(Iinventory)[nbparamT1*(kkI-1)+thvn+2]<-paste0("se.I",names(iodinel2)[kkI])
   # Compute C*e
-  Iinventory[nbparamT1*(kkI-1)+thvn+3]<-Iinventory[nbparamT1*(kkI-1)+thvn+1]*Iinventory[nbparamUAZ*(kkI-1)+ov+3]
+  Iinventory[nbparamT1*(kkI-1)+thvn+3]<-Iinventory[nbparamT1*(kkI-1)+thvn+1]*Iinventory[nbparamUAZ*(kkI-1)+indexlagI+3]
   names(Iinventory)[nbparamT1*(kkI-1)+thvn+3]<-paste0("chI",names(iodinel2)[kkI])
   # And the standard error
-  Iinventory[nbparamT1*(kkI-1)+thvn+4]<-Iinventory[nbparamT1*(kkI-1)+thvn+3] * sqrt((Iinventory[nbparamT1*(kkI-1)+thvn+2]/Iinventory[nbparamT1*(kkI-1)+thvn+1])^2+(Iinventory[nbparamUAZ*(kkI-1)+ov+3]/Iinventory[nbparamUAZ*(kkI-1)+ov+4])^2)
+  Iinventory[nbparamT1*(kkI-1)+thvn+4]<-Iinventory[nbparamT1*(kkI-1)+thvn+3] * sqrt((Iinventory[nbparamT1*(kkI-1)+thvn+2]/Iinventory[nbparamT1*(kkI-1)+thvn+1])^2+(Iinventory[nbparamUAZ*(kkI-1)+indexlagI+4]/Iinventory[nbparamUAZ*(kkI-1)+indexlagI+3])^2)
   names(Iinventory)[nbparamT1*(kkI-1)+thvn+4]<-paste0("se.chI",names(iodinel2)[kkI])
 }
 
+# Year alignment lag
+minyearSr<-as.numeric(names(strontiuml2)[1])
+indexlagSr<-ov+(minyearSr-1988)*4
 
 ## Strontium
 
@@ -189,15 +199,23 @@ for (kkSr in 1:length(strontiuml2)) {
   Srinventory[nbparamT1*(kkSr-1)+thvn+2]<-as.vector(predSr$se.fit)
   names(Srinventory)[nbparamT1*(kkSr-1)+thvn+2]<-paste0("se.Sr",names(strontiuml2)[kkSr])
   # Compute C*e
-  Srinventory[nbparamT1*(kkSr-1)+thvn+3]<-Srinventory[nbparamT1*(kkSr-1)+thvn+1]*Srinventory[nbparamUAZ*(kkSr-1)+ov+3]
+  Srinventory[nbparamT1*(kkSr-1)+thvn+3]<-Srinventory[nbparamT1*(kkSr-1)+thvn+1]*Srinventory[nbparamUAZ*(kkSr-1)+indexlagSr+3]
   names(Srinventory)[nbparamT1*(kkSr-1)+thvn+3]<-paste0("chSr",names(strontiuml2)[kkSr])
   # And the standard error
-  Srinventory[nbparamT1*(kkSr-1)+thvn+4]<-Srinventory[nbparamT1*(kkSr-1)+thvn+3] * sqrt((Srinventory[nbparamT1*(kkSr-1)+thvn+2]/Srinventory[nbparamT1*(kkSr-1)+thvn+1])^2+(Srinventory[nbparamUAZ*(kkSr-1)+ov+3]/Srinventory[nbparamUAZ*(kkSr-1)+ov+4])^2)
+  Srinventory[nbparamT1*(kkSr-1)+thvn+4]<-Srinventory[nbparamT1*(kkSr-1)+thvn+3] * sqrt((Srinventory[nbparamT1*(kkSr-1)+thvn+2]/Srinventory[nbparamT1*(kkSr-1)+thvn+1])^2+(Srinventory[nbparamUAZ*(kkSr-1)+indexlagSr+4]/Srinventory[nbparamUAZ*(kkSr-1)+indexlagSr+3])^2)
   names(Srinventory)[nbparamT1*(kkSr-1)+thvn+4]<-paste0("se.chSr",names(strontiuml2)[kkSr])
 }
 
-
 ## Cesium 137 
+
+Csinventory<-thicknessUAZ
+nbnegCsvals<-vector(mode = "integer", length = length(cesium137l2));
+nbNACsvals<-vector(mode = "integer", length = length(cesium137l2));
+
+# Year alignment lag
+minyearCs<-as.numeric(names(cesium137l2)[1])
+indexlagCs<-ov+(minyearSr-1988)*4
+
 
 for (kkCs in 1:length(cesium137l2)) {
   Cs.loess<-loess(mean~EASTING+NORTHING, data=cesium137l2[[kkCs]],degree=1,span=alphaloessconc)
@@ -216,14 +234,22 @@ for (kkCs in 1:length(cesium137l2)) {
   Csinventory[nbparamT1*(kkCs-1)+thvn+2]<-as.vector(predCs$se.fit)
   names(Csinventory)[nbparamT1*(kkCs-1)+thvn+2]<-paste0("se.Cs",names(cesium137l2)[kkCs])
   # Compute C*e
-  Csinventory[nbparamT1*(kkCs-1)+thvn+3]<-Csinventory[nbparamT1*(kkCs-1)+thvn+1]*Csinventory[nbparamUAZ*(kkCs-1)+ov+3]
+  Csinventory[nbparamT1*(kkCs-1)+thvn+3]<-Csinventory[nbparamT1*(kkCs-1)+thvn+1]*Csinventory[nbparamUAZ*(kkCs-1)+indexlagCs+3]
   names(Csinventory)[nbparamT1*(kkCs-1)+thvn+3]<-paste0("chCs",names(cesium137l2)[kkCs])
   # And the standard error
-  Csinventory[nbparamT1*(kkCs-1)+thvn+4]<-Csinventory[nbparamT1*(kkCs-1)+thvn+3] * sqrt((Csinventory[nbparamT1*(kkCs-1)+thvn+2]/Csinventory[nbparamT1*(kkCs-1)+thvn+1])^2+(Csinventory[nbparamUAZ*(kkCs-1)+ov+3]/Csinventory[nbparamUAZ*(kkCs-1)+ov+4])^2)
+  Csinventory[nbparamT1*(kkCs-1)+thvn+4]<-Csinventory[nbparamT1*(kkCs-1)+thvn+3] * sqrt((Csinventory[nbparamT1*(kkCs-1)+thvn+2]/Csinventory[nbparamT1*(kkCs-1)+thvn+1])^2+(Csinventory[nbparamUAZ*(kkCs-1)+indexlagCs+4]/Csinventory[nbparamUAZ*(kkCs-1)+indexlagCs+3])^2)
   names(Csinventory)[nbparamT1*(kkCs-1)+thvn+4]<-paste0("se.chCs",names(cesium137l2)[kkCs])
+  print(names(cesium137l2)[kkCs])
 }
 
+# rstudio::viewData(Csinventory[,names(Csinventory)[grep("Cs",names(Csinventory))]])
 
+#image.plot(ea.v,no.v,Csinventory$Cs1990)
+testCsplot<-Csinventory$Cs1991
+dim(testCsplot) <- c(50,60)
+testCsplot2<-t(testCsplot)
+image(ea.v,no.v,testCsplot2)
+image(no.v,ea.v,testCsplot2)
 
 
 # nbnegtritiumCvals<-vector(mode = "integer", length = length(tritiumCl2))

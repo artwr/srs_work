@@ -8,8 +8,12 @@ Tinventory.final.plot<-Tinventory.final
 names(Tinventory.final.plot)[1]<-"Year"
 Tinventory.final.plot$upr1<-Tinventory.final.plot$tCD.mean+2*Tinventory.final.plot$tCD.sd
 Tinventory.final.plot$lwr1<-Tinventory.final.plot$tCD.mean-2*Tinventory.final.plot$tCD.sd
+Tinventory.final.plot$lwr1bb<-Tinventory.final.plot$lwr1
+Tinventory.final.plot$lwr1bb[Tinventory.final.plot$lwr1bb<0]<-10
 Tinventory.final.plot$upr2<-Tinventory.final.plot$tCD.dint+2*Tinventory.final.plot$tCD.se
 Tinventory.final.plot$lwr2<-Tinventory.final.plot$tCD.dint-2*Tinventory.final.plot$tCD.se
+Tinventory.final.plot$lwr2bb<-Tinventory.final.plot$lwr2
+Tinventory.final.plot$lwr2bb[Tinventory.final.plot$lwr2bb<0]<-10
 #Draft ggplot for the inventory
 #qplot(MYEAR, inventory, data=inventoryja)
 
@@ -66,11 +70,39 @@ Tplot<- Tplot +geom_line(aes(y=tCD.mean), colour='blue')
 Tplot<- Tplot +geom_ribbon(data=Tinventory.final.plot,aes(ymin=lwr1, ymax=upr1), fill='blue', alpha = 0.3)
 Tplot<- Tplot +geom_line(aes(y=tCD.dint), colour='red')
 Tplot<- Tplot +geom_ribbon(data=Tinventory.final.plot,aes(ymin=lwr2, ymax=upr2), fill='red', alpha = 0.3)
+Tplot<- Tplot + geom_point(data=tritiumsource, aes(y=gwInventory))
 # Tplot<- Tplot +geom_line(aes(y=inventory1b), colour='red')
 # Tplot<- Tplot +geom_line(aes(y=inventory1lm), colour='green')
 # Tplot<- Tplot +geom_line(aes(y=inventoryC), colour='violet')
 Tplot<-Tplot+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
 # Tplot <- Tplot + scale_y_log10()
+print(Tplot)
+
+Tplot<-ggplot(data=Tinventory.final.plot, aes(x=Year))
+Tplot<- Tplot +geom_line(aes(y=tCD.mean), colour='blue')
+Tplot<- Tplot +geom_ribbon(data=Tinventory.final.plot,aes(ymin=lwr1, ymax=upr1), fill='blue', alpha = 0.3)
+Tplot<- Tplot +geom_line(aes(y=tCD.dint), colour='red')
+Tplot<- Tplot +geom_ribbon(data=Tinventory.final.plot,aes(ymin=lwr2, ymax=upr2), fill='red', alpha = 0.3)
+Tplot<- Tplot + geom_point(data=tritiumsource, aes(y=gwInventory))
+# Tplot<- Tplot +geom_line(aes(y=inventory1b), colour='red')
+# Tplot<- Tplot +geom_line(aes(y=inventory1lm), colour='green')
+# Tplot<- Tplot +geom_line(aes(y=inventoryC), colour='violet')
+Tplot<-Tplot+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+Tplot <- Tplot +coord_cartesian(xlim = c(1988,2011))
+print(Tplot)
+
+Tplot<-ggplot(data=Tinventory.final.plot, aes(x=Year))
+Tplot<- Tplot +geom_line(aes(y=tCD.mean), colour='blue')
+Tplot<- Tplot +geom_ribbon(data=Tinventory.final.plot,aes(ymin=lwr1bb, ymax=upr1), fill='blue', alpha = 0.3)
+Tplot<- Tplot +geom_line(aes(y=tCD.dint), colour='red')
+Tplot<- Tplot +geom_ribbon(data=Tinventory.final.plot,aes(ymin=lwr2bb, ymax=upr2), fill='red', alpha = 0.3)
+Tplot<- Tplot + geom_point(data=tritiumsource, aes(y=gwInventory))
+# Tplot<- Tplot +geom_line(aes(y=inventory1b), colour='red')
+# Tplot<- Tplot +geom_line(aes(y=inventory1lm), colour='green')
+# Tplot<- Tplot +geom_line(aes(y=inventoryC), colour='violet')
+Tplot<-Tplot+labs(title="Tritium Inventory")+xlab("Year")+ylab("Tritium (Ci)")
+Tplot <- Tplot +coord_cartesian(xlim = c(1988,2011))
+Tplot <- Tplot + scale_y_log10()
 print(Tplot)
 
 Tplot<-ggplot(data=Tinventory.final.plot, aes(x=Year))
