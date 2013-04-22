@@ -206,6 +206,12 @@ for (kkSr in 1:length(strontiuml2)) {
   names(Srinventory)[nbparamT1*(kkSr-1)+thvn+4]<-paste0("se.chSr",names(strontiuml2)[kkSr])
 }
 
+Srpf1 <- ggplot(Srinventory, aes(x=EASTING,y=NORTHING, fill=Sr2002)) 
+Srpf1 <- Srpf1 + geom_tile() 
+Srpf1 <- Srpf1 + scale_fill_gradient(limits=c(0, 800),low="green", high="red")
+# + geom_point(data=TCCZe, coulour= "black" , size = 4) 
+print(Srpf1)
+
 ## Cesium 137 
 
 Csinventory<-thicknessUAZ
@@ -245,11 +251,17 @@ for (kkCs in 1:length(cesium137l2)) {
 # rstudio::viewData(Csinventory[,names(Csinventory)[grep("Cs",names(Csinventory))]])
 
 #image.plot(ea.v,no.v,Csinventory$Cs1990)
-testCsplot<-Csinventory$Cs1991
-dim(testCsplot) <- c(50,60)
-testCsplot2<-t(testCsplot)
-image(ea.v,no.v,testCsplot2)
-image(no.v,ea.v,testCsplot2)
+# testCsplot<-Csinventory$Cs1991
+# dim(testCsplot) <- c(50,60)
+# testCsplot2<-t(testCsplot)
+# image(ea.v,no.v,testCsplot2)
+# image(no.v,ea.v,testCsplot2)
+
+Cspf1 <- ggplot(Csinventory, aes(x=EASTING,y=NORTHING, fill=Cs1999)) 
+Cspf1 <- Cspf1 + geom_tile() 
+Cspf1 <- Cspf1 + scale_fill_gradient(low="green", high="red")
+# + geom_point(data=TCCZe, coulour= "black" , size = 4) 
+print(Cspf1)
 
 
 # nbnegtritiumCvals<-vector(mode = "integer", length = length(tritiumCl2))
