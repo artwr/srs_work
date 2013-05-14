@@ -4,39 +4,13 @@
 require(geoR)
 require(ggplot2)
 require(scales)
-#require(sqldf)
 
 source('../inventory/interpolation_domain.R')
+source('../basin_coords/basin_poly.R')
 
 # rm(list=ls())
 
 ##########################################################
-
-#Add basin 3 coordinates
-f3basin<-readRDS("../basin_coords/f3basin.rdata")
-f3basin27<-readRDS("../basin_coords/f3basin27.rdata")
-
-f3basinmap <- ggplot(f3basin, aes(x=UTM_E, y=UTM_N)) +
-  geom_polygon(fill="black", colour="black")
-
-plot(f3basinmap)
-
-#All the basins
-basins<-readRDS("../basin_coords/basins.rdata")
-basins27<-readRDS("../basin_coords/basins27.rdata")
-
-
-## Necessary trick to be able to identofy each of the basins
-bnames <- data.frame(
-  id = c("F3","F2","F1"),
-  value = c(4,5,6)
-)
-
-basins$id<-rep(bnames$id, each = 5)
-basins27$id<-rep(bnames$id, each = 5)
-
-basinspoly <- merge(basins, bnames, by=c("id"))
-basins27poly <- merge(basins27, bnames, by=c("id"))
 
 # #Extent of the interpolation domain
 # no.min<-3680930

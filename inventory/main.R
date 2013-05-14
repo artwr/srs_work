@@ -1,5 +1,7 @@
 # File to use to perform the whole analysis
 
+#setwd("./inventory")
+
 require(plyr)
 require(ggplot2)
 require(splancs)
