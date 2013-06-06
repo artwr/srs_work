@@ -81,11 +81,11 @@ inventoryja<-merge(inventoryja,inventoryCja,by="MYEAR")
 # rm(th.avg.peryearhlm)
 
 # Save R object
-saveRDS(inventoryja, file = "inventoryja.rdata")
+saveRDS(inventoryja, file = "./data/inventoryja.rdata")
 
 # Save as csv
 inventoryja.csv<-inventoryja[,c("MYEAR","inventory1","inventory1b","inventory1lm","inventoryC")]
-write.csv(inventoryja.csv, file="inventoryja.csv")
+write.csv(inventoryja.csv, file="./data/inventoryja.csv")
 
 ########################################
 #4. Do the calculation again, this time with interpolation on a regular grid.
@@ -191,10 +191,10 @@ for (kk2 in 1:length(tritiumCl2)) {
 tritium.regression.diagnostics<-as.data.frame(cbind(nbnegtritiumvals,nbNAtritiumvals))
 tritiumC.regression.diagnostics<-as.data.frame(cbind(nbnegtritiumCvals,nbNAtritiumCvals))
 
-saveRDS(Tinventory,"Tinventory.rdata")
-saveRDS(TinventoryC,"TinventoryC.rdata")
-saveRDS(tritium.regression.diagnostics, file = "tritium.regression.diagnostics.rdata")
-saveRDS(tritiumC.regression.diagnostics, file = "tritiumC.regression.diagnostics.rdata")
+saveRDS(Tinventory,"./data/Tinventory.rdata")
+saveRDS(TinventoryC,"./data/TinventoryC.rdata")
+saveRDS(tritium.regression.diagnostics, file = "./diagnostics/tritium.regression.diagnostics.rdata")
+saveRDS(tritiumC.regression.diagnostics, file = "./diagnostics/tritiumC.regression.diagnostics.rdata")
 
 
 
@@ -234,11 +234,11 @@ inventory5$tCD.sd<-inventory5$t.sd+inventory5$tC.se
 inventory5$tCD.dint<-inventory5$t.dint+inventory5$tC.dint
 inventory5$tCD.se<-inventory5$t.se+inventory5$tC.se
 
-saveRDS(inventory5,"inventoryloesswithuncertaintyfinal.rdata")
+saveRDS(inventory5,"./data/inventoryloesswithuncertaintyfinal.rdata")
 
 Tinventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
 
-saveRDS(Tinventory.final,"Tinventoryfinal.rdata")
+saveRDS(Tinventory.final,"./data/Tinventoryfinal.rdata")
 
 rm(TCfl)
 rm(Tfl)

@@ -305,13 +305,13 @@ Sr.regression.diagnostics<-as.data.frame(cbind(nbnegSrvals,nbNASrvals))
 Cs.regression.diagnostics<-as.data.frame(cbind(nbnegCsvals,nbNACsvals))
 
 # saveRDS(Tinventory,"Tinventory.rdata")
-saveRDS(Iinventory,"Iinventory.rdata")
-saveRDS(Srinventory,"Srinventory.rdata")
-saveRDS(Csinventory,"Csinventory.rdata")
+saveRDS(Iinventory,"./data/Iinventory.rdata")
+saveRDS(Srinventory,"./data/Srinventory.rdata")
+saveRDS(Csinventory,"./data/Csinventory.rdata")
 
-saveRDS(I.regression.diagnostics, file = "I.regression.diagnostics.rdata")
-saveRDS(Sr.regression.diagnostics, file = "Sr.regression.diagnostics.rdata")
-saveRDS(Cs.regression.diagnostics, file = "Cs.regression.diagnostics.rdata")
+saveRDS(I.regression.diagnostics, file = "./diagnostics/I.regression.diagnostics.rdata")
+saveRDS(Sr.regression.diagnostics, file = "./diagnostics/Sr.regression.diagnostics.rdata")
+saveRDS(Cs.regression.diagnostics, file = "./diagnostics/Cs.regression.diagnostics.rdata")
 
 
 #Now for the averaging
@@ -350,14 +350,14 @@ Srinventory5$Sr.se<-area.dom*porosity.mean*Srinventory5$se.ch*1e-9*.3048
 
 # saveRDS(inventory5,"inventoryloesswithuncertaintyfinal.rdata")
 
-saveRDS(Iinventory5,"Iinventoryloesswithuncertaintyfinal.rdata")
+saveRDS(Iinventory5,"./data/Iinventoryloesswithuncertaintyfinal.rdata")
 
-saveRDS(Srinventory5,"Srinventoryloesswithuncertaintyfinal.rdata")
+saveRDS(Srinventory5,"./data/Srinventoryloesswithuncertaintyfinal.rdata")
 
-saveRDS(Csinventory5,"Csinventoryloesswithuncertaintyfinal.rdata")
+saveRDS(Csinventory5,"./data/Csinventoryloesswithuncertaintyfinal.rdata")
 
-saveRDS(Iinventory5,"Iinventory.final.rdata")
-saveRDS(Srinventory5,"Srinventory.final.rdata")
+saveRDS(Iinventory5,"./data/Iinventory.final.rdata")
+saveRDS(Srinventory5,"./data/Srinventory.final.rdata")
 
 # Tinventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
 

@@ -198,9 +198,9 @@ thickness.regression.diagnostics<-as.data.frame(cbind(nbnegthickvals,nbNAthickva
 
 
 #Save the datasets
-saveRDS(thicknessUAZ, file = "thicknessUAZ.rdata")
-saveRDS(thicknessLAZ, file = "thicknessLAZ.rdata")
-saveRDS(thickness.regression.diagnostics, file = "thickness.regression.diagnostics.rdata")
+saveRDS(thicknessUAZ, file = "./data/thicknessUAZ.rdata")
+saveRDS(thicknessLAZ, file = "./data/thicknessLAZ.rdata")
+saveRDS(thickness.regression.diagnostics, file = "./diagnostics/thickness.regression.diagnostics.rdata")
 
 
 
