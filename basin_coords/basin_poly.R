@@ -12,7 +12,7 @@ f3basin27<-readRDS("../basin_coords/f3basin27.rdata")
 #All the basins in NAD27 which is the proj of my data
 basins27<-readRDS("../basin_coords/basins27.rdata")
 
-# f3basinmap <- ggplot(f3basin, aes(x=UTM_E, y=UTM_N)) +
+# f3basinmap <- ggplot(f3basin, aes(x=EASTING, y=NORTHING)) +
 #   geom_polygon(fill="black", colour="black")
 # 
 # plot(f3basinmap)
@@ -36,7 +36,7 @@ basins27poly <- merge(basins27, bnames, by=c("id"))
 
 # ##############################
 # #Plot that identifies the basins with colours
-# basinsmap<-ggplot(basins27poly, aes(x=UTM_E, y=UTM_N)) + 
+# basinsmap<-ggplot(basins27poly, aes(x=EASTING, y=NORTHING)) + 
 #   geom_polygon(aes(group=id, fill=factor(value))) +
 #   scale_fill_discrete("Key")
 # 
@@ -46,7 +46,7 @@ basins27poly <- merge(basins27, bnames, by=c("id"))
 # 
 # #Plot with black basins and axis labels
 # 
-# basinsmap2<-ggplot(basins27poly, aes(x=UTM_E, y=UTM_N)) + 
+# basinsmap2<-ggplot(basins27poly, aes(x=EASTING, y=NORTHING)) + 
 #   geom_polygon(aes(group=id), fill="black") +
 #   scale_fill_discrete("Key") +
 #   labs(list(title = "Plot of the basins", x = "UTM Easting (m)", y = "UTM Northing (m)"))

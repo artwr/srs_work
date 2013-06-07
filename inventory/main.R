@@ -8,7 +8,7 @@ require(splancs)
 
 source('../inventory/functions.R')
 
-ptm1<-proc.time()
+#ptm1<-proc.time()
 #Define rectangle used for interpolation.
 # This was select as the max min coordinates 
 # on tritium well network measurement

@@ -6,7 +6,7 @@ TCCZdatac<-TCCZdata
 ##Convert non meaningful zeros to NAs
 TCCZdatac[TCCZdatac==0]<-NA
 
-colnames(TCCZdatac)[1:3]<-c("STATION_ID","UTM_E","UTM_N")
+colnames(TCCZdatac)[1:3]<-c("STATION_ID","EASTING","NORTHING")
 colnames(TCCZdatac)
 
 # Remove the points with no TCCZ pick. 
