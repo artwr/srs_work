@@ -16,10 +16,8 @@ require(plyr)
 
 
 #Import picks for the TCCZ
-TCCZe_all<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
-# Remove the points with no TCCZ pick. 
-TCCZe<-TCCZe_all[!is.na(TCCZe_all$TCCZ_top),]
-rm(TCCZe_all)
+TCCZe<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
+
 
 #Import the water level data
 wl<-readRDS("../SRS_data/wl.rdata")
