@@ -12,7 +12,7 @@ ptm1<-proc.time()
 #Define rectangle used for interpolation.
 # This was select as the max min coordinates 
 # on tritium well network measurement
-source('../inventory/interpolation_domain.R')
+source('../interpolation_domains/interpolation_domain.R')
 
 # Compute the aquifer thickness on an average and per year basis
 source('../inventory/aquifer_comp.R')
