@@ -17,3 +17,5 @@ TCCZbasinsmap<-ggplot(basins27poly, aes(x=EASTING, y=NORTHING)) +
   labs(list(title = "Plot of the basins with wells", x = "UTM Easting (m)", y = "UTM Northing (m)"))
 
 TCCZbasinsmap<- TCCZbasinsmap + geom_point(data=TCCZe, aes(x=EASTING, y=NORTHING))
+
+print(TCCZbasinsmap)
