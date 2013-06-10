@@ -32,4 +32,6 @@ area.dom<-areapl(pp)
 weightarea<-(break.size.ea*break.size.no)/area.dom
 
 interp.dom<-as.data.frame(pp)
+interp.dom2<-interp.dom
 names(interp.dom)<-c("UTM_E","UTM_N")
+names(interp.dom2)<-c("EASTING","NORTHING")

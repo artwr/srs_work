@@ -1,5 +1,5 @@
 # Plot of the TCCZ picks location + basins
-
+require(ggplot2)
 
 # Import Data -------------------------------------------------------------
 
@@ -14,8 +14,13 @@ TCCZe<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
 TCCZbasinsmap<-ggplot(basins27poly, aes(x=EASTING, y=NORTHING)) + 
   geom_polygon(aes(group=id), fill="light grey", colour = "blue", alpha = 1/3) +
   scale_fill_discrete("Key") +
-  labs(list(title = "Plot of the basins with wells", x = "UTM Easting (m)", y = "UTM Northing (m)"))
+  theme_bw() +
+  labs(list(title = "Plot of the basins with boreholes with TCCZ picks", x = "UTM Easting (m)", y = "UTM Northing (m)"))
 
 TCCZbasinsmap<- TCCZbasinsmap + geom_point(data=TCCZe, aes(x=EASTING, y=NORTHING))
 
+TCCZbasinsmap2<- TCCZbasinsmap + geom_polygon(data=interp.dom2, fill="light grey", colour = "orange", alpha=0)
+
 print(TCCZbasinsmap)
+
+print(TCCZbasinsmap2)
