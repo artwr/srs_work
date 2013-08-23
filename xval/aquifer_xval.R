@@ -5,7 +5,6 @@
 #
 #################
 
-
 #Import picks for the TCCZ
 TCCZe_all<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
 # Remove the points with no TCCZ pick. 
@@ -43,14 +42,21 @@ wll2<-wll[5:length(wll)]
 #
 XvalFitTCCZ <- data.frame( alphaspan = seq( .15, 1, .05))
 XvalFitTCCZ$SSEd1 <- rep(NA, nrow(XvalFitTCCZ))
+#Set up the predicted residual sum of squares
 XvalFitTCCZ$PRESSd1 <- rep(NA, nrow(XvalFitTCCZ))
 XvalFitTCCZ$SSEd2 <- rep(NA, nrow(XvalFitTCCZ))
 XvalFitTCCZ$PRESSd2 <- rep(NA, nrow(XvalFitTCCZ))
+XvalFitTCCZ$SSEd3 <- rep(NA, nrow(XvalFitTCCZ))
+XvalFitTCCZ$PRESSd3 <- rep(NA, nrow(XvalFitTCCZ))
+XvalFitTCCZ$SSEd4 <- rep(NA, nrow(XvalFitTCCZ))
+XvalFitTCCZ$PRESSd4 <- rep(NA, nrow(XvalFitTCCZ))
 
 for ( ii in 1:nrow(XvalFitTCCZ) ) {
   aspan <- XvalFitTCCZ$alphaspan[ii]
   fitd1 <- loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1, span= aspan)
   fitd2 <- loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 2, span= aspan)
+  fitd3 <- loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 3, span= aspan)
+  fitd4 <- loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 4, span= aspan)
   SSEd1 <- sum( ((TCCZe$TCCZ_top - predict(fitd1))[-c(1,nrow(TCCZe))]) ^ 2)
   SSEd2 <- sum( ((TCCZe$TCCZ_top - predict(fitd2))[-c(1,nrow(TCCZe))]) ^ 2)
   pressd1 <- 0
@@ -73,6 +79,8 @@ XvalFitTCCZ
 with( XvalFitTCCZ, matplot( alphaspan, cbind(PRESSd1,SSEd1), type = 'l') )
 
 with( XvalFitTCCZ, matplot( alphaspan, cbind(PRESSd2,SSEd2), type = 'l') )
+
+with( XvalFitTCCZ, matplot( alphaspan, cbind(PRESSd1,PRESSd2), type = 'l') )
 
 # plot( y ~ x, dd)
 # fit <- loess ( y ~ x, dd, span = .15 ,degree=1)   

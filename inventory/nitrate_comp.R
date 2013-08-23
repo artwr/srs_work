@@ -1,6 +1,5 @@
 #Nitrate Inventory Computation
 
-
 #################################
 #1.
 #load data
@@ -38,8 +37,8 @@ nitrateCl2<-nitrateCl[4:length(nitrateCl)]
 #Thickness is computed using a linear prediction
 #
 #Local polynomial fit (1st order) and linear model
-TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1, span= 0.25)
-TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1,span= 0.4)
+TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING, data = TCCZe, degree = 1, span = 0.25)
+TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data = TCCZe, degree = 1,span = 0.4)
 TCCZ.lm<-lm(TCCZ_top~EASTING+NORTHING,data=TCCZe)
 
 #Create the aquifer thickness data frame
