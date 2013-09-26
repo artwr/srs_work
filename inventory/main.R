@@ -1,6 +1,7 @@
 # File to use to perform the whole analysis
 
 #setwd("./inventory")
+#rm(list=ls())
 
 require(plyr)
 require(ggplot2)
