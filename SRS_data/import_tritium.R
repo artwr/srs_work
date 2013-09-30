@@ -8,16 +8,13 @@ rm(list=ls())
 tritium.raw<-read.csv("tritium4R.csv")
 #H well that's close enough to the east of the basins for a good boundary condition.
 HSB143D<-read.csv("HSB143D_add.csv")
-wl.raw<-read.csv("wl4R.csv")
 
 tritiumC.raw<-read.csv("tritiumC4R.csv")
 
 # extentdomC <- ggplot(data=tritiumC.raw) + geom_point(aes(x=EASTING,y=NORTHING))
 # print(extentdomC)
 
-#Remove FEX8 because of the 2 screens.
-wl.clean<-wl.raw[!wl.raw$STATION_ID=='FEX  8' & !wl.raw$STATION_ID=='FEX  9',]
-#wl.clean<-wl.raw[!wl.raw$STATION_ID=='FEX  9',]
+
 tritium.clean1<-tritium.raw[!tritium.raw$STATION_ID=='FEX  8',]
 tritiumC.clean1<-tritiumC.raw[!tritiumC.raw$STATION_ID=='FEX  8',]
 
@@ -29,7 +26,6 @@ tritium.clean<-tritium.clean1[!is.na(tritium.clean1$RESULT),]
 tritiumC.clean<-tritiumC.clean1[!is.na(tritiumC.clean1$RESULT),]
 
 #Visual inspection of the data
-#wl.fex<-wl.raw[wl.raw$STATION_ID=='FEX  8' | wl.raw$STATION_ID=='FEX  9',]
 #tritium.fex8<-tritium.raw[tritium.raw$STATION_ID=='FEX  8',]
 
 #Compute aggregates per station, year
@@ -53,13 +49,6 @@ HSB143D.plyr1<-ddply(HSB143D, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NO
 #
 tritium.final<-rbind(tritium.plyr1,HSB143D.plyr1)
 
-#For the water levels
-wl.plyr1<-ddply(wl.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$WATER_ELEV),median=median(x$WATER_ELEV),sd=sd(x$WATER_ELEV),mad=mad(x$WATER_ELEV),min=min(x$WATER_ELEV),max=max(x$WATER_ELEV)))
-
-#average across years
-wl.plyra<-ddply(wl.clean, c('STATION_SEQ','STATION_ID','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$WATER_ELEV),median=median(x$WATER_ELEV),sd=sd(x$WATER_ELEV),mad=mad(x$WATER_ELEV),min=min(x$WATER_ELEV),max=max(x$WATER_ELEV)))
-
-
 #Save as R datasets
 saveRDS(tritium.clean,file="tritiumcleanall.rdata")
 saveRDS(tritium.plyr1, file = "tritium.rdata")
@@ -67,8 +56,7 @@ saveRDS(tritiumC.plyr1, file = "tritiumC.rdata")
 saveRDS(tritium.final, file = "tritiumf.rdata")
 saveRDS(tritium.plyra, file = "tritiumavg.rdata")
 saveRDS(tritiumC.plyra, file = "tritiumCavg.rdata")
-saveRDS(wl.plyr1, file = "wl.rdata")
-saveRDS(wl.plyra, file = "wlavg.rdata")
+
 
 
 
