@@ -5,28 +5,44 @@ require(plyr)
 
 rm(list=ls())
 #read the data
+
+# UAZ
 tritium.raw<-read.csv("tritium4R.csv")
 #H well that's close enough to the east of the basins for a good boundary condition.
 HSB143D<-read.csv("HSB143D_add.csv")
-
+#LAZ
 tritiumC.raw<-read.csv("tritiumC4R.csv")
 
 # extentdomC <- ggplot(data=tritiumC.raw) + geom_point(aes(x=EASTING,y=NORTHING))
 # print(extentdomC)
 
-
+#Remove FEX8 because of the double screen
 tritium.clean1<-tritium.raw[!tritium.raw$STATION_ID=='FEX  8',]
 tritiumC.clean1<-tritiumC.raw[!tritiumC.raw$STATION_ID=='FEX  8',]
+
+#Store FEX8 separate;y for further inspection
+tritium.FEX8<-tritium.raw[tritium.raw$STATION_ID=='FEX  8',]
+tritiumC.FEX8<-tritiumC.raw[tritiumC.raw$STATION_ID=='FEX  8',]
+#Visual inspection of the data
+#tritium.fex8<-tritium.raw[tritium.raw$STATION_ID=='FEX  8',]
+
 
 #Replace Negative values with NA
 tritium.clean1[tritium.clean1$RESULT<0,]$RESULT<-NA
 tritiumC.clean1[tritiumC.clean1$RESULT<0,]$RESULT<-NA
 #tritium.see<-tritium.raw[tritium.raw$RESULT<0,]
+#Remove NA values since I cannot use them
 tritium.clean<-tritium.clean1[!is.na(tritium.clean1$RESULT),]
 tritiumC.clean<-tritiumC.clean1[!is.na(tritiumC.clean1$RESULT),]
 
-#Visual inspection of the data
-#tritium.fex8<-tritium.raw[tritium.raw$STATION_ID=='FEX  8',]
+#
+
+
+
+
+
+
+
 
 #Compute aggregates per station, year
 #
@@ -56,6 +72,9 @@ saveRDS(tritiumC.plyr1, file = "tritiumC.rdata")
 saveRDS(tritium.final, file = "tritiumf.rdata")
 saveRDS(tritium.plyra, file = "tritiumavg.rdata")
 saveRDS(tritiumC.plyra, file = "tritiumCavg.rdata")
+
+saveRDS(tritium.FEX8, file = "tritiumFEX8.rdata")
+saveRDS(tritiumC.FEX8, file = "tritiumCFEX8.rdata")
 
 
 
