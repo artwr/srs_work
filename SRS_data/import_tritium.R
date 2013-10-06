@@ -7,9 +7,9 @@ rm(list=ls())
 #read the data
 
 # UAZ
-tritium.raw<-read.table("tritium4R.csv",sep="|")
+tritium.raw<-read.table("tritium4R.csv",sep="|",header = TRUE)
 #LAZ
-tritiumC.raw<-read.table("tritiumC4R.csv",sep="|")
+tritiumC.raw<-read.table("tritiumC4R.csv",sep="|",header = TRUE)
 
 # extentdomC <- ggplot(data=tritiumC.raw) + geom_point(aes(x=EASTING,y=NORTHING))
 # print(extentdomC)
@@ -19,8 +19,8 @@ tritium.clean1<-tritium.raw[!tritium.raw$STATION_ID=='FEX  8',]
 tritiumC.clean1<-tritiumC.raw[!tritiumC.raw$STATION_ID=='FEX  8',]
 
 #Store FEX8 separate;y for further inspection
-tritium.FEX8<-tritium.raw[tritium.raw$STATION_ID=='FEX  8',]
-tritiumC.FEX8<-tritiumC.raw[tritiumC.raw$STATION_ID=='FEX  8',]
+# tritium.FEX8<-tritium.raw[tritium.raw$STATION_ID=='FEX  8',]
+# tritiumC.FEX8<-tritiumC.raw[tritiumC.raw$STATION_ID=='FEX  8',]
 #Visual inspection of the data
 #tritium.fex8<-tritium.raw[tritium.raw$STATION_ID=='FEX  8',]
 
@@ -61,8 +61,8 @@ saveRDS(tritiumC.plyr1, file = "tritiumC.rdata")
 saveRDS(tritium.plyra, file = "tritiumavg.rdata")
 saveRDS(tritiumC.plyra, file = "tritiumCavg.rdata")
 
-saveRDS(tritium.FEX8, file = "tritiumFEX8.rdata")
-saveRDS(tritiumC.FEX8, file = "tritiumCFEX8.rdata")
+# saveRDS(tritium.FEX8, file = "tritiumFEX8.rdata")
+# saveRDS(tritiumC.FEX8, file = "tritiumCFEX8.rdata")
 
 
 
