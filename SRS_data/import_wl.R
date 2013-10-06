@@ -4,7 +4,7 @@ require(plyr)
 
 rm(list=ls())
 #read the data
-wl.raw<-read.csv("wl4R.csv")
+wl.raw<-read.table("wl4R.csv",sep="|")
 
 #Remove FEX8 because of the 2 screens.
 wl.clean<-wl.raw[!wl.raw$STATION_ID=='FEX  8' & !wl.raw$STATION_ID=='FEX  9',]

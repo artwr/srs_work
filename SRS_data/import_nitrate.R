@@ -3,20 +3,24 @@ require(plyr)
 
 rm(list=ls())
 #read the data
-iodine.raw<-read.csv("iodine4R.csv")
-strontium.raw<-read.csv("strontium4R.csv")
-cesium137.raw<-read.csv("cesium1374R.csv")
-technetium.raw<-read.csv("technetium4R.csv")
-nitrate.raw<-read.csv("nitrate4R.csv")
-nitrateC.raw<-read.csv("nitrateC4R.csv")
+iodine.raw<-read.table("iodine4R.csv",sep="|")
+iodineC.raw<-read.table("iodineC4R.csv",sep="|")
+strontium.raw<-read.table("strontium4R.csv",sep="|")
+cesium137.raw<-read.table("cesium1374R.csv",sep="|")
+technetium.raw<-read.table("technetium4R.csv",sep="|")
+technetiumC.raw<-read.table("technetiumC4R.csv",sep="|")
+nitrate.raw<-read.table("nitrate4R.csv",sep="|")
+nitrateC.raw<-read.table("nitrateC4R.csv",sep="|")
 # seeextent <- ggplot(data=tritiumC.raw) + geom_point(aes(x=EASTING,y=NORTHING))
 # print(seeextent)
 
 #Remove FEX8 because of the 2 screens.
 iodine.clean1<-iodine.raw[!iodine.raw$STATION_ID=='FEX  8',]
+iodineC.clean1<-iodineC.raw[!iodineC.raw$STATION_ID=='FEX  8',]
 strontium.clean1<-strontium.raw[!strontium.raw$STATION_ID=='FEX  8',]
 cesium137.clean1<-cesium137.raw[!cesium137.raw$STATION_ID=='FEX  8',]
 technetium.clean1<-technetium.raw[!technetium.raw$STATION_ID=='FEX  8',]
+technetiumC.clean1<-technetiumC.raw[!technetiumC.raw$STATION_ID=='FEX  8',]
 nitrate.clean1<-nitrate.raw[!nitrate.raw$STATION_ID=='FEX  8',]
 nitrateC.clean1<-nitrateC.raw[!nitrateC.raw$STATION_ID=='FEX  8',]
 
@@ -31,21 +35,27 @@ nitrateC.clean<-nitrateC.clean1[!is.na(nitrateC.clean1$RESULT),]
 # nitrate.clean<-nitrate.clean1[!is.na(nitrate.clean1$RESULT),]
 
 iodine.clean1$RESULT[iodine.clean1$RESULT<0]<-NA
-iodine.clean<-iodine.clean1[!is.na(iodine.clean1$RESULT),]
+iodine.clean<-iodine.clean1[!is.na(iodineC.clean1$RESULT),]
+iodineC.clean1$RESULT[iodineC.clean1$RESULT<0]<-NA
+iodineC.clean<-iodineC.clean1[!is.na(iodineC.clean1$RESULT),]
 strontium.clean1$RESULT[strontium.clean1$RESULT<0]<-NA
 strontium.clean<-strontium.clean1[!is.na(strontium.clean1$RESULT),]
 cesium137.clean1$RESULT[cesium137.clean1$RESULT<0]<-NA
 cesium137.clean<-cesium137.clean1[!is.na(cesium137.clean1$RESULT),]
 technetium.clean1$RESULT[technetium.clean1$RESULT<0]<-NA
 technetium.clean<-technetium.clean1[!is.na(technetium.clean1$RESULT),]
+technetiumC.clean1$RESULT[technetiumC.clean1$RESULT<0]<-NA
+technetiumC.clean<-technetiumC.clean1[!is.na(technetiumC.clean1$RESULT),]
 
 #Using plyr
 
 nitrate.plyr1<-ddply(nitrate.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
 iodine.plyr1<-ddply(iodine.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
+iodineC.plyr1<-ddply(iodineC.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
 strontium.plyr1<-ddply(strontium.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
 cesium137.plyr1<-ddply(cesium137.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
 technetium.plyr1<-ddply(technetium.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
+technetiumC.plyr1<-ddply(technetiumC.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
 nitrate.plyra<-ddply(nitrate.clean, c('MYEAR'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
 nitrateC.plyr1<-ddply(nitrateC.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
 nitrateC.plyra<-ddply(nitrateC.clean, c('MYEAR'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))

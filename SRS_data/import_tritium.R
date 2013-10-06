@@ -7,11 +7,9 @@ rm(list=ls())
 #read the data
 
 # UAZ
-tritium.raw<-read.csv("tritium4R.csv")
-#H well that's close enough to the east of the basins for a good boundary condition.
-HSB143D<-read.csv("HSB143D_add.csv")
+tritium.raw<-read.table("tritium4R.csv",sep="|")
 #LAZ
-tritiumC.raw<-read.csv("tritiumC4R.csv")
+tritiumC.raw<-read.table("tritiumC4R.csv",sep="|")
 
 # extentdomC <- ggplot(data=tritiumC.raw) + geom_point(aes(x=EASTING,y=NORTHING))
 # print(extentdomC)
@@ -35,13 +33,7 @@ tritiumC.clean1[tritiumC.clean1$RESULT<0,]$RESULT<-NA
 tritium.clean<-tritium.clean1[!is.na(tritium.clean1$RESULT),]
 tritiumC.clean<-tritiumC.clean1[!is.na(tritiumC.clean1$RESULT),]
 
-#
-
-
-
-
-
-
+#Maybe QC?
 
 
 #Compute aggregates per station, year
@@ -61,15 +53,11 @@ tritium.plyra<-ddply(tritium.clean, c('MYEAR'), function(x) c(count=nrow(x),mean
 tritiumC.plyr1<-ddply(tritiumC.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
 tritiumC.plyra<-ddply(tritiumC.clean, c('MYEAR'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
 
-HSB143D.plyr1<-ddply(HSB143D, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$RESULT),median=median(x$RESULT),sd=sd(x$RESULT),mad=mad(x$RESULT),min=min(x$RESULT),max=max(x$RESULT)))
-#
-tritium.final<-rbind(tritium.plyr1,HSB143D.plyr1)
 
 #Save as R datasets
 saveRDS(tritium.clean,file="tritiumcleanall.rdata")
 saveRDS(tritium.plyr1, file = "tritium.rdata")
 saveRDS(tritiumC.plyr1, file = "tritiumC.rdata")
-saveRDS(tritium.final, file = "tritiumf.rdata")
 saveRDS(tritium.plyra, file = "tritiumavg.rdata")
 saveRDS(tritiumC.plyra, file = "tritiumCavg.rdata")
 
