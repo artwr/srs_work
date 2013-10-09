@@ -22,10 +22,14 @@ alphaloessconcl<-0.3
 #################################
 #1.
 #load data
-#Just the F wells
-#tritium<-readRDS("../SRS_data/tritium.rdata")
-#Added HSB 143 D which provides a BC on the eastern site of the interpolation domain
-tritium<-readRDS("../SRS_data/tritiumf.rdata")
+#wells within the polygon defined by
+# 'POLYGON((-81.69959850412471 33.25157883545753,
+# -81.6695146228905 33.27042851958022, 
+# -81.67053367567048 33.27832883035499,
+# -81.69388086898707 33.28329777530127,
+# -81.69959850412471 33.25157883545753))'
+#
+tritium<-readRDS("../SRS_data/tritium.rdata")
 tritiumC<-readRDS("../SRS_data/tritiumC.rdata")
 tritiumavg<-readRDS("../SRS_data/tritiumavg.rdata")
 tritiumCavg<-readRDS("../SRS_data/tritiumCavg.rdata")

@@ -14,7 +14,7 @@ source('../inventory/interpolation_domain.R')
 f3basin<-readRDS("../basin_coords/f3basin.rdata")
 f3basin27<-readRDS("../basin_coords/f3basin27.rdata")
 
-f3basinmap <- ggplot(f3basin, aes(x=UTM_E, y=UTM_N)) +
+f3basinmap <- ggplot(f3basin, aes(x=EASTING, y=NORTHING)) +
   geom_polygon(fill="black", colour="black")
 
 plot(f3basinmap)
