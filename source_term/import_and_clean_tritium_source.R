@@ -17,22 +17,46 @@ names(tritiumsource.raw)<-c("Year", "VolumeinL","H3input", "CumulH3input",
 #bbb<-cumsumdecaycorrected(tritiumsource.raw$NetH3afterevap,12.3)
 
 tritiumsource<-tritiumsource.raw[,c("Year", "CumulH3afterevapdecayc","CumulH3frommigrationfromFdecayc", "H3inventorydecayc")]
-tritiumsource$sourceterm2<-cumsumdecaycorrected(tritiumsource.raw$NetH3afterevap,12.3)
-names(tritiumsource)<-c("Year", "sourceterm","TritiuminFMB", "gwInventory","sourceterm2")
+# tritiumsource$sourceterm2<-cumsumdecaycorrected(tritiumsource.raw$NetH3afterevap,12.3)
+# names(tritiumsource)<-c("Year", "sourceterm","TritiuminFMB", "gwInventory","sourceterm2")
+names(tritiumsource)<-c("Year", "sourceterm","TritiuminFMB", "gwInventory")
+
+tritiumsource2<-tritiumsource
+names(tritiumsource2)<-c("Year", "Input","Outflow", "Difference")
+
 
 tritiumsource.csv<-tritiumsource
 saveRDS(tritiumsource.csv,file="../source_term/tritiumsource.rdata")
 
+# tritiumsource.long<-melt(tritiumsource, id.vars=c("Year"), 
+#                          measure.vars=c("sourceterm","TritiuminFMB", "gwInventory","sourceterm2"),
+#                          variable.name="Legend", value.name='value')
 tritiumsource.long<-melt(tritiumsource, id.vars=c("Year"), 
-                         measure.vars=c("sourceterm","TritiuminFMB", "gwInventory","sourceterm2"),
+                         measure.vars=c("sourceterm","TritiuminFMB", "gwInventory"),
+                         variable.name="Legend", value.name='value')
+tritiumsource2.long<-melt(tritiumsource2, id.vars=c("Year"), 
+                         measure.vars=c("Input","Outflow", "Difference"),
                          variable.name="Legend", value.name='value')
 tritiumsource.long$col1[tritiumsource.long$Legend=='sourceterm']<-"brown"
 tritiumsource.long$col1[tritiumsource.long$Legend=='TritiuminFMB']<-"blue"
 tritiumsource.long$col1[tritiumsource.long$Legend=='gwInventory']<-"orange"
-tritiumsource.long$col1[tritiumsource.long$Legend=='sourceterm2']<-"red"
+# tritiumsource.long$col1[tritiumsource.long$Legend=='sourceterm2']<-"red"
+
+
+tritiumsource2.long$col1[tritiumsource.long$Legend=='Input']<-"brown"
+tritiumsource2.long$col1[tritiumsource.long$Legend=='Outflow']<-"blue"
+tritiumsource2.long$col1[tritiumsource.long$Legend=='Difference']<-"orange"
+
 # tritiumsource$cumulinputH3<-cumsum(tritiumsource$H3input))
 # tritiumsource$cumulinputH3afterevap<-cumsum(tritiumsource$NetH3afterevap))
 # rightcolours<-c("brown","blue","orange")
+saveRDS(tritiumsource.long,file="../source_term/tritiumsourcelongformat.rdata")
+saveRDS(tritiumsource2.long,file="../source_term/tritiumsource2longformat.rdata")
+
+
+
+
+
 swgg3<-ggplot(data=tritiumsource.long,aes(x=Year, y=value, group=Legend, colour=col1)) + theme_bw()
 swgg3<- swgg3 + geom_line(size=2) 
 swgg3<- swgg3 + scale_colour_identity(guide = "legend")
