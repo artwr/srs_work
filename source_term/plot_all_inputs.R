@@ -1,0 +1,24 @@
+##plot with facets for the source terms
+require(ggplot2)
+require(reshape2)
+
+sourceterms<-readRDS('../source_term/sourceterms.rdata')
+sourceterms2<-sourceterms[,c(1,4,6,7,8)]
+# Year  Volume.L	CumulVol.L	Tritium.Ci	Tritiumafterevap.Ci	Strontium90.Ci	UNAT.Ci	Cesium137.Ci
+sourcetermdatalong<-melt(sourceterms2, id.vars=c("Year"), measure.vars = c("Tritium.Ci","Strontium90.Ci","UNAT.Ci","Cesium137.Ci"),variable.name = "Name.Units", na.rm = FALSE,
+     value.name = "Value")
+
+sourcetermdatalong$flabel<-factor(sourcetermdatalong$Name.Units, labels = c("Tritium (Ci)","Strontium 90 (Ci)","Natural Uranium (Ci)","Cesium 137 (Ci)"))
+
+##
+plots1<-ggplot(data=sourcetermdatalong, aes(x=Year,y=Value)) + geom_point() + facet_wrap(facets=c("Name.Units"), scales = "free_y")
+print(plots1)
+
+plots2 <- ggplot(data=sourcetermdatalong, aes(x=Year,y=Value)) + geom_line() 
+plots2 <- plots2 + theme_bw()
+plots2 <- plots2 +facet_wrap( ~ flabel, ncol = 2, scales = "free_y")
+print(plots2)
+
+# facet_wrap(facets, nrow = NULL, ncol = NULL, scales = "fixed", shrink = TRUE, as.table = TRUE, 
+#            drop = TRUE)
+
