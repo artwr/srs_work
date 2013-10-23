@@ -8,7 +8,7 @@ sourceterms2<-sourceterms[,c(1,4,6,7,8)]
 sourcetermdatalong<-melt(sourceterms2, id.vars=c("Year"), measure.vars = c("Tritium.Ci","Strontium90.Ci","UNAT.Ci","Cesium137.Ci"),variable.name = "Name.Units", na.rm = FALSE,
      value.name = "Value")
 
-sourcetermdatalong$flabel<-factor(sourcetermdatalong$Name.Units, labels = c("Tritium (Ci)","Strontium 90 (Ci)","Natural Uranium (Ci)","Cesium 137 (Ci)"))
+sourcetermdatalong$flabel<-factor(sourcetermdatalong$Name.Units, labels = c("Tritium (Ci)","Strontium 90 (Ci)","U-NAT (Ci)","Cesium 137 (Ci)"))
 
 ##
 plots1<-ggplot(data=sourcetermdatalong, aes(x=Year,y=Value)) + geom_point() + facet_wrap(facets=c("Name.Units"), scales = "free_y")
