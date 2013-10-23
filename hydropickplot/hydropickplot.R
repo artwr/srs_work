@@ -1,5 +1,5 @@
 ##Plot aquifer
-setwd("D:/SRS/data_SRS/R_data_files")
+# setwd("D:/SRS/data_SRS/R_data_files")
 # Load data
 srs1<-read.table("hydropicks.dat",skip = 1, header = FALSE)
 names(srs1)<-c("x","y","Surface","TCCZ","LAZ","GCU","GAU","MBCS","well")
@@ -18,3 +18,10 @@ s3d1$points3d(srs1$x,srs1$y,srs1$GAU,col="lightblue",type="h",pch=8)
 s3d1$points3d(srs1$x,srs1$y,srs1$MBCS,col="purple",type="h",pch=8)
 
 ##
+# groundsurface<-as.data.frame(cbind(srs1$x,srs1$y,srs1$Surface))
+# plot_rgl_model_a(groundsurface, plot_contour=F,verbose=T, smoother=T)
+
+
+
+
+
