@@ -14,7 +14,7 @@ cumsumdecaycorrected<-function(yearlyvalues,halflife) {
   k<- log(2)/halflife; ek<-exp(-k);
   n<-length(yearlyvalues);v<-ek^(0:(n-1));
   MM<-rep.int(0,n) %o% rep.int(0,n);
-  for (jj in 1:(n-1)) {
+  for (jj in 1:n) {
     MM[jj:n,jj]<-v[1:(n-(jj-1))]
   }
   return (MM %*% yearlyvalues)
