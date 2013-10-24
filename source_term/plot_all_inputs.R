@@ -26,6 +26,8 @@ plots2 <- plots2 +facet_wrap( ~ flabel, ncol = 2, scales = "free_y")
 print(plots2)
 
 
+
+
 pdf(file = "inputs.pdf", width = 6, height = 7, title = "Input to the basins as reported by Cummins et al. [1991]", 
     version = "1.6", pointsize = 12)
 plots3 <- ggplot(data=sourcetermdatalong, aes(x=Year,y=Value)) + geom_line(size=1.5) 
@@ -35,6 +37,12 @@ plots3 <- plots3 + ylab("Activity (Ci)")
 plots3 <- plots3 +facet_wrap( ~ flabel, ncol = 2, scales = "free_y")
 print(plots3)
 dev.off()
+
+# pdf(file = "C:/Users/Arthur/Dropbox/dissertation/th_outline/images/inputs.pdf", width = 6, height = 7, 
+#     title = "Input to the basins as reported by Cummins et al. [1991]", version = "1.6", pointsize = 12)
+# print(plots3)
+# dev.off()
+
 
 
 # facet_wrap(facets, nrow = NULL, ncol = NULL, scales = "fixed", shrink = TRUE, as.table = TRUE, 
