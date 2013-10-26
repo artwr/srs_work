@@ -49,6 +49,7 @@ plot(basinsmap2)
 #Add river line
 ##################################
 
+##Small Frame
 basinsmap2r<-ggplot(basins27poly, aes(x=EASTING, y=NORTHING)) + 
   geom_polygon(aes(group=id), fill="black") +
   scale_fill_discrete("Key") +
@@ -63,6 +64,24 @@ basinsmap2r<- basinsmap2r + coord_cartesian(xlim = c(ea.min+50,ea.max+50), ylim 
 basinsmap2r <- basinsmap2r + theme_bw() + theme(aspect.ratio =1)
 
 plot(basinsmap2r)
+
+
+
+##Large Frame
+basinsmapr<-ggplot(basins27poly, aes(x=EASTING, y=NORTHING)) + 
+  geom_polygon(aes(group=id), fill="black") +
+  scale_fill_discrete("Key") +
+  labs(list(title = "Plot of the basins", x = "UTM Easting (m)", y = "UTM Northing (m)"))
+
+# basinsmapr<- basinsmapr + geom_polygon(data=river.df, aes(group=id), fill="blue", colour="blue")
+
+basinsmapr<- basinsmapr + geom_line(data=river2.df, aes(x=EASTING, y=NORTHING), colour="blue", size=1)
+
+# basinsmapr<- basinsmapr + coord_cartesian(xlim = c(ea.min+50,ea.max+50), ylim = c(no.min+50,no.max+50))
+
+basinsmapr <- basinsmapr + theme_bw() + theme(aspect.ratio =1)
+
+plot(basinsmapr)
 
 
 ############################################################
