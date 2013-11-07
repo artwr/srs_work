@@ -1,0 +1,8 @@
+proj_cmd.txt
+
+#
+proj +proj=utm +zone=17 +datum=NAD83 <b2.txt
+
+proj +proj=utm +zone=17 +datum=NAD27 <b2.txt >b2_utm27.txt
+
+proj +proj=utm +zone=17 +datum=NAD27 <fmbpoly.txt >fmbpoly_utm27.txt

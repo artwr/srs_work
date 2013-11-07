@@ -2,6 +2,7 @@
 IP <- as.data.frame(installed.packages())
 
 # MyPkgs_laptop <- subset(IP, !Priority %in% c("base", "recommended"), select =  c(Package))
+# filename = paste0(c("MyPkgs_",format(Sys.time(), "%Y%m%d"),".Rdata"))
 # save(MyPkgs_laptop, file = "MyPkgs_laptop.Rdata")
 # load("MyPkgs_desktop.Rdata")
 # ptoinstall<-setdiff(MyPkgs_desktop$Package,MyPkgs_laptop$Package)

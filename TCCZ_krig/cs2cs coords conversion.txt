@@ -1,7 +1,0 @@
-cs2cs coords conversion
-
-SRS UTM27 to lat long
-cs2cs +proj=utm +zone=17 +datum=NAD27 +to +proj=latlong +datum=NAD83 -f %.10f
-
-SRS UTM27 to lat long with original coordinates.
-cs2cs -E +proj=utm +zone=17 +datum=NAD27 +to +proj=latlong +datum=NAD83 -f %.10f
