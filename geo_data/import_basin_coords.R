@@ -1,0 +1,8 @@
+f3basin<-read.table("raw/f3basin_utm.txt", sep="\t", col.names=c("EASTING","NORTHING"))
+f3basin27<-read.table("raw/f3basin_utm27.txt", sep="\t", col.names=c("EASTING","NORTHING"))
+basins<-read.table("raw/b2_utm.txt", sep="\t", col.names=c("EASTING","NORTHING"))
+basins27<-read.table("raw/b2_utm27.txt", sep="\t", col.names=c("EASTING","NORTHING"))
+saveRDS(f3basin,"processed/f3basin.rdata")
+saveRDS(f3basin27,"processed/f3basin27.rdata")
+saveRDS(basins,"processed/basins.rdata")
+saveRDS(basins27,"processed/basins27.rdata")
