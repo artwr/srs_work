@@ -3,3 +3,4 @@
 .RData
 Thumbs.db
 *.png
+.DS_Store
