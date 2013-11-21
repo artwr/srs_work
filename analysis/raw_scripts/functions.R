@@ -34,7 +34,7 @@ cumsumdecaycorrected<-function(yearlyvalues,halflife) {
 #   expand.grid(EASTING=ea.v, NORTHING=no.v)
 # }
 # 
-# getexpandgridd<- function(xd.min,xd.max,yd.min,yd.max,ybreaks.d,xbreaksd) {
+# getexpandgridd<- function(xd.min,xd.max,yd.min,yd.max,ybreaks.d,xbreaks.d) {
 #   xd.v<-seq(xd.min, xd.max, length = xd.b)
 #   yd.v<-seq(yd.min, yd.max, length = yd.b)
 #   expand.grid(EASTING=ea.v, NORTHING=no.v)
@@ -79,7 +79,6 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
     for (i in 1:numPlots) {
       # Get the i,j matrix positions of the regions that contain this subplot
       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-      
       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
                                       layout.pos.col = matchidx$col))
     }
