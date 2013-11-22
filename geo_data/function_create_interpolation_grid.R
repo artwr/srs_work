@@ -10,7 +10,7 @@
 #   expand.grid(EASTING=ea.v, NORTHING=no.v)
 # }
 
-create_interp_grid <- function(xd.min,xd.max,yd.min,yd.max,y.step.size,x.step.size) {
+createInterpGrid <- function(xd.min,xd.max,yd.min,yd.max,y.step.size,x.step.size) {
   # Compute the number of elements needed in the vector
   # to satisfy the step size. The ceiling function ensures that
   # the actual stepsize will be less than or equal to the one chosen 
