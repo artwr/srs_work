@@ -1,8 +1,9 @@
 require(ggplot2)
 require(scales)
+require(plyr)
 
 
-basins27<-readRDS("../basin_coords/basins27.rdata")
+basins27<-readRDS("../../geo_data/processed/basins27.rdata")
 names(basins27)<-c('EASTING','NORTHING','id')
 
 ## Necessary trick to be able to identofy each of the basins
@@ -16,7 +17,7 @@ basins27poly <- merge(basins27, bnames, by=c("id"))
 
 
 # iodine<-readRDS("../SRS_data/iodine.rdata")
-strontium<-readRDS("../SRS_data/strontium.rdata")
+strontium<-readRDS("../../srs_data/processed/strontium.rdata")
 # cesium137<-readRDS("../SRS_data/cesium137.rdata")
 # technetium<-readRDS("../SRS_data/technetium.rdata")
 

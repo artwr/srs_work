@@ -1,11 +1,11 @@
 #create ggplot of density effect
 require(ggplot2)
 
-nitrateFAW5<-readRDS("../FAW5/nitrateFAW5.rdata")
+nitrateFAW5<-readRDS("../../srs_data/processed/nitrateFAW5.rdata")
 
 #PNG format
 #png("nitrateFAW5_test.png", width=720, height=600)
-png("../FAW5/nitrateFAW5.png", width=720, height=960)
+png("../exploratory/nitrateFAW5.png", width=720, height=960)
 gg<-ggplot(data=nitrateFAW5,aes(x=nitratemgl))
 gg<-gg+geom_line(aes(y=depth.from.wt), colour="#000099",size=3)
 gg<-gg+scale_y_reverse()
@@ -22,7 +22,7 @@ print(gg)
 dev.off()
 
 
-png("../FAW5/nitrateFAW5_pts.png", width=720, height=960)
+png("../exploratory/nitrateFAW5_pts.png", width=720, height=960)
 gg2<-ggplot(data=nitrateFAW5,aes(x=nitratemgl))
 gg2<-gg2+geom_point(aes(y=depth.from.wt), colour="#000099", ,size=5)
 gg2<-gg2+scale_y_reverse()
