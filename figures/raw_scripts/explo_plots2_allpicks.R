@@ -7,7 +7,7 @@ require(geoR)
 ##
 TCCZ<-readRDS("../../geo_data/processed/TCCZ.rdata")
 
-scatterplot3d(TCCZ$UTM_E,y=TCCZ$UTM_N,z=TCCZ$TCCZ_top, type = "h",
+scatterplot3d(TCCZ$EASTING,y=TCCZ$NORTHING,z=TCCZ$TCCZ_top, type = "h",
               xlab = "UTM Easting", ylab = "UTM Northing",
               zlab = "Elevation TCCZ (ft)",
               main = "F-area Elevation Data", angle=50)

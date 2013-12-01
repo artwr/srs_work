@@ -5,7 +5,7 @@ require(scatterplot3d)
 require(geoR)
 
 ##
-TCCZe<-readRDS("TCCZ_o.rdata")
+TCCZe<-readRDS("../../geo_data/processed/TCCZ_wtoppick.rdata")
 summary(TCCZe)
 
 scatterplot3d(x=TCCZe$UTM_N,y=TCCZe$UTM_E,z=TCCZe$TCCZ_top, type = "h",

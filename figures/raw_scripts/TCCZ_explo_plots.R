@@ -1,17 +1,18 @@
 ##Exploratory plotting
-setwd("D:/work/Code/srs_work/TCCZ_krig/TCCZ")
+# setwd("D:/work/Code/srs_work/TCCZ_krig/TCCZ")
 rm(list=ls())
 require(scatterplot3d)
 require(geoR)
 require(akima)
+require(tripack)
 
 ##
-TCCZe<-readRDS("TCCZ_o.rdata")
+TCCZe<-readRDS("../../geo_data/processed/TCCZ_wtoppick.rdata")
 summary(TCCZe)
 
 hist(TCCZe$TCCZ_top, breaks = 20)
 
-scatterplot3d(x=TCCZe$UTM_N,y=TCCZe$UTM_E,z=TCCZe$TCCZ_top, type = "h",
+scatterplot3d(x=TCCZe$NORTHING,y=TCCZe$EASTING,z=TCCZe$TCCZ_top, type = "h",
               xlab = "UTM Easting", ylab = "UTM Northing",
               zlab = "Elevation TCCZ (ft)",
               main = "F-area Elevation Data", angle=80)
@@ -25,6 +26,7 @@ points(TCCZg, cex.min = 1, cex.max = 1, col = "gray")
 points(TCCZge, cex.min = 2, cex.max = 2, col = "gray")
 
 plot(TCCZge)
+plot(TCCZge, lowess = T)
 
 with(TCCZge, hist(data, main = "", xlab = "ground elevation"))
 
@@ -41,7 +43,7 @@ points(TCCZge, trend = "1st", pt.div = 2, abs = T, cex.max = 2.5)
 points(TCCZge, trend = "2nd", pt.div = 2, abs = T, cex.max = 2.5)
 #points(TCCZg, cex.min = 1, cex.max = 4)
 
-TCCZ.vm<-voronoi.mosaic(TCCZe$UTM_E,y=TCCZe$UTM_N,duplicate="error")
+TCCZ.vm<-voronoi.mosaic(TCCZe$EASTING,y=TCCZe$NORTHING,duplicate="error")
 plot.voronoi(TCCZ.vm)
 TCCZ.vp <- voronoi.polygons(TCCZ.vm)
 plot(TCCZ.vp)
