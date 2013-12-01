@@ -1,6 +1,6 @@
 #Plot the error on calculating the aquifer
 
-source('../inventory/aquifer_comp.R')
+source('../../analysis/raw_scripts/aquifer_comp.R')
 
 require(spatstat) 
 require(maptools)

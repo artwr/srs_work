@@ -3,10 +3,10 @@ require(ggplot2)
 
 # Import Data -------------------------------------------------------------
 
-source('../basin_coords/basin_poly.R')
+source('../../geo_data/create_basin_polygon_df.R')
 
 #Import picks for the TCCZ
-TCCZe<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
+TCCZe<-readRDS("../../geo_data/processed/TCCZ_wtoppick.rdata")
 
 
 # Define baseplot ---------------------------------------------------------
