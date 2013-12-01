@@ -1,14 +1,14 @@
 ##Exploratory plotting
-setwd("D:/SRS/data_SRS/TCCZ_krig/R_work")
+# setwd("D:/SRS/data_SRS/TCCZ_krig/R_work")
 rm(list=ls())
 
 require(scatterplot3d)
 require(geoR)
 ##
-TCCZ<-readRDS("TCCZ.rdata")
+TCCZ<-readRDS("../../geo_data/processed/TCCZ.rdata")
 
 scatterplot3d(TCCZ$UTM_E,y=TCCZ$UTM_N,z=TCCZ$TCCZ_top, type = "h",
-              xlab = "UTM Easting", ylab = "SRS Northing",
+              xlab = "UTM Easting", ylab = "UTM Northing",
               zlab = "Elevation TCCZ (ft)",
               main = "F-area Elevation Data", angle=50)
 
