@@ -3,11 +3,11 @@
 #################################
 #1.
 #load data
-#nitrate<-readRDS("../SRS_data/nitrate.rdata")
-nitrate<-readRDS("../SRS_data/nitrate.rdata")
-nitrateC<-readRDS("../SRS_data/nitrateC.rdata")
-nitrateavg<-readRDS("../SRS_data/nitrateavg.rdata")
-nitrateCavg<-readRDS("../SRS_data/nitrateCavg.rdata")
+#nitrate<-readRDS("../../srs_data/processed/nitrate.rdata")
+nitrate<-readRDS("../../srs_data/processed/nitrate.rdata")
+nitrateC<-readRDS("../../srs_data/processed/nitrateC.rdata")
+nitrateavg<-readRDS("../../srs_data/processed/nitrateavg.rdata")
+nitrateCavg<-readRDS("../../srs_data/processed/nitrateCavg.rdata")
 
 #Add log transform
 nitrate$logmean<-log(nitrate$mean)
@@ -137,17 +137,17 @@ write.csv(inventoryjaN.csv, file="inventoryja.csv")
 #5. Using loess and prediction.
 
 # Test Use of the loess model and linear models for TCCZ prediction
-pre3<-predict(TCCZ.loess1,newdata = testgrid1,se = TRUE)
-pre3b<-predict(TCCZ.loess1b,newdata = testgrid1,se = TRUE)
-pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE)
+pre3<-predict(TCCZ.loess1,newdata = interpolation.grid,se = TRUE)
+pre3b<-predict(TCCZ.loess1b,newdata = interpolation.grid,se = TRUE)
+pre3lm<-predict(TCCZ.lm,newdata = interpolation.grid,se = TRUE)
 
 wll.loess<-llply(wll2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1, span=0.75)})
-wl.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)})
+wl.pred<-llply(wll.loess, function(m) {predict(m,newdata=interpolation.grid,se=TRUE)})
 
 nitratel.loess<-llply(nitratel2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1,span=0.75)})
-nitrate.pred<-llply(nitratel.loess, function(m) {predict(m,newdata=testgrid1,se =TRUE)})
+nitrate.pred<-llply(nitratel.loess, function(m) {predict(m,newdata=interpolation.grid,se =TRUE)})
 
-inv5<-testgrid1
+inv5<-interpolation.grid
 inv5$TCCZfit<-as.vector(pre3$fit)
 inv5$TCCZfitb<-as.vector(pre3b$fit)
 inv5$TCCZfitlm<-as.vector(pre3lm$fit)
@@ -160,8 +160,8 @@ nbparam1<-6
 for (kk in 1:length(nitratel2)) {
   N.loess<-loess(mean~EASTING+NORTHING, data=nitratel2[[kk]],degree=1,span=0.5)
   logN.loess<-loess(logmean~EASTING+NORTHING, data=nitratel2[[kk]],degree=1,span=0.5)
-  predN<-predict(N.loess,newdata = testgrid1 ,se = TRUE)
-  predlogN<-predict(logN.loess,newdata = testgrid1 ,se = TRUE)
+  predN<-predict(N.loess,newdata = interpolation.grid ,se = TRUE)
+  predlogN<-predict(logN.loess,newdata = interpolation.grid ,se = TRUE)
   fullfit<-as.vector(predN$fit)
   fullfit[fullfit<0]<-NA
   #fullfit[fullfit<0]<-1
@@ -174,7 +174,7 @@ for (kk in 1:length(nitratel2)) {
   #inv5[nbparam1*(kk-1)+10]<-pdret$se.fit
   #names(inv5)[nbparam1*(kk-1)+10]<-paste0("seT",names(nitratel2)[kk])
   w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=0.5)
-  predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE)
+  predw<-predict(w.loess,newdata = interpolation.grid ,se = TRUE)
   inv5[nbparam1*(kk-1)+11]<-as.vector(predw$fit)
   names(inv5)[nbparam1*(kk-1)+11]<-paste0("w",names(wll2)[kk])
   height<-as.vector(predw$fit)-inv5$TCCZfitb
@@ -188,12 +188,12 @@ for (kk in 1:length(nitratel2)) {
 }
 
  nbparam1C<-4
-inv5C<-testgrid1
+inv5C<-interpolation.grid
 for (kk2 in 1:length(nitrateCl2)) {
   N.loess<-loess(mean~EASTING+NORTHING, data=nitrateCl2[[kk2]],degree=1,span=0.5)
   logN.loess<-loess(logmean~EASTING+NORTHING, data=nitrateCl2[[kk2]],degree=1,span=0.5)
-  predN<-predict(N.loess,newdata = testgrid1 ,se = TRUE)
-  predlogN<-predict(logN.loess,newdata = testgrid1 ,se = TRUE)
+  predN<-predict(N.loess,newdata = interpolation.grid ,se = TRUE)
+  predlogN<-predict(logN.loess,newdata = interpolation.grid ,se = TRUE)
   fullfit<-as.vector(predN$fit)
   #fullfit[fullfit<0]<-NA
   #fullfit[fullfit<0]<-1
@@ -312,7 +312,7 @@ inventoryN.final<-merge(inventoryjaN.csv, inventory5, by="MYEAR")
 # print(final.plot4)
 
 
-saveRDS(inventoryN.final,"inventoryfinalN_alt.rdata")
+saveRDS(inventoryN.final,"../processed_data/inventoryfinalN_alt.rdata")
 
 print(proc.time() - ptm1)
 

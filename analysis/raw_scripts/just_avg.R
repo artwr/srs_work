@@ -49,20 +49,20 @@ ptm1<-proc.time()
 #################################
 #1.
 #load data
-#tritium<-readRDS("../SRS_data/tritium.rdata")
-tritium<-readRDS("../SRS_data/tritiumf.rdata")
-tritiumC<-readRDS("../SRS_data/tritiumC.rdata")
-tritiumavg<-readRDS("../SRS_data/tritiumavg.rdata")
-tritiumCavg<-readRDS("../SRS_data/tritiumCavg.rdata")
-nitrate<-readRDS("../SRS_data/nitrate.rdata")
-nitrateC<-readRDS("../SRS_data/nitrateC.rdata")
-nitrateavg<-readRDS("../SRS_data/nitrateavg.rdata")
-nitrateCavg<-readRDS("../SRS_data/nitrateCavg.rdata")
-wl<-readRDS("../SRS_data/wl.rdata")
-TCCZe_all<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
-TCCZe<-TCCZe_all[!is.na(TCCZe_all$TCCZ_top),]
-rm(TCCZe_all)
-wlavg<-readRDS("../SRS_data/wlavg.rdata")
+tritium<-readRDS("../../srs_data/processed/tritium.rdata")
+# tritium<-readRDS("../../srs_data/processed/tritiumf.rdata")
+tritiumC<-readRDS("../../srs_data/processed/tritiumC.rdata")
+tritiumavg<-readRDS("../../srs_data/processed/tritiumavg.rdata")
+tritiumCavg<-readRDS("../../srs_data/processed/tritiumCavg.rdata")
+nitrate<-readRDS("../../srs_data/processed/nitrate.rdata")
+nitrateC<-readRDS("../../srs_data/processed/nitrateC.rdata")
+nitrateavg<-readRDS("../../srs_data/processed/nitrateavg.rdata")
+nitrateCavg<-readRDS("../../srs_data/processed/nitrateCavg.rdata")
+wl<-readRDS("../../srs_data/processed/wl.rdata")
+TCCZe<-readRDS("../../geo_data/processed/TCCZ_wtoppicks.rdata")
+# TCCZe<-TCCZe_all[!is.na(TCCZe_all$TCCZ_top),]
+# rm(TCCZe_all)
+wlavg<-readRDS("../../srs_data/processed/wlavg.rdata")
 #basin coords for plotting if needed
 #f3basin<-readRDS("../basin_coords/f3basin.rdata")
 #f3basin27<-readRDS("../basin_coords/f3basin27.rdata")
@@ -91,34 +91,7 @@ tritiumCl2<-tritiumCl[3:length(tritiumCl)]
 #2.
 #Define interpolation domain and compute area, define other parameters
 
-#Boundaries
-no.min<-3680930
-no.max<-3682110
-ea.min<-436175
-ea.max<-437155
-#number of breaks ~ 20 m apart
-ea.b<-1+(ea.max-ea.min)/20
-no.b<-1+(no.max-no.min)/20
-#Create the vectors
-ea.v<-seq(ea.min, ea.max, length = ea.b)
-no.v<-seq(no.min, no.max, length = no.b)
-#Create the expandgrid df for predictions
-testgrid1<-expand.grid(EASTING=ea.v, NORTHING=no.v)
-
-#Create polygon to compute area. Needs splancs lib for more complex polygons
-d.ea<-c(ea.min,ea.min,ea.max,ea.max,ea.min)
-d.no<-c(no.min,no.max,no.max,no.min,no.min)
-pp<-cbind(d.ea,d.no)
-#plot(pp, type="b")
-area.dom<-areapl(pp)
-
-#Define porosity value
-porosity.mean<-.3
-#porosity.sd<-.03
-
-# LAZ Aquifer C assumed thickness in m 
-# (corresponds to the screen interval for the C wells)
-Cth<-10*.3048
+source("./create_subsurface_parameters_vars.R")
 
 #########################################################
 #3. Do simple average calculations on the well positions only
@@ -236,17 +209,17 @@ write.csv(inventoryja.csv, file="inventoryja.csv")
 #5. Using loess and prediction.
 
 # Test Use of the loess model and linear models for TCCZ prediction
-pre3<-predict(TCCZ.loess1,newdata = testgrid1,se = TRUE)
-pre3b<-predict(TCCZ.loess1b,newdata = testgrid1,se = TRUE)
-pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE)
+pre3<-predict(TCCZ.loess1,newdata = interpolation.grid,se = TRUE)
+pre3b<-predict(TCCZ.loess1b,newdata = interpolation.grid,se = TRUE)
+pre3lm<-predict(TCCZ.lm,newdata = interpolation.grid,se = TRUE)
 
 wll.loess<-llply(wll2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1, span=0.75)})
-wl.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)})
+wl.pred<-llply(wll.loess, function(m) {predict(m,newdata=interpolation.grid,se=TRUE)})
 
 tritiuml.loess<-llply(tritiuml2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1,span=0.75)})
-tritium.pred<-llply(tritiuml.loess, function(m) {predict(m,newdata=testgrid1,se =TRUE)})
+tritium.pred<-llply(tritiuml.loess, function(m) {predict(m,newdata=interpolation.grid,se =TRUE)})
 
-inv5<-testgrid1
+inv5<-interpolation.grid
 inv5$TCCZfit<-as.vector(pre3$fit)
 inv5$TCCZfitb<-as.vector(pre3b$fit)
 inv5$TCCZfitlm<-as.vector(pre3lm$fit)
@@ -259,8 +232,8 @@ nbparam1<-6
 for (kk in 1:length(tritiuml2)) {
   t.loess<-loess(mean~EASTING+NORTHING, data=tritiuml2[[kk]],degree=1,span=0.5)
   logt.loess<-loess(logmean~EASTING+NORTHING, data=tritiuml2[[kk]],degree=1,span=0.5)
-  predt<-predict(t.loess,newdata = testgrid1 ,se = TRUE)
-  predlogt<-predict(logt.loess,newdata = testgrid1 ,se = TRUE)
+  predt<-predict(t.loess,newdata = interpolation.grid ,se = TRUE)
+  predlogt<-predict(logt.loess,newdata = interpolation.grid ,se = TRUE)
   fullfit<-as.vector(predt$fit)
   fullfit[fullfit<0]<-NA
   #fullfit[fullfit<0]<-1
@@ -273,7 +246,7 @@ for (kk in 1:length(tritiuml2)) {
   #inv5[nbparam1*(kk-1)+10]<-pdret$se.fit
   #names(inv5)[nbparam1*(kk-1)+10]<-paste0("seT",names(tritiuml2)[kk])
   w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=0.5)
-  predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE)
+  predw<-predict(w.loess,newdata = interpolation.grid ,se = TRUE)
   inv5[nbparam1*(kk-1)+11]<-as.vector(predw$fit)
   names(inv5)[nbparam1*(kk-1)+11]<-paste0("w",names(wll2)[kk])
   height<-as.vector(predw$fit)-inv5$TCCZfitb
@@ -287,12 +260,12 @@ for (kk in 1:length(tritiuml2)) {
 }
 
  nbparam1C<-4
-inv5C<-testgrid1
+inv5C<-interpolation.grid
 for (kk2 in 1:length(tritiumCl2)) {
   t.loess<-loess(mean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=0.5)
   logt.loess<-loess(logmean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=0.5)
-  predt<-predict(t.loess,newdata = testgrid1 ,se = TRUE)
-  predlogt<-predict(logt.loess,newdata = testgrid1 ,se = TRUE)
+  predt<-predict(t.loess,newdata = interpolation.grid ,se = TRUE)
+  predlogt<-predict(logt.loess,newdata = interpolation.grid ,se = TRUE)
   fullfit<-as.vector(predt$fit)
   #fullfit[fullfit<0]<-NA
   #fullfit[fullfit<0]<-1
@@ -471,7 +444,7 @@ print(proc.time() - ptm1)
 #TCCZ.lm<-lm(TCCZ_top~UTM_E+UTM_N,data=TCCZe,na.action=na.omit)
 #tritium.interp<-interp(tritium$EASTING, tritium$NORTHING, tritium$mean, xo=seq(ea.min, ea.max, length = ea.b), yo=seq(no.min, no.max, length = no.b), linear = TRUE, extrap=FALSE, duplicate = "mean")
 #wlavg.lm<-lm(mean~EASTING+NORTHING, data =wlavg)
-#prewllm<-predict(wlavg.lm,newdata = testgrid1,se = TRUE ,na.action = na.omit)
+#prewllm<-predict(wlavg.lm,newdata = interpolation.grid,se = TRUE ,na.action = na.omit)
 
 
 
@@ -503,13 +476,13 @@ print(proc.time() - ptm1)
 #   mirror.matrix(t(x))
 # }
 # # Debug Statements for interp output
-# tx<-matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE)
-# ty<-matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE)
+# tx<-matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE)
+# ty<-matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE)
 # tz<-wlavg.interp2$z
 # tzprime<-t(wlavg.interp2$z)
 # tz90<-rotate90.matrix(tz)
-#TCCZ.loess1.interp<-list(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
-#TCCZ.loess1b.interp<-list(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
+#TCCZ.loess1.interp<-list(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
+#TCCZ.loess1b.interp<-list(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
 
 
 
@@ -540,10 +513,10 @@ print(proc.time() - ptm1)
 # image.plot(tritiuml.interpext['1992'][[1]],asp = 1)
 # contour(wll.interpext['1988'][[1]][[1]],wll.interpext['1988'][[1]][[2]],wll.interpext['1988'][[1]][[3]])
 # contour(wll.interp['1988'][[1]][[1]],wll.interp['1988'][[1]][[2]],wll.interp['1988'][[1]][[3]])
-#image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=thickness['1996'][[1]][[3]])
+#image.plot(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=thickness['1996'][[1]][[3]])
 
 #Make into a dataframe for ggplot
-# thicknessdf<-testgrid1
+# thicknessdf<-interpolation.grid
 # for (jj in 1:length(thickness)) {
 #   thicknessdf[2+jj]<-as.vector(thickness[jj][[1]][[3]])
 #   names(thicknessdf)[2+jj]<-paste0("th",names(thickness)[jj])
@@ -555,17 +528,17 @@ print(proc.time() - ptm1)
 
 
 
-# image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
-# image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3b$fit,nrow=60, ncol=50, byrow=TRUE))
-# image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3lm$fit,nrow=60, ncol=50, byrow=TRUE))
+# image.plot(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
+# image.plot(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3b$fit,nrow=60, ncol=50, byrow=TRUE))
+# image.plot(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=matrix(pre3lm$fit,nrow=60, ncol=50, byrow=TRUE))
 # 
-# image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=rotate270.matrix(wlavg.interp$z)-matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
-# image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=rotate90.matrix(wlavg.interp$z)-matrix(pre3b$fit,nrow=60, ncol=50, byrow=TRUE))
-# image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=rotate90.matrix(wlavg.interp$z)-matrix(pre3lm$fit,nrow=60, ncol=50, byrow=TRUE))
+# image.plot(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=rotate270.matrix(wlavg.interp$z)-matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
+# image.plot(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=rotate90.matrix(wlavg.interp$z)-matrix(pre3b$fit,nrow=60, ncol=50, byrow=TRUE))
+# image.plot(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=rotate90.matrix(wlavg.interp$z)-matrix(pre3lm$fit,nrow=60, ncol=50, byrow=TRUE))
 # 
-# image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=wlavg.interp$z-matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
-# image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=wlavg.interp$z-matrix(pre3b$fit,nrow=60, ncol=50, byrow=TRUE))
-# image.plot(x=matrix(testgrid1$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(testgrid1$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=wlavg.interp$z-matrix(pre3lm$fit,nrow=60, ncol=50, byrow=TRUE))
+# image.plot(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=wlavg.interp$z-matrix(pre3$fit,nrow=60, ncol=50, byrow=TRUE))
+# image.plot(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=wlavg.interp$z-matrix(pre3b$fit,nrow=60, ncol=50, byrow=TRUE))
+# image.plot(x=matrix(interpolation.grid$EASTING,nrow=60, ncol=50, byrow=TRUE),y=matrix(interpolation.grid$NORTHING,nrow=60, ncol=50, byrow=TRUE),z=wlavg.interp$z-matrix(pre3lm$fit,nrow=60, ncol=50, byrow=TRUE))
 
 
 # image.plot(wlavg.interp)
@@ -582,15 +555,15 @@ print(proc.time() - ptm1)
 # 
 # t.loess<-loess(mean~EASTING+NORTHING, data=tritiuml2[['1996']],degree=1,span=0.5)
 # logt.loess<-loess(logmean~EASTING+NORTHING, data=tritiuml2[['1996']],degree=1,span=0.5)
-# predt<-predict(t.loess,newdata = testgrid1 ,se = TRUE)
-# predlogt<-predict(logt.loess,newdata = testgrid1 ,se = TRUE)
+# predt<-predict(t.loess,newdata = interpolation.grid ,se = TRUE)
+# predlogt<-predict(logt.loess,newdata = interpolation.grid ,se = TRUE)
 # T1996<-as.vector(predt$fit)
 # Tcl1996<-T1996
 # Tcl1996[Tcl1996<0]<-NA
 # LogT1996<-as.vector(predlogt$fit)
 # Tprime1996<-exp(LogT1996)
 # w.loess<-loess(mean~EASTING+NORTHING, data=wll2[['1996']],degree=1, span=0.5)
-# predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE)
+# predw<-predict(w.loess,newdata = interpolation.grid ,se = TRUE)
 # w1996<-as.vector(predw$fit)
 # h1996<-as.vector(predw$fit)-inv5$TCCZfitb
 # h1996[h1996<1]<-NA

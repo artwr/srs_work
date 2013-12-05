@@ -7,20 +7,21 @@ require(plyr)
 require(ggplot2)
 require(splancs)
 
-source('../inventory/functions.R')
+source('./functions.R')
 
 #ptm1<-proc.time()
 #Define rectangle used for interpolation.
 # This was select as the max min coordinates 
 # on tritium well network measurement
-source('../interpolation_domains/interpolation_domain.R')
+source('../../geo_data/create_interpolation_domain_df.R')
+
 
 # Compute the aquifer thickness on an average and per year basis
-source('../inventory/aquifer_comp.R')
+source('./aquifer_comp.R')
 
 # Compute the inventory for tritium
 ptm1<-proc.time()
-source('../inventory/tritium_comp.R')
+source('./tritium_comp.R')
 print(proc.time()-ptm1)
 
 # Compute the inventory for nitrate

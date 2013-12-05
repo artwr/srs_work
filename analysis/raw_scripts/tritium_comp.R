@@ -29,10 +29,10 @@ alphaloessconcl<-0.3
 # -81.69388086898707 33.28329777530127,
 # -81.69959850412471 33.25157883545753))'
 #
-tritium<-readRDS("../SRS_data/tritium.rdata")
-tritiumC<-readRDS("../SRS_data/tritiumC.rdata")
-tritiumavg<-readRDS("../SRS_data/tritiumavg.rdata")
-tritiumCavg<-readRDS("../SRS_data/tritiumCavg.rdata")
+tritium<-readRDS("../../srs_data/processed/tritium.rdata")
+tritiumC<-readRDS("../../srs_data/processed/tritiumC.rdata")
+tritiumavg<-readRDS("../../srs_data/processed/tritiumavg.rdata")
+tritiumCavg<-readRDS("../../srs_data/processed/tritiumCavg.rdata")
 
 #Add log transform
 tritium$logmean<-log(tritium$mean)
@@ -106,9 +106,9 @@ write.csv(inventoryja.csv, file="./data/inventoryja.csv")
 #5. Using loess and prediction.
 
 # tritiuml.loess<-llply(tritiuml2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1,span=alphaloessconc)})
-# tritium.pred<-llply(tritiuml.loess, function(m) {predict(m,newdata=testgrid1,se =TRUE)})
+# tritium.pred<-llply(tritiuml.loess, function(m) {predict(m,newdata=interpolation.grid,se =TRUE)})
 
-# inv5<-testgrid1
+# inv5<-interpolation.grid
 # inv5$TCCZfit<-as.vector(pre3$fit)
 # inv5$TCCZfitb<-as.vector(pre3b$fit)
 # inv5$TCCZfitlm<-as.vector(pre3lm$fit)
@@ -118,7 +118,7 @@ write.csv(inventoryja.csv, file="./data/inventoryja.csv")
 
 Tinventory<-thicknessUAZ
 thvn<-dim(thicknessUAZ)[2]
-dimpredgrid<-dim(testgrid1)
+dimpredgrid<-dim(interpolation.grid)
 nbnegtritiumvals<-vector(mode = "integer", length = length(tritiuml2));
 nbNAtritiumvals<-vector(mode = "integer", length = length(tritiuml2));
 
@@ -127,8 +127,8 @@ nbparamT1<-6
 for (kk in 1:length(tritiuml2)) {
   t.loess<-loess(mean~EASTING+NORTHING, data=tritiuml2[[kk]],degree=1,span=alphaloessconc)
   logt.loess<-loess(logmean~EASTING+NORTHING, data=tritiuml2[[kk]],degree=1,span=alphaloessconc)
-  predt<-predict(t.loess,newdata = testgrid1 ,se = TRUE)
-  predlogt<-predict(logt.loess,newdata = testgrid1 ,se = TRUE)
+  predt<-predict(t.loess,newdata = interpolation.grid ,se = TRUE)
+  predlogt<-predict(logt.loess,newdata = interpolation.grid ,se = TRUE)
   #The prediction is given as a matrix, convert to vector
   dimpredictions<-dim(predt$fit)
   fullfit<-as.vector(predt$fit)
@@ -167,8 +167,8 @@ TinventoryC<-thicknessLAZ
 for (kk2 in 1:length(tritiumCl2)) {
   tC.loess<-loess(mean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=alphaloessconc)
   logtC.loess<-loess(logmean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=alphaloessconc)
-  predtC<-predict(tC.loess,newdata = testgrid1 ,se = TRUE)
-  predlogtC<-predict(logtC.loess,newdata = testgrid1 ,se = TRUE)
+  predtC<-predict(tC.loess,newdata = interpolation.grid ,se = TRUE)
+  predlogtC<-predict(logtC.loess,newdata = interpolation.grid ,se = TRUE)
   fullfit<-as.vector(predtC$fit)
   nbnegtritiumCvals[kk2]<-sum(fullfit<0, na.rm=TRUE)
   fullfit[fullfit<0]<-NA

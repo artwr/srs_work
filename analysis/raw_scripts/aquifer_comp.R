@@ -16,12 +16,11 @@ require(plyr)
 
 
 #Import picks for the TCCZ
-TCCZe<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
-
+TCCZe<-readRDS("../../geo_data/processed/TCCZ_wtoppick.rdata")
 
 #Import the water level data
-wl<-readRDS("../SRS_data/wl.rdata")
-wlavg<-readRDS("../SRS_data/wlavg.rdata")
+wl<-readRDS("../../srs_data/processed/wl.rdata")
+wlavg<-readRDS("../../srs_data/processed/wlavg.rdata")
 
 #Split per measurement year
 wll<-split(wl,wl$MYEAR)
@@ -36,17 +35,9 @@ wll2<-wll[5:length(wll)]
 
 #########################################################
 #1.
-#Define interpolation domain and compute area, define other parameters
+#define other parameters
 
-# source('interpolation_domain.R')
-
-#Define porosity value
-porosity.mean<-.3
-#porosity.sd<-.03
-
-# LAZ Aquifer C assumed thickness in m 
-# (corresponds to the screen interval for the C wells)
-Cth<-10*.3048
+source("./create_subsurface_parameters_vars.R")
 
 #Alpha loess
 alphaloess1<-0.25
@@ -135,14 +126,14 @@ th.avg.peryearhlm<-ddply(thperyear.cleanhlm, c('MYEAR'), function(x) c(counthlm=
 ####################
 
 #Look at the representation of the error on the regularly spaced grid
-pre3<-predict(TCCZ.loess1,newdata = testgrid1,se = TRUE);
-pre3b<-predict(TCCZ.loess1b,newdata = testgrid1,se = TRUE);
-pre3lm<-predict(TCCZ.lm,newdata = testgrid1,se = TRUE, interval = "prediction",level = 0.95);
+pre3<-predict(TCCZ.loess1,newdata = interpolation.grid,se = TRUE);
+pre3b<-predict(TCCZ.loess1b,newdata = interpolation.grid,se = TRUE);
+pre3lm<-predict(TCCZ.lm,newdata = interpolation.grid,se = TRUE, interval = "prediction",level = 0.95);
 
 # wll.loess<-llply(wll2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1, span=alphaloesswl)});
-# wll.pred<-llply(wll.loess, function(m) {predict(m,newdata=testgrid1,se=TRUE)});
+# wll.pred<-llply(wll.loess, function(m) {predict(m,newdata=interpolation.grid,se=TRUE)});
 
-thicknessUAZ<-testgrid1;
+thicknessUAZ<-interpolation.grid;
 thicknessUAZ$TCCZfit<-as.vector(pre3$fit);
 thicknessUAZ$TCCZfitb<-as.vector(pre3b$fit);
 thicknessUAZ$TCCZfitlm<-as.vector(pre3lm$fit[,1]);
@@ -153,7 +144,7 @@ thicknessUAZ$TCCZsefitlm<-as.vector(pre3lm$se.fit);
 ov <- dim(thicknessUAZ)[2];
 nbparamUAZ<-4;
 
-# dimpredgrid<-dim(testgrid1)
+# dimpredgrid<-dim(interpolation.grid)
 
 nbnegthickvals<-vector(mode = "integer", length = length(wll2));
 nbNAthickvals<-vector(mode = "integer", length = length(wll2));
@@ -164,7 +155,7 @@ for (kk in 1:length(wll2)) {
   # Compute the locally weighted regression model
   w.loess<-loess(mean~EASTING+NORTHING, data=wll2[[kk]],degree=1, span=alphaloesswl);
   # Predict on the regular grid in the interpolation domain
-  predw<-predict(w.loess,newdata = testgrid1 ,se = TRUE);
+  predw<-predict(w.loess,newdata = interpolation.grid ,se = TRUE);
   # Store the fit
   thicknessUAZ[nbparamUAZ*(kk-1)+ov+1]<-as.vector(predw$fit);
   names(thicknessUAZ)[nbparamUAZ*(kk-1)+ov+1]<-paste0("wl",names(wll2)[kk]);
@@ -186,19 +177,19 @@ for (kk in 1:length(wll2)) {
   names(thicknessUAZ)[nbparamUAZ*(kk-1)+ov+4]<-paste0("se.e",names(wll2)[kk]);
 }
 
-testgrid1C<-testgrid1;
-thicknessLAZ<-testgrid1C;
+interpolation.gridC<-interpolation.grid;
+thicknessLAZ<-interpolation.gridC;
 thicknessLAZ$e.in.m<-Cth;
 
-rm(testgrid1C)
+rm(interpolation.gridC)
 
 thickness.regression.diagnostics<-as.data.frame(cbind(nbnegthickvals,nbNAthickvals))
 
 
 #Save the datasets
-saveRDS(thicknessUAZ, file = "./data/thicknessUAZ.rdata")
-saveRDS(thicknessLAZ, file = "./data/thicknessLAZ.rdata")
-saveRDS(thickness.regression.diagnostics, file = "./diagnostics/thickness.regression.diagnostics.rdata")
+saveRDS(thicknessUAZ, file = "../processed_data/thicknessUAZ.rdata")
+saveRDS(thicknessLAZ, file = "../processed_data/thicknessLAZ.rdata")
+saveRDS(thickness.regression.diagnostics, file = "../processed_data/diagnostics/thickness.regression.diagnostics.rdata")
 
 
 

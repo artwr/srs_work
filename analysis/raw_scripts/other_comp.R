@@ -15,17 +15,17 @@ alphaloessconcl<-0.3
 #1.
 #load data
 #Just the F wells
-#tritium<-readRDS("../SRS_data/tritium.rdata")
+#tritium<-readRDS("../../srs_data/processed/tritium.rdata")
 #Added HSB 143 D which provides a BC on the eastern site of the interpolation domain
-# tritium<-readRDS("../SRS_data/tritiumf.rdata")
-# tritiumC<-readRDS("../SRS_data/tritiumC.rdata")
-# tritiumavg<-readRDS("../SRS_data/tritiumavg.rdata")
-# tritiumCavg<-readRDS("../SRS_data/tritiumCavg.rdata")
+# tritium<-readRDS("../../srs_data/processed/tritiumf.rdata")
+# tritiumC<-readRDS("../../srs_data/processed/tritiumC.rdata")
+# tritiumavg<-readRDS("../../srs_data/processed/tritiumavg.rdata")
+# tritiumCavg<-readRDS("../../srs_data/processed/tritiumCavg.rdata")
 
-iodine<-readRDS("../SRS_data/iodine.rdata")
-strontium<-readRDS("../SRS_data/strontium.rdata")
-cesium137<-readRDS("../SRS_data/cesium137.rdata")
-technetium<-readRDS("../SRS_data/technetium.rdata")
+iodine<-readRDS("../../srs_data/processed/iodine.rdata")
+strontium<-readRDS("../../srs_data/processed/strontium.rdata")
+cesium137<-readRDS("../../srs_data/processed/cesium137.rdata")
+technetium<-readRDS("../../srs_data/processed/technetium.rdata")
 
 # #Add log transform
 # tritium$logmean<-log(tritium$mean)
@@ -116,9 +116,9 @@ names(thicknessUAZ)
 #5. Using loess and prediction.
 
 # tritiuml.loess<-llply(tritiuml2, function(zzl) {loess(mean~EASTING+NORTHING, data=zzl,degree=1,span=alphaloessconc)})
-# tritium.pred<-llply(tritiuml.loess, function(m) {predict(m,newdata=testgrid1,se =TRUE)})
+# tritium.pred<-llply(tritiuml.loess, function(m) {predict(m,newdata=interpolation.grid,se =TRUE)})
 
-# inv5<-testgrid1
+# inv5<-interpolation.grid
 # inv5$TCCZfit<-as.vector(pre3$fit)
 # inv5$TCCZfitb<-as.vector(pre3b$fit)
 # inv5$TCCZfitlm<-as.vector(pre3lm$fit)
@@ -137,7 +137,7 @@ names(thicknessUAZ)
 Iinventory<-thicknessUAZ
 Srinventory<-thicknessUAZ
 thvn<-dim(thicknessUAZ)[2]
-dimpredgrid<-dim(testgrid1)
+dimpredgrid<-dim(interpolation.grid)
 nbnegIvals<-vector(mode = "integer", length = length(iodinel2));
 nbNAIvals<-vector(mode = "integer", length = length(iodinel2));
 nbnegSrvals<-vector(mode = "integer", length = length(strontiuml2));
@@ -155,7 +155,7 @@ indexlagI<-ov+(minyearI-1988)*4
 
 for (kkI in 1:length(iodinel2)) {
   I.loess<-loess(mean~EASTING+NORTHING, data=iodinel2[[kkI]],degree=1,span=alphaloessconc)
-  predI<-predict(I.loess,newdata = testgrid1 ,se = TRUE)
+  predI<-predict(I.loess,newdata = interpolation.grid ,se = TRUE)
   #The prediction is given as a matrix, convert to vector
   dimpredictions<-dim(predI$fit)
   fullfit<-as.vector(predI$fit)
@@ -185,7 +185,7 @@ indexlagSr<-ov+(minyearSr-1988)*4
 
 for (kkSr in 1:length(strontiuml2)) {
   Sr.loess<-loess(mean~EASTING+NORTHING, data=strontiuml2[[kkSr]],degree=1,span=alphaloessconc)
-  predSr<-predict(Sr.loess,newdata = testgrid1 ,se = TRUE)
+  predSr<-predict(Sr.loess,newdata = interpolation.grid ,se = TRUE)
   dimpredictions<-dim(predSr$fit)
   fullfit<-as.vector(predSr$fit)
   #Remove negative values as we will just consider them NULL
@@ -225,7 +225,7 @@ indexlagCs<-ov+(minyearSr-1988)*4
 
 for (kkCs in 1:length(cesium137l2)) {
   Cs.loess<-loess(mean~EASTING+NORTHING, data=cesium137l2[[kkCs]],degree=1,span=alphaloessconc)
-  predCs<-predict(Cs.loess,newdata = testgrid1 ,se = TRUE)
+  predCs<-predict(Cs.loess,newdata = interpolation.grid ,se = TRUE)
   #The prediction is given as a matrix, convert to vector
   dimpredictions<-dim(predCs$fit)
   fullfit<-as.vector(predCs$fit)
@@ -273,8 +273,8 @@ print(Cspf1)
 # for (kk2 in 1:length(tritiumCl2)) {
 #   tC.loess<-loess(mean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=alphaloessconc)
 #   logtC.loess<-loess(logmean~EASTING+NORTHING, data=tritiumCl2[[kk2]],degree=1,span=alphaloessconc)
-#   predtC<-predict(tC.loess,newdata = testgrid1 ,se = TRUE)
-#   predlogtC<-predict(logtC.loess,newdata = testgrid1 ,se = TRUE)
+#   predtC<-predict(tC.loess,newdata = interpolation.grid ,se = TRUE)
+#   predlogtC<-predict(logtC.loess,newdata = interpolation.grid ,se = TRUE)
 #   fullfit<-as.vector(predtC$fit)
 #   nbnegtritiumCvals[kk2]<-sum(fullfit<0, na.rm=TRUE)
 #   fullfit[fullfit<0]<-NA
