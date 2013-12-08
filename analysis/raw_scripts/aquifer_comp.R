@@ -2,8 +2,6 @@
 #Source the file at the beginning of each analysis for a contaminant.
 
 #Load packages
-# require(fields)
-require(splancs)
 require(plyr)
 
 #Clean if necessary

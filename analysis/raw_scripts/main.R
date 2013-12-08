@@ -5,6 +5,7 @@
 
 require(plyr)
 require(ggplot2)
+require(scales)
 require(splancs)
 
 source('./functions.R')
@@ -14,6 +15,10 @@ source('./functions.R')
 # This was select as the max min coordinates 
 # on tritium well network measurement
 source('../../geo_data/create_interpolation_domain_df.R')
+
+# File containing parameters used for all computations like porosity
+# the aquifer thickness for the C wells
+source('./create_subsurface_parameters_vars.R')
 
 
 # Compute the aquifer thickness on an average and per year basis
@@ -33,7 +38,7 @@ print(proc.time()-ptm1)
 # Compute the inventory for cesium
 
 
-require(scales)
+
 
 
 print(proc.time()-ptm1)
