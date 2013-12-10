@@ -3,6 +3,7 @@ require(plyr)
 
 rm(list=ls())
 #read the data
+setwd("./srs_data/raw/")
 iodine.raw<-read.table("iodine4R.csv",sep="|",header = TRUE)
 iodineC.raw<-read.table("iodineC4R.csv",sep="|",header = TRUE)
 strontium.raw<-read.table("strontium4R.csv",sep="|",header = TRUE)
@@ -62,6 +63,7 @@ nitrateC.plyra<-ddply(nitrateC.clean, c('MYEAR'), function(x) c(count=nrow(x),me
 
 
 #Save as R datasets
+setwd("../processed/")
 saveRDS(nitrate.clean,file="nitratecleanall.rdata")
 saveRDS(nitrateC.clean,file="nitrateCcleanall.rdata")
 saveRDS(iodine.clean,file="iodinecleanall.rdata")
@@ -81,4 +83,5 @@ saveRDS(nitrateC.plyr1, file = "nitrateC.rdata")
 saveRDS(nitrate.plyra, file = "nitrateavg.rdata")
 saveRDS(nitrateC.plyra, file = "nitrateCavg.rdata")
 
+setwd("../..")
 

@@ -4,7 +4,7 @@ require(ggplot2)
 require(scales)
 require(reshape2)
 
-tritiumsource.raw<-read.csv("../source_term/tritiumsource.csv")
+tritiumsource.raw<-read.csv("./srs_data/raw/tritiumsource.csv")
 tritiumsource.raw<-tritiumsource.raw[!is.na(tritiumsource.raw$Year),]
 # tritiumsource.raw2<-read.csv("tritiumsource.csv")
 names(tritiumsource.raw)<-c("Year", "VolumeinL","H3input", "CumulH3input",
@@ -26,7 +26,7 @@ names(tritiumsource2)<-c("Year", "Input","Outflow", "Difference")
 
 
 tritiumsource.csv<-tritiumsource
-saveRDS(tritiumsource.csv,file="../source_term/tritiumsource.rdata")
+saveRDS(tritiumsource.csv,file="./srs_data/processed/tritiumsource.rdata")
 
 # tritiumsource.long<-melt(tritiumsource, id.vars=c("Year"), 
 #                          measure.vars=c("sourceterm","TritiuminFMB", "gwInventory","sourceterm2"),
@@ -50,8 +50,8 @@ tritiumsource2.long$col1[tritiumsource.long$Legend=='Difference']<-"orange"
 # tritiumsource$cumulinputH3<-cumsum(tritiumsource$H3input))
 # tritiumsource$cumulinputH3afterevap<-cumsum(tritiumsource$NetH3afterevap))
 # rightcolours<-c("brown","blue","orange")
-saveRDS(tritiumsource.long,file="../source_term/tritiumsourcelongformat.rdata")
-saveRDS(tritiumsource2.long,file="../source_term/tritiumsource2longformat.rdata")
+saveRDS(tritiumsource.long,file="./srs_data/processed/tritiumsourcelongformat.rdata")
+saveRDS(tritiumsource2.long,file="./srs_data/processed/tritiumsource2longformat.rdata")
 
 
 

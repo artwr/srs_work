@@ -5,7 +5,7 @@ require(plyr)
 
 rm(list=ls())
 #read the data
-
+setwd("./srs_data/raw/")
 # UAZ
 tritium.raw<-read.table("tritium4R.csv",sep="|",header = TRUE)
 #LAZ
@@ -55,6 +55,7 @@ tritiumC.plyra<-ddply(tritiumC.clean, c('MYEAR'), function(x) c(count=nrow(x),me
 
 
 #Save as R datasets
+setwd("../processed/")
 saveRDS(tritium.clean,file="tritiumcleanall.rdata")
 saveRDS(tritium.plyr1, file = "tritium.rdata")
 saveRDS(tritiumC.plyr1, file = "tritiumC.rdata")
@@ -63,7 +64,7 @@ saveRDS(tritiumC.plyra, file = "tritiumCavg.rdata")
 
 # saveRDS(tritium.FEX8, file = "tritiumFEX8.rdata")
 # saveRDS(tritiumC.FEX8, file = "tritiumCFEX8.rdata")
-
+setwd("../..")
 
 
 

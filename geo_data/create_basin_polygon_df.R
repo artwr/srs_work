@@ -2,15 +2,15 @@
 
 #Add basin 3 coordinates
 #UTM83
-# f3basin<-readRDS("processed/f3basin.rdata")
+# f3basin<-readRDS("./geo_data/processed/f3basin.rdata")
 #NAD27
-f3basin27<-readRDS("processed/f3basin27.rdata")
+f3basin27<-readRDS("./geo_data/processed/f3basin27.rdata")
 
 #All the basins in NAD83
-# basins<-readRDS("processed/basins.rdata")
+# basins<-readRDS("./geo_data/processed/basins.rdata")
 
 #All the basins in NAD27 which is the proj of my data
-basins27<-readRDS("processed/basins27.rdata")
+basins27<-readRDS("./geo_data/processed/basins27.rdata")
 
 # f3basinmap <- ggplot(f3basin, aes(x=EASTING, y=NORTHING)) +
 #   geom_polygon(fill="black", colour="black")
@@ -32,7 +32,7 @@ bnames <- data.frame(
 basins27$id<-rep(bnames$id, each = 5)
 #Creates a polygon ready for ggpot2
 basins27poly <- merge(basins27, bnames, by=c("id"))
-saveRDS(basins27poly,"processed/basins27poly.rdata")
+saveRDS(basins27poly,"./geo_data/processed/basins27poly.rdata")
 
 # ##############################
 # #Plot that identifies the basins with colours

@@ -14,11 +14,11 @@ require(plyr)
 
 
 #Import picks for the TCCZ
-TCCZe<-readRDS("../../geo_data/processed/TCCZ_wtoppick.rdata")
+TCCZe<-readRDS("./geo_data/processed/TCCZ_wtoppick.rdata")
 
 #Import the water level data
-wl<-readRDS("../../srs_data/processed/wl.rdata")
-wlavg<-readRDS("../../srs_data/processed/wlavg.rdata")
+wl<-readRDS("./srs_data/processed/wl.rdata")
+wlavg<-readRDS("./srs_data/processed/wlavg.rdata")
 
 #Split per measurement year
 wll<-split(wl,wl$MYEAR)
@@ -35,7 +35,7 @@ wll2<-wll[5:length(wll)]
 #1.
 #define other parameters
 
-source("./create_subsurface_parameters_vars.R")
+source("./analysis/raw_scripts/create_subsurface_parameters_vars.R")
 
 #Alpha loess
 alphaloess1<-0.25
@@ -185,9 +185,9 @@ thickness.regression.diagnostics<-as.data.frame(cbind(nbnegthickvals,nbNAthickva
 
 
 #Save the datasets
-saveRDS(thicknessUAZ, file = "../processed_data/thicknessUAZ.rdata")
-saveRDS(thicknessLAZ, file = "../processed_data/thicknessLAZ.rdata")
-saveRDS(thickness.regression.diagnostics, file = "../processed_data/diagnostics/thickness.regression.diagnostics.rdata")
+saveRDS(thicknessUAZ, file = "./analysis/processed_data/thicknessUAZ.rdata")
+saveRDS(thicknessLAZ, file = "./analysis/processed_data/thicknessLAZ.rdata")
+saveRDS(thickness.regression.diagnostics, file = "./analysis/processed_data/diagnostics/thickness.regression.diagnostics.rdata")
 
 
 

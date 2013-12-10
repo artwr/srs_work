@@ -21,10 +21,10 @@ alphaloessconcl<-0.3
 # -81.69388086898707 33.28329777530127,
 # -81.69959850412471 33.25157883545753))'
 #
-tritium<-readRDS("../../srs_data/processed/tritium.rdata")
-tritiumC<-readRDS("../../srs_data/processed/tritiumC.rdata")
-tritiumavg<-readRDS("../../srs_data/processed/tritiumavg.rdata")
-tritiumCavg<-readRDS("../../srs_data/processed/tritiumCavg.rdata")
+tritium<-readRDS("./srs_data/processed/tritium.rdata")
+tritiumC<-readRDS("./srs_data/processed/tritiumC.rdata")
+tritiumavg<-readRDS("./srs_data/processed/tritiumavg.rdata")
+tritiumCavg<-readRDS("./srs_data/processed/tritiumCavg.rdata")
 
 #Add log transform
 tritium$logmean<-log(tritium$mean)
@@ -77,11 +77,11 @@ inventoryja<-merge(inventoryja,inventoryCja,by="MYEAR")
 # rm(th.avg.peryearhlm)
 
 # Save R object
-saveRDS(inventoryja, file = "../processed_data/inventoryja.rdata")
+saveRDS(inventoryja, file = "./analysis/processed_data/inventoryja.rdata")
 
 # Save as csv
 inventoryja.csv<-inventoryja[,c("MYEAR","inventory1","inventory1b","inventory1lm","inventoryC")]
-write.csv(inventoryja.csv, file="../processed_data/inventoryja.csv")
+write.csv(inventoryja.csv, file="./analysis/processed_data/inventoryja.csv")
 
 ########################################
 #4. Do the calculation again, this time with interpolation on a regular grid.
@@ -187,10 +187,10 @@ for (kk2 in 1:length(tritiumCl2)) {
 tritium.regression.diagnostics<-as.data.frame(cbind(nbnegtritiumvals,nbNAtritiumvals))
 tritiumC.regression.diagnostics<-as.data.frame(cbind(nbnegtritiumCvals,nbNAtritiumCvals))
 
-saveRDS(Tinventory,"../processed_data/Tinventory.rdata")
-saveRDS(TinventoryC,"../processed_data/TinventoryC.rdata")
-saveRDS(tritium.regression.diagnostics, file = "../processed_data/diagnostics/tritium.regression.diagnostics.rdata")
-saveRDS(tritiumC.regression.diagnostics, file = "../processed_data/diagnostics/tritiumC.regression.diagnostics.rdata")
+saveRDS(Tinventory,"./analysis/processed_data/Tinventory.rdata")
+saveRDS(TinventoryC,"./analysis/processed_data/TinventoryC.rdata")
+saveRDS(tritium.regression.diagnostics, file = "./analysis/processed_data/diagnostics/tritium.regression.diagnostics.rdata")
+saveRDS(tritiumC.regression.diagnostics, file = "./analysis/processed_data/diagnostics/tritiumC.regression.diagnostics.rdata")
 
 
 
@@ -230,11 +230,11 @@ inventory5$tCD.sd<-inventory5$t.sd+inventory5$tC.se
 inventory5$tCD.dint<-inventory5$t.dint+inventory5$tC.dint
 inventory5$tCD.se<-inventory5$t.se+inventory5$tC.se
 
-saveRDS(inventory5,"../processed_data/inventoryloesswithuncertaintyfinal.rdata")
+saveRDS(inventory5,"./analysis/processed_data/inventoryloesswithuncertaintyfinal.rdata")
 
 Tinventory.final<-merge(inventoryja.csv, inventory5, by="MYEAR")
 
-saveRDS(Tinventory.final,"../processed_data/Tinventoryfinal.rdata")
+saveRDS(Tinventory.final,"./analysis/processed_data/Tinventoryfinal.rdata")
 
 rm(TCfl)
 rm(Tfl)

@@ -4,6 +4,7 @@ require(plyr)
 
 rm(list=ls())
 #read the data
+setwd("./srs_data/raw")
 wl.raw<-read.table("wl4R.csv",sep="|",header = TRUE)
 
 #Remove FEX8 because of the 2 screens.
@@ -19,5 +20,7 @@ wl.plyr1<-ddply(wl.clean, c('STATION_SEQ','STATION_ID','MYEAR','EASTING','NORTHI
 #average across years
 wl.plyra<-ddply(wl.clean, c('STATION_SEQ','STATION_ID','EASTING','NORTHING'), function(x) c(count=nrow(x),mean=mean(x$WATER_ELEV),median=median(x$WATER_ELEV),sd=sd(x$WATER_ELEV),mad=mad(x$WATER_ELEV),min=min(x$WATER_ELEV),max=max(x$WATER_ELEV)))
 
+setwd("../processed")
 saveRDS(wl.plyr1, file = "wl.rdata")
 saveRDS(wl.plyra, file = "wlavg.rdata")
+setwd("../..")

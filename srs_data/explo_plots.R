@@ -1,12 +1,12 @@
 ##Exploratory plotting
-setwd("D:/SRS/data_SRS/TCCZ_krig/R_work")
+#setwd("D:/SRS/data_SRS/TCCZ_krig/R_work")
 rm(list=ls())
 require(scatterplot3d)
 require(geoR)
 
 ##
-tritium<-readRDS("tritium.rdata")
-wl<-readRDS("wl.rdata")
+tritium<-readRDS("./srs_data/processed/tritium.rdata")
+wl<-readRDS("./srs_data/processed/wl.rdata")
 
 
 # scatterplot3d(TCCZe$UTM_N,y=TCCZe$UTM_E,z=TCCZe$TCCZ_top, type = "h",

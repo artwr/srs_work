@@ -3,7 +3,7 @@ require(plyr)
 
 rm(list=ls())
 #read the data
-corr.raw<-read.csv("../SRS_data/corr4R.csv")
+corr.raw<-read.csv("./srs_data/raw/corr4R.csv")
 
 head(corr.raw)
 
