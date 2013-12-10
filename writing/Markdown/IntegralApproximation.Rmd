@@ -31,3 +31,5 @@ There are several ways to deal with that final integral. One can look at the ava
 
 \( m_{tritium}\approx \bar{n} \sum_{i,j}\overline{C_z(x_i,y_j)}h(x_i,y_j)A_{ij} \\
    m_{tritium}\approx \bar{n} A_{tot} \frac{1}{n_in_j} \sum_{i,j}\overline{C_z(x_i,y_j)}h(x_i,y_j) \)
+   
+As one can see this is equivalent to computing a mean of the population and multiply this by the total area. This estimate could be obtained by Monte-Carlo Integration
