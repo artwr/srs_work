@@ -40,10 +40,6 @@ tritiuml2<-tritiuml[10:length(tritiuml)]
 tritiumCl2<-tritiumCl[3:length(tritiumCl)]
 # names(tritiuml2)
 
-
-
-
-
 #########################################################
 #2. Do simple average calculations on the well positions only
 # \int_D C h p dx dy = \int_D dx dy * \hat{C} * \hat{h} * porosity p

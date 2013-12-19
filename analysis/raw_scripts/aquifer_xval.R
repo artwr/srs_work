@@ -8,6 +8,7 @@
 #Import picks for the TCCZ
 TCCZe<-readRDS("./geo_data/processed/TCCZ_wtoppick.rdata")
 
+
 #Import the water level data
 wl<-readRDS("../SRS_data/wl.rdata")
 wlavg<-readRDS("../SRS_data/wlavg.rdata")
@@ -21,9 +22,9 @@ wll2 <- split(wl,wl$MYEAR)
 # wll<-split(wl,wl$MYEAR)
 # #Select 1988 and after
 # wll2<-wll[5:length(wll)]
-
 #
 XvalFitTCCZ <- data.frame( alphaspan = seq( .05, 1, .05))
+
 XvalFitTCCZ$SSEd1 <- rep(NA, nrow(XvalFitTCCZ))
 #Set up the predicted residual sum of squares
 XvalFitTCCZ$PRESSd1 <- rep(NA, nrow(XvalFitTCCZ))
@@ -33,6 +34,7 @@ XvalFitTCCZ$PRESSd2 <- rep(NA, nrow(XvalFitTCCZ))
 # XvalFitTCCZ$PRESSd3 <- rep(NA, nrow(XvalFitTCCZ))
 # XvalFitTCCZ$SSEd4 <- rep(NA, nrow(XvalFitTCCZ))
 # XvalFitTCCZ$PRESSd4 <- rep(NA, nrow(XvalFitTCCZ))
+
 
 for ( ii in 1:nrow(XvalFitTCCZ) ) {
   aspan <- XvalFitTCCZ$alphaspan[ii]
