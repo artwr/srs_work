@@ -20,10 +20,14 @@ TCCZe<-readRDS("./geo_data/processed/TCCZ_wtoppick.rdata")
 wl<-readRDS("./srs_data/processed/wl.rdata")
 wlavg<-readRDS("./srs_data/processed/wlavg.rdata")
 
+# Select 1988 and after :
+wlp1988 <- wl[wl$MYEAR > 1987,]
+wll2 <- split(wl,wl$MYEAR)
+
 #Split per measurement year
 wll<-split(wl,wl$MYEAR)
-#Select 1988 and after
-wll2<-wll[5:length(wll)]
+# Select 1988 and after
+# wll2<-wll[5:length(wll)]
 
 #basin coords for plotting if needed
 #f3basin<-readRDS("../basin_coords/f3basin.rdata")
@@ -43,8 +47,8 @@ alphaloess2<-0.4
 alphaloesswl<-0.25
 
 #Local polynomial fit (1st order) and linear model
-TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1, span= alphaloess1)
-TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1,span= alphaloess2)
+TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 3, span= alphaloess1)
+TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 3,span= alphaloess2)
 TCCZ.lm<-lm(TCCZ_top~EASTING+NORTHING,data=TCCZe)
 
 ####################

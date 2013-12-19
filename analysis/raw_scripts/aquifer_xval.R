@@ -6,57 +6,40 @@
 #################
 
 #Import picks for the TCCZ
-TCCZe_all<-readRDS("../TCCZ_krig/TCCZ/TCCZ_o.rdata")
-# Remove the points with no TCCZ pick. 
-TCCZe<-TCCZe_all[!is.na(TCCZe_all$TCCZ_top),]
-rm(TCCZe_all)
+TCCZe<-readRDS("./geo_data/processed/TCCZ_wtoppick.rdata")
 
 #Import the water level data
 wl<-readRDS("../SRS_data/wl.rdata")
 wlavg<-readRDS("../SRS_data/wlavg.rdata")
 
-#Split per measurement year
-wll<-split(wl,wl$MYEAR)
-#Select 1988 and after
-wll2<-wll[5:length(wll)]
+# Select 1988 and after :
+wlp1988 <- wl[wl$MYEAR > 1987,]
+wll2 <- split(wl,wl$MYEAR)
 
-#basin coords for plotting if needed
-#f3basin<-readRDS("../basin_coords/f3basin.rdata")
-#f3basin27<-readRDS("../basin_coords/f3basin27.rdata")
-
-#########################################################
-#1.
-#Define interpolation domain and compute area, define other parameters
-
-# source('interpolation_domain.R')
-
-#Define porosity value
-# porosity.mean<-.3
-#porosity.sd<-.03
-
-#Alpha loess
-# alphaloess1<-0.25
-# alphaloess2<-0.4
-# alphaloesswl<-0.25
+# 
+# #Split per measurement year
+# wll<-split(wl,wl$MYEAR)
+# #Select 1988 and after
+# wll2<-wll[5:length(wll)]
 
 #
-XvalFitTCCZ <- data.frame( alphaspan = seq( .15, 1, .05))
+XvalFitTCCZ <- data.frame( alphaspan = seq( .05, 1, .05))
 XvalFitTCCZ$SSEd1 <- rep(NA, nrow(XvalFitTCCZ))
 #Set up the predicted residual sum of squares
 XvalFitTCCZ$PRESSd1 <- rep(NA, nrow(XvalFitTCCZ))
 XvalFitTCCZ$SSEd2 <- rep(NA, nrow(XvalFitTCCZ))
 XvalFitTCCZ$PRESSd2 <- rep(NA, nrow(XvalFitTCCZ))
-XvalFitTCCZ$SSEd3 <- rep(NA, nrow(XvalFitTCCZ))
-XvalFitTCCZ$PRESSd3 <- rep(NA, nrow(XvalFitTCCZ))
-XvalFitTCCZ$SSEd4 <- rep(NA, nrow(XvalFitTCCZ))
-XvalFitTCCZ$PRESSd4 <- rep(NA, nrow(XvalFitTCCZ))
+# XvalFitTCCZ$SSEd3 <- rep(NA, nrow(XvalFitTCCZ))
+# XvalFitTCCZ$PRESSd3 <- rep(NA, nrow(XvalFitTCCZ))
+# XvalFitTCCZ$SSEd4 <- rep(NA, nrow(XvalFitTCCZ))
+# XvalFitTCCZ$PRESSd4 <- rep(NA, nrow(XvalFitTCCZ))
 
 for ( ii in 1:nrow(XvalFitTCCZ) ) {
   aspan <- XvalFitTCCZ$alphaspan[ii]
   fitd1 <- loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1, span= aspan)
   fitd2 <- loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 2, span= aspan)
-  fitd3 <- loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 3, span= aspan)
-  fitd4 <- loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 4, span= aspan)
+  # fitd3 <- loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 3, span= aspan)
+  # fitd4 <- loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 4, span= aspan)
   SSEd1 <- sum( ((TCCZe$TCCZ_top - predict(fitd1))[-c(1,nrow(TCCZe))]) ^ 2)
   SSEd2 <- sum( ((TCCZe$TCCZ_top - predict(fitd2))[-c(1,nrow(TCCZe))]) ^ 2)
   pressd1 <- 0

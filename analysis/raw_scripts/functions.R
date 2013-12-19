@@ -5,7 +5,6 @@ require(plyr)
 # for each year in the dataset
 minboundrect<-function(interpdataset) {ddply(interpdataset, c('MYEAR'), function(x) c(datacount=nrow(x),x.min=min(x$EASTING),x.max=max(x$EASTING),y.min=min(x$NORTHING),y.max=max(x$NORTHING)))}
 
-
 # Function to compute the cumulative input decay corrected
 # Using a vector containing the original inputs
 # and a constant containing the half-life in years
@@ -19,6 +18,11 @@ cumsumdecaycorrected<-function(yearlyvalues,halflife) {
   }
   return (MM %*% yearlyvalues)
 }
+
+# Function to return a list split on a 
+
+
+
 
 
 #basin coords for plotting if needed

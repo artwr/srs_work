@@ -28,9 +28,9 @@ tritiumCavg<-readRDS("./srs_data/processed/tritiumCavg.rdata")
 
 #Add log transform
 tritium$logmean<-log(tritium$mean)
-tritium$log10mean<-log10(tritium$mean)
+#tritium$log10mean<-log10(tritium$mean)
 tritiumC$logmean<-log(tritiumC$mean)
-tritiumC$log10mean<-log10(tritiumC$mean)
+#tritiumC$log10mean<-log10(tritiumC$mean)
 
 #Split per measurement year
 tritiuml<-split(tritium,tritium$MYEAR)
@@ -39,6 +39,9 @@ tritiumCl<-split(tritiumC,tritiumC$MYEAR)
 tritiuml2<-tritiuml[10:length(tritiuml)]
 tritiumCl2<-tritiumCl[3:length(tritiumCl)]
 # names(tritiuml2)
+
+
+
 
 
 #########################################################
@@ -115,6 +118,8 @@ nbnegtritiumvals<-vector(mode = "integer", length = length(tritiuml2));
 nbNAtritiumvals<-vector(mode = "integer", length = length(tritiuml2));
 
 nbparamT1<-6
+
+# Tinventory<-
 
 for (kk in 1:length(tritiuml2)) {
   t.loess<-loess(mean~EASTING+NORTHING, data=tritiuml2[[kk]],degree=1,span=alphaloessconc)
