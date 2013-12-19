@@ -22,9 +22,6 @@ cumsumdecaycorrected<-function(yearlyvalues,halflife) {
 # Function to return a list split on a 
 
 
-
-
-
 #basin coords for plotting if needed
 #f3basin<-readRDS("../basin_coords/f3basin.rdata")
 #f3basin27<-readRDS("../basin_coords/f3basin27.rdata")

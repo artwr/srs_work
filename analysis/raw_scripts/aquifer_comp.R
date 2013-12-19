@@ -47,8 +47,13 @@ alphaloess2<-0.4
 alphaloesswl<-0.25
 
 #Local polynomial fit (1st order) and linear model
+<<<<<<< HEAD
 TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 3, span= alphaloess1)
 TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 3,span= alphaloess2)
+=======
+TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1, span= alphaloess1)
+TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1,span= alphaloess2)
+>>>>>>> b85e55fe8ef14e97ac15dbc23f16ff49b1c4c306
 TCCZ.lm<-lm(TCCZ_top~EASTING+NORTHING,data=TCCZe)
 
 ####################
