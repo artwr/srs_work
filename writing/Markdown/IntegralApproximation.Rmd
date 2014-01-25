@@ -11,7 +11,7 @@ The mass of tritium present at the site (in units of activity i.e. Ci) can be co
 
 \( m_{tritium}=\int_D nCdV \) 
 
-Of course, in this integral the domain is not a regular polyhedron, and we do not know the integrand at every point :
+where n is the porosity and C is the activity concentration. The domain for this integral corresponds to the drainage area downgradient of the F-area seepage basins and the aquifers below. The domain is not a regular polyhedron, and we do not know the integrand at every point :
 
 \( m_{tritium}=\iiint_D n(x,y,z)C(x,y,z)dxdydz \)
 
