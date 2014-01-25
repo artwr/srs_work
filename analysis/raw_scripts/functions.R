@@ -1,4 +1,5 @@
 require(plyr)
+require(RColorBrewer)
 
 
 # Function to compute the minimum bounding rectangle 
@@ -19,6 +20,28 @@ cumsumdecaycorrected<-function(yearlyvalues,halflife) {
   return (MM %*% yearlyvalues)
 }
 
+# Create a diagnostics plot for the loess model with X,Y as regressors
+# Takes the model and the grid as input, prints
+# 1) plot value over domain
+# 2) plot standard error 
+
+spatialLoessDiagnostics<-function(loess.model, grid.df) {
+  loessprediction<-predict(loess.model, newdata = grid.df, se = TRUE)
+  plot.df<-grid.df
+  plot.df$fit<- as.vector(loessprediction$fit)
+  plot.df$se.fit<- as.vector(loessprediction$se.fit)
+  ggdiag <- ggplot(data = plot.df, mapping = aes(x=EASTING,y=NORTHING))
+  ggres <- ggdiag + geom_tile(aes(fill = fit)) + scale_fill_gradient(low = "white", high = "green")
+#   ggstderr <- ggdiag + geom_tile(aes(fill = se.fit)) + scale_fill_gradient(low = "white", high = "green")
+  print(ggres)
+#   print(ggstderr)
+}
+
+# define jet colormap
+# jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"))
+
+# use the jet colormap
+# scale_fill_gradientn(colour = jet.colors(7))
 # Function to return a list split on a 
 
 
