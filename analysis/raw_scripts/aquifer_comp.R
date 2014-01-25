@@ -22,7 +22,7 @@ wlavg<-readRDS("./srs_data/processed/wlavg.rdata")
 
 # Select 1988 and after :
 wlp1988 <- wl[wl$MYEAR > 1987,]
-wll2 <- split(wl,wl$MYEAR)
+wll2 <- split(wlp1988,wlp1988$MYEAR)
 
 #Split per measurement year
 wll<-split(wl,wl$MYEAR)
@@ -42,19 +42,14 @@ wll<-split(wl,wl$MYEAR)
 source("./analysis/raw_scripts/create_subsurface_parameters_vars.R")
 
 #Alpha loess
-alphaloess1<-0.25
-alphaloess2<-0.4
-alphaloesswl<-0.25
+alphaloess1 <- 0.25
+alphaloess2 <- 0.15
+alphaloesswl <- 0.25
 
-#Local polynomial fit (1st order) and linear model
-<<<<<<< HEAD
-TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 3, span= alphaloess1)
-TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 3,span= alphaloess2)
-=======
-TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1, span= alphaloess1)
-TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data=TCCZe,degree= 1,span= alphaloess2)
->>>>>>> b85e55fe8ef14e97ac15dbc23f16ff49b1c4c306
-TCCZ.lm<-lm(TCCZ_top~EASTING+NORTHING,data=TCCZe)
+#Local polynomial fit (2nd order) and linear model
+TCCZ.loess1 <- loess(TCCZ_top~EASTING+NORTHING, data = TCCZe, degree = 2, span = alphaloess1)
+TCCZ.loess1b <- loess(TCCZ_top~EASTING+NORTHING, data = TCCZe, degree = 2, span = alphaloess2)
+TCCZ.lm <- lm(TCCZ_top~EASTING+NORTHING , data=TCCZe)
 
 ####################
 # 2. Computation of thickness on the water level points for aggregate/average computation
