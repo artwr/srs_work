@@ -1,10 +1,14 @@
 #correlations_analysis
 
 # required libraries
-library(Hmisc)
-library(spatstat)
+require(Hmisc)
+require(spatstat)
+require(gclus)
+require(plyr)
+#require(dplyr)
 
-# rcorr(as.matrix(mtcars))
+# 
+source("analysis/raw_scripts/functions_correl.R")
 
 corr.clean <- readRDS(file = "srs_data/processed/corrclean.rdata")
 
@@ -17,12 +21,14 @@ cormatrixlist <- rcorr(as.matrix(datavals))
 cormatrix <- cormatrixlist$r
 numpairs <- cormatrixlist$n
 pvals <- cormatrixlist$P
-
+# Correlogram plot
 plot(im(cormatrix[nrow(cormatrix):1,]))
 
+
 numpairsmat1 <- numpairs
+diag(numpairsmat1) <- NA
 numpairsmat1[upper.tri(numpairsmat1)] <- NA
-pairnumdf <- as.data.frame(as.table(numpairsmat1))
+pairnumdf <- as.data.frame(as.table(numpairsmat1, useNA = "no"))
 names(pairnumdf) <- c("First.Variable", "Second.Variable", "n")
 head(pairnumdf[order(pairnumdf$n),], n = 20L)
 
@@ -46,26 +52,20 @@ varclusterpearson <- varclus(as.matrix(datavals) , similarity="pearson", na.acti
 
 plot(hclust(distance), main="Dissimilarity = 1 - Correlation", xlab="")
 
+mosthighlycorrelated(datavals, 20)
 
+correlationsdf(datavals)
 
-mosthighlycorrelated <- function(mydataframe, numtoreport)
-{
-  require(Hmisc)
-  # find the correlations
-  cormatrixlist <- rcorr(mydataframe)
-  cormatrix <- cormatrixlist$r
-  numpairs <- cormatrixlist$n
-  pvals <- cormatrixlist$P
-  # set the correlations on the diagonal or lower triangle to zero,
-  # so they will not be reported as the highest ones:
-  diag(cormatrix) <- 0
-  cormatrix[lower.tri(cormatrix)] <- 0
-  # flatten the matrix into a dataframe for easy sorting
-  fm <- as.data.frame(as.table(cormatrix))
-  fm <-
-  
-  # assign human-friendly names
-  names(fm) <- c("First.Variable", "Second.Variable","Correlation", "Number.of.pairs", "P.value")
-  # sort and print the top n correlations
-  head(fm[order(abs(fm$Correlation),decreasing=T),],n=numtoreport)
-}
+cormatrix1 <- cormatrix
+diag(cormatrix1) <- NA
+cormatrix1[lower.tri(cormatrix1)] <- NA
+cordf <-as.data.frame(as.table(cormatrix1, useNA = "always"))
+names(cordf) <- c("First.Variable", "Second.Variable","Correlation")
+head(cordf[!is.na(cordf$Correlation),])
+head(cordf[order(abs(cordf$Correlation),decreasing=T),], n = 20)
+
+head(as.vector(numpairs))
+
+cordfclean <- cordf[!is.na(cordf$Correlation),]
+is.numeric(cordfclean$Correlation)
+abs(cordfclean$Correlation)
