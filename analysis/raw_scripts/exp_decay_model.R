@@ -7,11 +7,11 @@ require(ggplot2)
 ptsize<-12
 
 
-inventory.final<-readRDS("../inventory/inventoryfinal.rdata")
-inventoryN.final<-readRDS("../inventory/inventoryfinalN.rdata")
+inventory.final<-readRDS("./analysis/processed_data/inventoryfinal.rdata")
+inventoryN.final<-readRDS("./analysis/processed_data/inventoryfinalN.rdata")
 names(inventoryN.final)[1]<-"Year"
 names(inventoryN.final)
-sourceterm<-readRDS("../source_term/tritiumsource.rdata")
+sourceterm<-readRDS("./srs_data/processed/tritiumsource.rdata")
 comparison<-merge(sourceterm,inventory.final,by.x = "Year", by.y = "MYEAR")
 comparison$inventory1bCD<-comparison$inventory1b+comparison$inventoryC
 
@@ -19,9 +19,9 @@ gwI.lm<-lm(log(gwInventory)~Year,data=comparison)
 inv1all.lm<-lm(log(inventory1bCD)~Year,data=comparison)
 inv1UAZ.lm<-lm(log(inventory1b)~Year,data=comparison)
 inv1LAZ.lm<-lm(log(inventoryC)~Year,data=comparison)
-inv1loessall.lm<-lm(log(tCD)~Year,data=comparison)
-inv1loessUAZ.lm<-lm(log(t)~Year,data=comparison)
-inv1loessLAZ.lm<-lm(log(tC)~Year,data=comparison)
+inv1loessall.lm<-lm(log(tCD.mean)~Year,data=comparison)
+inv1loessUAZ.lm<-lm(log(t.mean)~Year,data=comparison)
+inv1loessLAZ.lm<-lm(log(tC.mean)~Year,data=comparison)
 inv1loessNall.lm<-lm(log(NCD)~Year,data=inventoryN.final)
 inv1loessNUAZ.lm<-lm(log(N)~Year,data=inventoryN.final)
 inv1loessNLAZ.lm<-lm(log(NC)~Year,data=inventoryN.final)
@@ -45,8 +45,9 @@ inv1loessNLAZ.lm$coefficients[2]
 years<-data.frame(Year=seq(from=1988,to=2061,by=1))
 gwI.pred<-predict(gwI.lm, newdata=years, se.fit=TRUE, interval = "prediction")
 inv1.pred<-predict(inv1all.lm, newdata=years, se.fit=TRUE, interval = "prediction")
-inv1loess.pred<-predict(inv1loess.lm, newdata=years, se.fit=TRUE, interval = "prediction")
-
+inv1loess.pred<-predict(inv1loessall.lm, newdata=years, se.fit=TRUE, interval = "prediction")
+summary(gwI.pred)
+exp(gwI.pred$fit[,1])
 predictdf<-years
 predictdf$lip1<-gwI.pred$fit[,1]
 predictdf$lup1<-gwI.pred$fit[,2]
@@ -56,8 +57,8 @@ predictdf$up1<-exp(gwI.pred$fit[,2])
 predictdf$lo1<-exp(gwI.pred$fit[,3])
 # # predictdf$tmcl<-20
 # # + geom_line(aes(y=tmcl))
-ggplot(aes(x=Year, y=ip1), data = predictdf) + geom_smooth(aes(ymin=lo1,ymax=up1), stat="identity") + scale_y_log10() + geom_point(data=comparison)
-
+gg1 <- ggplot(aes(x=Year, y=ip1), data = predictdf) + geom_smooth(aes(ymin=lo1,ymax=up1), stat="identity") + scale_y_log10() + geom_point(aes(x=Year, y= gwInventory), data=comparison)
+print(gg1)
 # ggplot(data=predictf)
 
 
