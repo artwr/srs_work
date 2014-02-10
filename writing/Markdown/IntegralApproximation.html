@@ -8,7 +8,7 @@
 
 
 <!-- MathJax scripts -->
-<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 
 
@@ -16,8 +16,13 @@
 body, td {
    font-family: sans-serif;
    background-color: white;
-   font-size: 12px;
-   margin: 8px;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  line-height: 20px;
 }
 
 tt, code, pre {
@@ -52,19 +57,21 @@ a:visited {
    color: rgb(50%, 0%, 50%);
 }
 
-pre {	
-   margin-top: 0;
-   max-width: 95%;
-   border: 1px solid #ccc;
-   white-space: pre-wrap;
+pre, img {
+  max-width: 100%;
 }
 
 pre code {
    display: block; padding: 0.5em;
 }
 
-code.r, code.cpp {
-   background-color: #F8F8F8;
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
 }
 
 table, td, th {
@@ -156,7 +163,7 @@ Just for some tests
 
 <p>\( m_{tritium}=\int_D nCdV \) </p>
 
-<p>Of course, in this integral the domain is not a regular polyhedron, and we do not know the integrand at every point :</p>
+<p>where n is the porosity and C is the activity concentration. The domain for this integral corresponds to the drainage area downgradient of the F-area seepage basins and the aquifers below. The domain is not a regular polyhedron, and we do not know the integrand at every point :</p>
 
 <p>\( m_{tritium}=\iiint_D n(x,y,z)C(x,y,z)dxdydz \)</p>
 
