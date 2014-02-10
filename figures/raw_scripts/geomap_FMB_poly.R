@@ -1,14 +1,15 @@
 # Load the basins data for plotting and create the appropriate polygons
-
+require(ggplot2)
+require(scales)
 #Add coordinates of an outline of FMB
 #NAD27
-fmbpoly27<-readRDS("../basin_coords/fmbpoly27.rdata")
+fmbpoly27 <- readRDS("geo_data/processed/fmbpoly27.rdata")
 
 #All the basins in NAD83
 # basins<-readRDS("../basin_coords/basins.rdata")
 
 #All the basins in NAD27 which is the proj of my data
-source("../basin_coords/basin_poly.R")
+basins27poly <- readRDS("geo_data/processed/basins27poly.rdata")
 
 # #Plot with black basins and axis labels
 # 
