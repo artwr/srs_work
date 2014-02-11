@@ -40,12 +40,16 @@ resultsCDT$CDATE <- as.Date(resultsCDT$COLLECTION_DATE)
 resultsCDT$ADATE <- as.Date(resultsCDT$ANALYSIS_DATE)
 
 # Create ZDATE which will be the reference date for comparison between datapoints
+# and ZYEAR for yearly aggregation
 resultsDT$ZDATE <- resultsDT$CDATE
 resultsDT$ZDATE[is.na(resultsDT$ZDATE)] <- resultsDT$ADATE[is.na(resultsDT$ZDATE)]
+resultsDT$ZYEAR <- format(resultsDT$ZDATE,"%Y")
 resultsCDT$ZDATE <- resultsCDT$CDATE
-resultsCDT$ZDATE[is.na(resultsDT$ZDATE)] <- resultsCDT$ADATE[is.na(resultsDT$ZDATE)]
-
+resultsCDT$ZDATE[is.na(resultsCDT$ZDATE)] <- resultsCDT$ADATE[is.na(resultsCDT$ZDATE)]
+resultsCDT$ZYEAR <- format(resultsCDT$ZDATE,"%Y")
 saveRDS(as.data.frame(resultsDT), "./srs_data/processed/results.rdata")
 saveRDS(as.data.frame(resultsCDT), "./srs_data/processed/resultsC.rdata")
 
-rm(list = c("results.raw", "resultsC.raw", "resultsDT", "resultsCDT"))
+message("Date column types created, results saved as RDS object","\r",appendLF=TRUE)
+
+rm(list = c("results.raw", "resultsC.raw", "resultsDT", "resultsCDT", "resultsrawClasses"))

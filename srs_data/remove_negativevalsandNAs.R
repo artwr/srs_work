@@ -12,7 +12,7 @@ results.clean1<-results.clean1[!results.clean1$STATION_ID=='FEX  9',]
 
 # resultsC.clean1<-resultsC[!resultsC$STATION_ID=='FEX  8',]
 # resultsC.clean1<-resultsC.clean1[!resultsC.clean1$STATION_ID=='FEX  9',]
-
+resultsC.clean1<-resultsC
 #Store FEX8 separate;y for further inspection
 # tritium.FEX8<-tritium.raw[tritium.raw$STATION_ID=='FEX  8',]
 # tritiumC.FEX8<-tritiumC.raw[tritiumC.raw$STATION_ID=='FEX  8',]
@@ -39,4 +39,6 @@ rm(results.clean)
 rm(resultsC)
 rm(resultsC.clean1)
 rm(resultsC.clean)
+
+message("Negative and NA values removed")
 
