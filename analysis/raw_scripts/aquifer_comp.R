@@ -20,14 +20,16 @@ TCCZe<-readRDS("./geo_data/processed/TCCZ_wtoppick.rdata")
 wl<-readRDS("./srs_data/processed/wl.rdata")
 wlavg<-readRDS("./srs_data/processed/wlavg.rdata")
 
-# Select 1988 and after :
-wlp1988 <- wl[wl$MYEAR > 1987,]
-wll2 <- split(wlp1988,wlp1988$MYEAR)
-
 #Split per measurement year
-wll<-split(wl,wl$MYEAR)
+# wll<-split(wl,wl$MYEAR)
 # Select 1988 and after
 # wll2<-wll[5:length(wll)]
+
+# Faster
+# Select 1988 and after :
+wlp1988 <- wl[wl$MYEAR > 1987,]
+# Split into a list by year
+wll2 <- split(wlp1988,wlp1988$MYEAR)
 
 #basin coords for plotting if needed
 #f3basin<-readRDS("../basin_coords/f3basin.rdata")
@@ -47,9 +49,36 @@ alphaloess2 <- 0.15
 alphaloesswl <- 0.25
 
 #Local polynomial fit (2nd order) and linear model
-TCCZ.loess1 <- loess(TCCZ_top~EASTING+NORTHING, data = TCCZe, degree = 2, span = alphaloess1)
-TCCZ.loess1b <- loess(TCCZ_top~EASTING+NORTHING, data = TCCZe, degree = 2, span = alphaloess2)
+TCCZ.loess1 <- loess(TCCZ_top~EASTING+NORTHING, data = TCCZe, degree = 2, span = alphaloess1, normalize = FALSE, method = c("loess"), control = lcontrol)
+TCCZ.loess1b <- loess(TCCZ_top~EASTING+NORTHING, data = TCCZe, degree = 2, span = alphaloess2, normalize = FALSE, method = c("loess"), control = lcontrol)
 TCCZ.lm <- lm(TCCZ_top~EASTING+NORTHING , data=TCCZe)
+
+# Look at the error
+pre1<-predict(TCCZ.loess1, se = TRUE)
+pre1b<-predict(TCCZ.loess1b, se = TRUE)
+pre1lm<-predict(TCCZ.lm, se = TRUE, interval = "confidence",level = 0.95)
+
+#
+TCCZ.pred <- TCCZe
+#
+TCCZ.pred$TCCZ.fit<-pre1$fit
+TCCZ.pred$TCCZ.se.fit<-pre1$se.fit
+TCCZ.pred$TCCZ.fitb<-pre1b$fit
+TCCZ.pred$TCCZ.se.fitb<-pre1b$se.fit
+TCCZ.pred$TCCZ.fitlm<-pre1lm$fit[,1]
+TCCZ.pred$TCCZ.se.fitlm<-pre1lm$se.fit
+#Upper
+TCCZ.pred$TCCZ.fitlmupr<-pre1lm$fit[,2]
+#Lower Bound
+TCCZ.pred$TCCZ.fitlmlwr<-pre1lm$fit[,3]
+
+#Error
+TCCZ.pred$ehat.l1 <- TCCZ.pred$TCCZ_top - TCCZ.pred$TCCZ.fit
+TCCZ.pred$ehat.l1b <- TCCZ.pred$TCCZ_top - TCCZ.pred$TCCZ.fitb
+TCCZ.pred$ehat.lm <- TCCZ.pred$TCCZ_top - TCCZ.pred$TCCZ.fitlm
+
+saveRDS(TCCZ.pred,"./analysis/processed_data/TCCZloesspred.rdata")
+
 
 ####################
 # 2. Computation of thickness on the water level points for aggregate/average computation
@@ -78,7 +107,10 @@ thperyear$TCCZ.se.fitlm<-pre2lm$se.fit
 #Upper
 thperyear$TCCZ.fitlmupr<-pre2lm$fit[,2]
 #Lower Bound
-thperyear$TCCZ.fitlmlwr<-pre2lm$fit[,3]
+thperyear$TCCZ.fitlmlwr<-pre2lm$fit[,3] 
+
+thperyear[thperyear$TCCZ.fitb < 0, c("STATION_ID", "EASTING", "NORTHING", "mean", "TCCZ.fit", "TCCZ.fitb", "TCCZ.fitlm")]
+thperyear[thperyear$TCCZ.se.fitb > 200, ]
 
 #Compute the thickness in feet
 thperyear$h<-thperyear$mean-thperyear$TCCZ.fit
@@ -86,10 +118,10 @@ thperyear$hb<-thperyear$mean-thperyear$TCCZ.fitb
 thperyear$hlm<-thperyear$mean-thperyear$TCCZ.fitlm
 
 #Compute the standard error of that estimate
-thperyear$hse<-sqrt(max(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fit^2)
-thperyear$hbse<-sqrt(max(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fitb^2)
-thperyear$hlmse<-sqrt(max(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fitlm^2)
-
+thperyear$hse<-sqrt(pmax(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fit^2)
+thperyear$hbse<-sqrt(pmax(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fitb^2)
+thperyear$hlmse<-sqrt(pmax(1,thperyear$sd, na.rm =TRUE)^2+thperyear$TCCZ.se.fitlm^2)
+summary(thperyear)
 # #Diagnostics on the thickness
 # summary(thperyear$hlm)
 # #ggplot
@@ -136,6 +168,7 @@ pre3lm<-predict(TCCZ.lm,newdata = interpolation.grid,se = TRUE, interval = "pred
 # wll.pred<-llply(wll.loess, function(m) {predict(m,newdata=interpolation.grid,se=TRUE)});
 
 thicknessUAZ<-interpolation.grid;
+dim(pre3$fit)
 thicknessUAZ$TCCZfit<-as.vector(pre3$fit);
 thicknessUAZ$TCCZfitb<-as.vector(pre3b$fit);
 thicknessUAZ$TCCZfitlm<-as.vector(pre3lm$fit[,1]);

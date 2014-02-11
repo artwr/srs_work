@@ -2,36 +2,62 @@
 require(gstat)
 require(geoR)
 require(geoRglm)
+require(nlme)
+require(classInt)
+require(fields)
 #
-
-
-# for (i in 1:6) {
-#    fit <- lm(y ~ poly(x, degree = i))
-#    r[i] <- (summary(fit))$r.squared
-#    ar[i] <- (summary(fit))$adj.r.squared
-#    }
-lm3_3 <- lm(TCCZ_top ~ EASTING + I(EASTING^2) + I(EASTING^3) + NORTHING + I(NORTHING^2) + I(NORTHING^3), data = TCCZe)
-
-
 #Import picks for the TCCZ
 TCCZe<-readRDS("./geo_data/processed/TCCZ_wtoppick.rdata")
+picks<-readRDS("./geo_data/processed/picks_all.rdata")
 
 ## gstat
 ## data(meuse)
 hist(TCCZe$TCCZ_top, breaks = 25)
 TCCZe$TCCZ_top.l <- log10(TCCZe$TCCZ_top)
+TCCZe$logTCCZ_top <- log(TCCZe$TCCZ_top)
 TCCZe$g_elev_ft.l <- log10(TCCZe$g_elev_ft)
+TCCZe$logg_elev_ft <- log(TCCZe$g_elev_ft)
 hist(TCCZe$TCCZ_top.l, breaks = 25)
 
 #Bivariate
 with(TCCZe, plot(TCCZ_top ~ g_elev_ft))
 with(TCCZe, plot(TCCZ_top.l ~ g_elev_ft.l))
 
+# Convert to SpatialPointDataFrame
 TCCZsp <- TCCZe
 coordinates(TCCZsp) <- c("EASTING","NORTHING")
 
+# Plots
 plot(TCCZsp, asp = 1, pch = 1)
 plot(TCCZsp, asp = 1, cex = 4 * (TCCZsp$TCCZ_top - min(TCCZsp$TCCZ_top))/(max(TCCZsp$TCCZ_top) - min(TCCZsp$TCCZ_top)), pch = 1)
+
+# Estimating the trend model
+linmodel <- lm(TCCZ_top ~ EASTING + NORTHING, data = TCCZsp)
+# linmodel2 <- lm(TCCZ_top ~ EASTING + NORTHING + EASTING*NORTHING, data = TCCZsp)
+summary(linmodel)
+# summary(linmodel2)
+
+# Computing residuals
+fitted <- predict(linmodel, newdata = TCCZsp, na.action = na.pass)
+ehat <- TCCZsp$TCCZ_top - fitted
+
+range(TCCZsp$TCCZ_top)
+range(ehat)
+
+# Colors
+pal <- tim.colors(4)
+
+# plot fitted/predicted values from lm regression
+fj5 <- classIntervals(fitted, n = 5, style = "fisher")
+fj5col <- findColours(fj5, pal)
+plot(TCCZsp, col = fj5col, pch = 19)
+points(TCCZsp, pch=1)
+legend("topleft", fill = attr(fj5col, "palette"),
+       legend = names(attr(fj5col, "table")), bty = "n")
+
+TCCZ_pca <- prcomp(TCCZe[, ], scale =
+                           TRUE)
+#########
 
 v.l <- variogram(TCCZ_top.l ~ 1, TCCZsp, cutoff = 600, width = 30)
 print(plot(v.l,plot.numbers = T))
@@ -104,6 +130,12 @@ print(spplot(TCCZk1, "var1.pred", asp=1, col.regions=bpy.colors(64),  main="OK p
 # print(spplot(TCCZk1, "var1.var", asp=1, col.regions=bpy.colors(64),  main="OK prediction, TCCZ elevation variance(ft^2)"))
 print(spplot(TCCZk1, "var1.var", asp=1,  main="OK prediction, TCCZ elevation variance(ft^2)"))
 
+# for (i in 1:6) {
+#    fit <- lm(y ~ poly(x, degree = i))
+#    r[i] <- (summary(fit))$r.squared
+#    ar[i] <- (summary(fit))$adj.r.squared
+#    }
+lm3_3 <- lm(TCCZ_top ~ EASTING + I(EASTING^2) + I(EASTING^3) + NORTHING + I(NORTHING^2) + I(NORTHING^3), data = TCCZe)
 
 
 ## geoR
