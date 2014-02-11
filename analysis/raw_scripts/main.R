@@ -8,7 +8,23 @@ require(ggplot2)
 require(scales)
 require(splancs)
 
+
+# LOESS models options
+# Direct method allows extrapolation
+lcontrol<-loess.control(surface = c("direct"),
+                        statistics = c("exact"),
+                        trace.hat = c("exact"),
+                        cell = 0.2, iterations = 5)
+
+# Uses interpolation on a kd-tree, will give NA outside of the bounding box
+# lcontrol<-loess.control(surface = c("interpolate"),
+#                         statistics = c("exact"),
+#                         trace.hat = c("exact"),
+#                         cell = 0.2, iterations = 5)
+
+# Auxiliary Functions
 source('./analysis/raw_scripts/functions.R')
+source('./analysis/raw_scripts/functions_computation.R')
 
 #ptm1<-proc.time()
 #Define rectangle used for interpolation.

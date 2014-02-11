@@ -7,9 +7,9 @@ options(na.action="na.exclude")
 
 # Alpha.loess
 #
-alphaloessconch<-0.75
-alphaloessconc<-0.5
-alphaloessconcl<-0.3
+alphaloessconch<-0.5
+alphaloessconc<-0.3
+alphaloessconcl<-0.20
 
 #################################
 #1.
@@ -26,19 +26,23 @@ tritiumC<-readRDS("./srs_data/processed/tritiumC.rdata")
 tritiumavg<-readRDS("./srs_data/processed/tritiumavg.rdata")
 tritiumCavg<-readRDS("./srs_data/processed/tritiumCavg.rdata")
 
+# Select 1988 and after :
+tritiump1988 <- tritium[tritium$MYEAR > 1987,]
+tritiumCp1988 <- tritiumC[tritiumC$MYEAR > 1987,]
+
 #Add log transform
-tritium$logmean<-log(tritium$mean)
+tritiump1988$logmean<-log(tritiump1988$mean)
 #tritium$log10mean<-log10(tritium$mean)
-tritiumC$logmean<-log(tritiumC$mean)
+tritiumCp1988$logmean<-log(tritiumCp1988$mean)
 #tritiumC$log10mean<-log10(tritiumC$mean)
 
 #Split per measurement year
-tritiuml<-split(tritium,tritium$MYEAR)
-tritiumCl<-split(tritiumC,tritiumC$MYEAR)
-#Select 1988 and after
-tritiuml2<-tritiuml[10:length(tritiuml)]
-tritiumCl2<-tritiumCl[3:length(tritiumCl)]
-# names(tritiuml2)
+tritiuml2<-split(tritiump1988,tritiump1988$MYEAR)
+tritiumCl2<-split(tritiumCp1988,tritiumCp1988$MYEAR)
+# #Select 1988 and after
+# tritiuml2<-tritiuml[10:length(tritiuml)]
+# tritiumCl2<-tritiumCl[3:length(tritiumCl)]
+# # names(tritiuml2)
 
 #########################################################
 #2. Do simple average calculations on the well positions only

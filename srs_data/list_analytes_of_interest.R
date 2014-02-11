@@ -40,11 +40,16 @@ setnames(beforeafterC, c("ANALYTE_NAME", "COUNT.RAW", "COUNT.CLEAN", "COUNT.DIFF
 
 saveRDS(beforeafter,"srs_data/processed/results_counts.rdata")
 saveRDS(beforeafterC,"srs_data/processed/resultsC_counts.rdata")
+analyte_by_count <- results.counts2[order(-COUNT)]
+analyte_by_countC <- resultsC.counts2[order(-COUNT)]
 
 write.table(results.counts, file = "./srs_data/processed/analytecountsraw.txt", sep = "|", row.names = FALSE)
 write.table(resultsC.counts, file = "./srs_data/processed/analytecountsCraw.txt", sep = "|", row.names = FALSE)
 
 write.table(results.counts2, file = "./srs_data/processed/analytecountsclean.txt", sep = "|", row.names = FALSE)
 write.table(resultsC.counts2, file = "./srs_data/processed/analytecountsCclean.txt", sep = "|", row.names = FALSE)
+
+write.table(analyte_by_count, file = "./srs_data/processed/analyteordbycountsclean.txt", sep = "|", row.names = FALSE)
+write.table(analyte_by_countC, file = "./srs_data/processed/analyteordbycountsCclean.txt", sep = "|", row.names = FALSE)
 
 rm(list=ls())

@@ -3,26 +3,34 @@
 #################################
 #1.
 #load data
-#nitrate<-readRDS("../../srs_data/processed/nitrate.rdata")
-nitrate<-readRDS("../../srs_data/processed/nitrate.rdata")
-nitrateC<-readRDS("../../srs_data/processed/nitrateC.rdata")
-nitrateavg<-readRDS("../../srs_data/processed/nitrateavg.rdata")
-nitrateCavg<-readRDS("../../srs_data/processed/nitrateCavg.rdata")
+#nitrate<-readRDS("./srs_data/processed/nitrate.rdata")
+nitrate<-readRDS("./srs_data/processed/nitrate.rdata")
+nitrateC<-readRDS("./srs_data/processed/nitrateC.rdata")
+nitrateavg<-readRDS("./srs_data/processed/nitrateavg.rdata")
+nitrateCavg<-readRDS("./srs_data/processed/nitrateCavg.rdata")
+
+# Select 1988 and after :
+nitratep1988 <- nitrate[nitrate$MYEAR > 1987,]
+nitrateCp1988 <- nitrateC[nitrateC$MYEAR > 1987,]
 
 #Add log transform
-nitrate$logmean<-log(nitrate$mean)
-nitrate$log10mean<-log10(nitrate$mean)
-nitrateC$logmean<-log(nitrateC$mean)
-nitrateC$log10mean<-log10(nitrateC$mean)
-
+nitratep1988$logmean<-log(nitratep1988$mean)
+#nitrate$log10mean<-log10(nitrate$mean)
+nitrateCp1988$logmean<-log(nitrateCp1988$mean)
+#nitrateC$log10mean<-log10(nitrateC$mean)
 
 #Split per measurement year
-nitratel<-split(nitrate,nitrate$MYEAR)
-nitrateCl<-split(nitrateC,nitrateC$MYEAR)
-#Select 1988 and after
-nitratel2<-nitratel[4:length(nitratel)]
-nitrateCl2<-nitrateCl[4:length(nitrateCl)]
-# names(nitrateCl2)
+nitratel2<-split(nitratep1988,nitratep1988$MYEAR)
+nitrateCl2<-split(nitrateCp1988,nitrateCp1988$MYEAR)
+
+
+# #Split per measurement year
+# nitratel<-split(nitrate,nitrate$MYEAR)
+# nitrateCl<-split(nitrateC,nitrateC$MYEAR)
+# #Select 1988 and after
+# nitratel2<-nitratel[4:length(nitratel)]
+# nitrateCl2<-nitrateCl[4:length(nitrateCl)]
+# # names(nitrateCl2)
 #########################################################
 #2.
 #Define interpolation domain and compute area, define other parameters
@@ -37,45 +45,45 @@ nitrateCl2<-nitrateCl[4:length(nitrateCl)]
 #Thickness is computed using a linear prediction
 #
 #Local polynomial fit (1st order) and linear model
-TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING, data = TCCZe, degree = 1, span = 0.25)
-TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data = TCCZe, degree = 1,span = 0.4)
-TCCZ.lm<-lm(TCCZ_top~EASTING+NORTHING,data=TCCZe)
-
-#Create the aquifer thickness data frame
-thperyear<-wl
-#Add the TCCZ values predicted by the linear models
-# with standard error estimates
-pre2<-predict(TCCZ.loess1,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
-pre2b<-predict(TCCZ.loess1b,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
-pre2lm<-predict(TCCZ.lm,newdata = wl[,c("EASTING","NORTHING")],se = TRUE, interval = "prediction",level = 0.95)
-#
-thperyear$TCCZ.fit<-pre2$fit
-thperyear$TCCZ.se.fit<-pre2$se.fit
-thperyear$TCCZ.fitb<-pre2b$fit
-thperyear$TCCZ.se.fitb<-pre2b$se.fit
-thperyear$TCCZ.fitlm<-pre2lm$fit[,1]
-thperyear$TCCZ.se.fitlm<-pre2lm$se.fit
-thperyear$TCCZ.fitlmupr<-pre2lm$fit[,2]
-thperyear$TCCZ.fitlmlwr<-pre2lm$fit[,3]
-
-#Compute the thickness in feet
-thperyear$h<-thperyear$mean-thperyear$TCCZ.fit
-thperyear$hb<-thperyear$mean-thperyear$TCCZ.fitb
-thperyear$hlm<-thperyear$mean-thperyear$TCCZ.fitlm
-
-# Replace negative values with NA
-thperyear$h[thperyear$h<=0]<-NA
-thperyear$hb[thperyear$hb<=0]<-NA
-thperyear$hlm[thperyear$hlm<=0]<-NA
-#Remove NAs
-thperyear.cleanh<-thperyear[!is.na(thperyear$h),]
-thperyear.cleanhb<-thperyear[!is.na(thperyear$hb),]
-thperyear.cleanhlm<-thperyear[!is.na(thperyear$hlm),]
-
-#Compute the avg per year
-th.avg.peryearh<-ddply(thperyear.cleanh, c('MYEAR'), function(x) c(counth=nrow(x),h.mean=mean(x$h),h.median=median(x$h),h.sd=sd(x$h),h.mad=mad(x$h),h.min=min(x$h),h.max=max(x$h)))
-th.avg.peryearhb<-ddply(thperyear.cleanhb, c('MYEAR'), function(x) c(counthb=nrow(x),hb.mean=mean(x$hb),hb.median=median(x$hb),hb.sd=sd(x$hb),hb.mad=mad(x$hb),hb.min=min(x$hb),hb.max=max(x$hb)))
-th.avg.peryearhlm<-ddply(thperyear.cleanhlm, c('MYEAR'), function(x) c(counthlm=nrow(x),hlm.mean=mean(x$hlm),hlm.median=median(x$hlm),hlm.sd=sd(x$hlm),hlm.mad=mad(x$hlm),hlm.min=min(x$hlm),hlm.max=max(x$hlm)))
+# TCCZ.loess1<-loess(TCCZ_top~EASTING+NORTHING, data = TCCZe, degree = 1, span = 0.25)
+# TCCZ.loess1b<-loess(TCCZ_top~EASTING+NORTHING,data = TCCZe, degree = 1,span = 0.4)
+# TCCZ.lm<-lm(TCCZ_top~EASTING+NORTHING,data=TCCZe)
+# 
+# #Create the aquifer thickness data frame
+# thperyear<-wl
+# #Add the TCCZ values predicted by the linear models
+# # with standard error estimates
+# pre2<-predict(TCCZ.loess1,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
+# pre2b<-predict(TCCZ.loess1b,newdata = wl[,c("EASTING","NORTHING")],se = TRUE)
+# pre2lm<-predict(TCCZ.lm,newdata = wl[,c("EASTING","NORTHING")],se = TRUE, interval = "prediction",level = 0.95)
+# #
+# thperyear$TCCZ.fit<-pre2$fit
+# thperyear$TCCZ.se.fit<-pre2$se.fit
+# thperyear$TCCZ.fitb<-pre2b$fit
+# thperyear$TCCZ.se.fitb<-pre2b$se.fit
+# thperyear$TCCZ.fitlm<-pre2lm$fit[,1]
+# thperyear$TCCZ.se.fitlm<-pre2lm$se.fit
+# thperyear$TCCZ.fitlmupr<-pre2lm$fit[,2]
+# thperyear$TCCZ.fitlmlwr<-pre2lm$fit[,3]
+# 
+# #Compute the thickness in feet
+# thperyear$h<-thperyear$mean-thperyear$TCCZ.fit
+# thperyear$hb<-thperyear$mean-thperyear$TCCZ.fitb
+# thperyear$hlm<-thperyear$mean-thperyear$TCCZ.fitlm
+# 
+# # Replace negative values with NA
+# thperyear$h[thperyear$h<=0]<-NA
+# thperyear$hb[thperyear$hb<=0]<-NA
+# thperyear$hlm[thperyear$hlm<=0]<-NA
+# #Remove NAs
+# thperyear.cleanh<-thperyear[!is.na(thperyear$h),]
+# thperyear.cleanhb<-thperyear[!is.na(thperyear$hb),]
+# thperyear.cleanhlm<-thperyear[!is.na(thperyear$hlm),]
+# 
+# #Compute the avg per year
+# th.avg.peryearh<-ddply(thperyear.cleanh, c('MYEAR'), function(x) c(counth=nrow(x),h.mean=mean(x$h),h.median=median(x$h),h.sd=sd(x$h),h.mad=mad(x$h),h.min=min(x$h),h.max=max(x$h)))
+# th.avg.peryearhb<-ddply(thperyear.cleanhb, c('MYEAR'), function(x) c(counthb=nrow(x),hb.mean=mean(x$hb),hb.median=median(x$hb),hb.sd=sd(x$hb),hb.mad=mad(x$hb),hb.min=min(x$hb),hb.max=max(x$hb)))
+# th.avg.peryearhlm<-ddply(thperyear.cleanhlm, c('MYEAR'), function(x) c(counthlm=nrow(x),hlm.mean=mean(x$hlm),hlm.median=median(x$hlm),hlm.sd=sd(x$hlm),hlm.mad=mad(x$hlm),hlm.min=min(x$hlm),hlm.max=max(x$hlm)))
 
 #Create inventory df
 inventoryja<-merge(nitrateavg[nitrateavg$MYEAR>=1984,],th.avg.peryearh,by="MYEAR")
@@ -91,22 +99,24 @@ inventoryja$inventory1b<-area.dom*porosity.mean*inventoryja$hb.mean*inventoryja$
 inventoryja$inventory1lm<-area.dom*porosity.mean*inventoryja$hlm.mean*inventoryja$mean*.3048*1e-6
 inventoryja<-merge(inventoryja,inventoryCja,by="MYEAR")
 
-rm(thperyear)
-rm(thperyear.cleanh)
-rm(thperyear.cleanhb)
-rm(thperyear.cleanhlm)
-rm(th.avg.peryearh)
-rm(th.avg.peryearhb)
-rm(th.avg.peryearhlm)
+# rm(thperyear)
+# rm(thperyear.cleanh)
+# rm(thperyear.cleanhb)
+# rm(thperyear.cleanhlm)
+# rm(th.avg.peryearh)
+# rm(th.avg.peryearhb)
+# rm(th.avg.peryearhlm)
 
 #Draft ggplot for the inventory
 #qplot(MYEAR, inventory, data=inventoryja)
 ja.plot<-ggplot(data=inventoryja, aes(x=MYEAR))
+ja.plot<- ja.plot + theme_bw()
 ja.plot<- ja.plot +geom_line(aes(y=inventory1), colour='blue')
 ja.plot<- ja.plot +geom_line(aes(y=inventory1b), colour='red')
 ja.plot<- ja.plot +geom_line(aes(y=inventory1lm), colour='green')
 ja.plot<- ja.plot +geom_line(aes(y=inventoryC), colour='violet')
 ja.plot<-ja.plot+labs(title="Nitrate Inventory")+xlab("Year")+ylab("nitrate (kg)")
+ja.plot <- ja.plot + scale_colour_manual("", breaks = c("UAZ LOESS .5", "UAZ LOESS .3", "UAZ LinMod", "LAZ"),values=c("red","green","blue","violet")) + guides(guide = "legend")
 print(ja.plot)
 
 # 
@@ -117,10 +127,10 @@ print(ja.plot)
 # ja.plotlog2<- ja.plot + coord_trans(y="log2")
 # print(ja.plotlog2)
 
-saveRDS(inventoryja, file = "inventoryja.rdata")
+saveRDS(inventoryja, file = "./analysis/processed_data/inventoryNja.rdata")
 
 inventoryjaN.csv<-inventoryja[,c("MYEAR","inventory1","inventory1b","inventory1lm","inventoryC")]
-write.csv(inventoryjaN.csv, file="inventoryja.csv")
+write.csv(inventoryjaN.csv, file="./analysis/processed_data/inventoryNja.csv")
 
 ########################################
 #4. Do the calculation again, this time with interpolation on a regular grid.
@@ -150,7 +160,7 @@ nitrate.pred<-llply(nitratel.loess, function(m) {predict(m,newdata=interpolation
 inv5<-interpolation.grid
 inv5$TCCZfit<-as.vector(pre3$fit)
 inv5$TCCZfitb<-as.vector(pre3b$fit)
-inv5$TCCZfitlm<-as.vector(pre3lm$fit)
+inv5$TCCZfitlm<-as.vector(pre3lm$fit[,1])
 inv5$TCCZsefit<-as.vector(pre3$se.fit)
 inv5$TCCZsefitb<-as.vector(pre3b$se.fit)
 inv5$TCCZsefitlm<-as.vector(pre3lm$se.fit)
@@ -243,28 +253,28 @@ for (kk2 in 1:length(nitrateCl2)) {
 
 #qplot(x=h1994,y=T1994,data=inv5)
 
-inventory5<-data.frame(MYEAR=seq(1988,2011,length=24))
+inventory5N<-data.frame(MYEAR=seq(1988,2011,length=24))
 for (jj2 in 1:length(inventory5$MYEAR)) {
-  inventory5$meanch[jj2]<-mean(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
-  inventory5$medianch[jj2]<-median(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
-  inventory5$sdch[jj2]<-sd(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
+  inventory5N$meanch[jj2]<-mean(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
+  inventory5N$medianch[jj2]<-median(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
+  inventory5N$sdch[jj2]<-sd(inv5[[nbparam1*(jj2-1)+13]], na.rm=TRUE)
 #   print("invOK")
-  inventory5$meanchfl[jj2]<-mean(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
-  inventory5$medianchfl[jj2]<-median(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
-  inventory5$sdchfl[jj2]<-sd(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
-  inventory5$meanchC[jj2]<-mean(inv5C[[nbparam1C*(jj2-1)+5]], na.rm=TRUE)
+  inventory5N$meanchfl[jj2]<-mean(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
+  inventory5N$medianchfl[jj2]<-median(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
+  inventory5N$sdchfl[jj2]<-sd(inv5[[nbparam1*(jj2-1)+14]], na.rm=TRUE)
+  inventory5N$meanchC[jj2]<-mean(inv5C[[nbparam1C*(jj2-1)+5]], na.rm=TRUE)
 #   print("Cok")
 #   print(jj2)
 }
-inventory5$N<-area.dom*porosity.mean*inventory5$meanch*1e-6*.3048
-inventory5$Nmed<-area.dom*porosity.mean*inventory5$medianch*1e-6*.3048
-inventory5$Nfl<-area.dom*porosity.mean*inventory5$meanchfl*1e-6*.3048
-inventory5$Nmedfl<-area.dom*porosity.mean*inventory5$medianchfl*1e-6*.3048
+inventory5N$N<-area.dom*porosity.mean*inventory5$meanch*1e-6*.3048
+inventory5N$Nmed<-area.dom*porosity.mean*inventory5$medianch*1e-6*.3048
+inventory5N$Nfl<-area.dom*porosity.mean*inventory5$meanchfl*1e-6*.3048
+inventory5N$Nmedfl<-area.dom*porosity.mean*inventory5$medianchfl*1e-6*.3048
 # inventory5$NC<-area.dom*porosity.mean*inventory5$meanchC*1e-12
-inventory5$NC<-area.dom*porosity.mean*inventory5$meanchC*1e-6
-inventory5$NCD<-inventory5$N+inventory5$NC
+inventory5N$NC<-area.dom*porosity.mean*inventory5$meanchC*1e-6
+inventory5N$NCD<-inventory5$N+inventory5$NC
 
-inventoryN.final<-merge(inventoryjaN.csv, inventory5, by="MYEAR")
+inventoryN.final<-merge(inventoryjaN.csv, inventory5N, by="MYEAR")
 
 # pdf(file="%GDRIVE%\test\testinv.pdf",paper="letter")
 # final.plot<-ggplot(data=inventory.final, aes(x=MYEAR))
@@ -312,7 +322,7 @@ inventoryN.final<-merge(inventoryjaN.csv, inventory5, by="MYEAR")
 # print(final.plot4)
 
 
-saveRDS(inventoryN.final,"../processed_data/inventoryfinalN_alt.rdata")
+saveRDS(inventoryN.final,"./analysis/processed_data/inventoryfinalN_alt.rdata")
 
 print(proc.time() - ptm1)
 
