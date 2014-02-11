@@ -1,5 +1,6 @@
 require(plyr)
 require(RColorBrewer)
+require(ggplot2)
 
 
 # Function to compute the minimum bounding rectangle 
@@ -26,6 +27,7 @@ cumsumdecaycorrected<-function(yearlyvalues,halflife) {
 # 2) plot standard error 
 
 spatialLoessDiagnostics<-function(loess.model, grid.df) {
+  require(ggplot2)
   loessprediction<-predict(loess.model, newdata = grid.df, se = TRUE)
   plot.df<-grid.df
   plot.df$fit<- as.vector(loessprediction$fit)
@@ -36,6 +38,14 @@ spatialLoessDiagnostics<-function(loess.model, grid.df) {
   print(ggres)
 #   print(ggstderr)
 }
+
+spatialLoessPrediction<-function(loess.model, grid.df) {
+  require(ggplot2)
+  loessprediction<-predict(loess.model, newdata = grid.df, se = TRUE)
+  list(fit = as.vector(loessprediction$fit), se.fit = as.vector(loessprediction$se.fit))
+}
+
+
 
 # define jet colormap
 # jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"))
