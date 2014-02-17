@@ -35,13 +35,20 @@ length(unique(results$RESULT_SEQ))
 analyte_units <- analyte_units[order(analyte_units$ANALYTE_NAME),]
 # write.table(analyte_units$ANALYTE_NAME, file = "./srs_data/processed/analytenames.txt", sep = "|", row.names = FALSE)
 
+
+varofinterest <- c("TRITIUM", "NONVOLATILE BETA", "GROSS ALPHA", "NITRATE NITRITE AS NITROGEN", "SPECIFIC CONDUCTANCE", "IODINE 129", "URANIUM 235", "URANIUM 238", "CESIUM 137", "TECHNETIUM 99", "STRONTIUM 90", "TOTAL ACTIVITY", "PH")
+
+
+resultssub <- subset(results, (ANALYTE_NAME %in% varofinterest))
+resultsCsub <- resultsC[(resultsC$ANALYTE_NAME %in% varofinterest), ]
 # Use a subset of the columns to simply the cross tabulation/casting
 
-names(results[, c(1, 27)])
-results.molten <- results[ , c(1, 5:8, 10, 13)]
+names(resultssub)
+names(results[, c(1, 20, 27, 14, 15)])
+results.molten <- results[, c(1, 20, 27, 14, 15)]
 names(results.molten)
 # 
-dcast(results.molten, STATION_SEQ + ZDATE + SAMPLE_SEQ ~ ANALYTE_NAME, mean)
+results.wide.test <- dcast(results.molten, STATION_SEQ + ZDATE + SAMPLE_SEQ ~ RESULT, mean, margins = results.molten$ANALYTE_NAME)
 # results.wide <- 
 
 # stations <- 
