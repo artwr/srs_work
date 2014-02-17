@@ -11,16 +11,16 @@ require(splancs)
 
 # LOESS models options
 # Direct method allows extrapolation
-lcontrol<-loess.control(surface = c("direct"),
+lcontrold<-loess.control(surface = c("direct"),
                         statistics = c("exact"),
                         trace.hat = c("exact"),
                         cell = 0.2, iterations = 5)
 
-# Uses interpolation on a kd-tree, will give NA outside of the bounding box
-# lcontrol<-loess.control(surface = c("interpolate"),
-#                         statistics = c("exact"),
-#                         trace.hat = c("exact"),
-#                         cell = 0.2, iterations = 5)
+# Uses interpolation on a kd-tree, will give NA outside of the 2D bounding box
+lcontroli<-loess.control(surface = c("interpolate"),
+                        statistics = c("exact"),
+                        trace.hat = c("exact"),
+                        cell = 0.2, iterations = 5)
 
 # Auxiliary Functions
 source('./analysis/raw_scripts/functions.R')
