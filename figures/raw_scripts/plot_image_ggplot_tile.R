@@ -1,4 +1,7 @@
 # Plot tiles
+
+currentparamforplotting <- par(no.readonly = TRUE)
+
 require(ggmap)
 # thicknessUAZ
 
