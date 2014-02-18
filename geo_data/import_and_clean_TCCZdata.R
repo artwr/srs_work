@@ -2,13 +2,10 @@
 TCCZdata<-read.csv("./geo_data/processed/TCCZ_definitive_all.csv")
 ##Convert non meaningful zeros to NAs
 TCCZdata[TCCZdata==0]<-NA
-##Save as flat object
-saveRDS(TCCZdata, file = "./geo_data/processed/TCCZ_definitive_all.rdata")
-
 # Remove the points with no TCCZ pick. 
-TCCZdata2<-TCCZdatac[!is.na(TCCZdatac$TCCZ_top),]
+TCCZdata2<-TCCZdata[!is.na(TCCZdata$TCCZ_top),]
 
-##Save to compressed object
+##Save as flat object
 # saveRDS(TCCZdata, file = "./geo_data/processed/TCCZ_all.rdata")
 saveRDS(TCCZdata, file = "./geo_data/processed/TCCZ_definitive_all.rdata")
 saveRDS(TCCZdata2, file = "./geo_data/processed/TCCZ_wtoppick.rdata")
