@@ -5,6 +5,7 @@
 require(reshape2)
 require(plyr)
 require(ggplot2)
+require(ggthemes)
 require(scales)
 require(splancs)
 
