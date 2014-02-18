@@ -35,6 +35,6 @@ area.dom<-areapl(pp)
 weightarea<-(spatial.step.size.ea*spatial.step.size.no)/area.dom
 
 interp.dom<-as.data.frame(pp)
-interp.dom2<-interp.dom
-names(interp.dom)<-c("UTM_E","UTM_N")
-names(interp.dom2)<-c("EASTING","NORTHING")
+# interp.dom2<-interp.dom
+# names(interp.dom)<-c("UTM_E","UTM_N")
+names(interp.dom)<-c("EASTING","NORTHING")
