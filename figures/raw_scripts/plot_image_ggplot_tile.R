@@ -1,9 +1,18 @@
 # Plot tiles
 
 currentparamforplotting <- par(no.readonly = TRUE)
+require(ggthemes)
+# + scale_colour_gradient_tableau("Blue-Green Sequential", limits=c(3, 4))
+# + scale_colour_gradient_tableau("Purple Sequential", limits=c(3, 4))
+# + scale_colour_gradient_tableau("Grey Sequential", limits=c(3, 4))
 
 require(ggmap)
 # thicknessUAZ
+
+basetileggplot <- function(df) {
+  ggdiag <- ggplot(data = df, mapping = aes(x=EASTING,y=NORTHING)) + theme_bw(base_size = 14)
+}
+
 
 ggdiag <- ggplot(data = thicknessUAZ, mapping = aes(x=EASTING,y=NORTHING))
 ggres <- ggdiag + geom_tile(aes(fill = TCCZfit)) + scale_fill_gradient(low = "white", high = "green")
