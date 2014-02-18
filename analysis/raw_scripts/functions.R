@@ -40,7 +40,6 @@ spatialLoessDiagnostics<-function(loess.model, grid.df) {
 }
 
 spatialLoessPrediction<-function(loess.model, grid.df) {
-  require(ggplot2)
   loessprediction<-predict(loess.model, newdata = grid.df, se = TRUE)
   list(fit = as.vector(loessprediction$fit), se.fit = as.vector(loessprediction$se.fit))
 }
