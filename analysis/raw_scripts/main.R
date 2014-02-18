@@ -1,13 +1,12 @@
 # File to use to perform the whole analysis
 
-#setwd("./inventory")
 #rm(list=ls())
 
+require(reshape2)
 require(plyr)
 require(ggplot2)
 require(scales)
 require(splancs)
-
 
 # LOESS models options
 # Direct method allows extrapolation
