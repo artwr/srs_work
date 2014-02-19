@@ -5,11 +5,19 @@ TCCZe <- readRDS("./geo_data/processed/TCCZ_nearF_final.rdata")
 
 #
 #Alpha loess
-alphaloessTCCZ <- c(.15,.2,.25,.3,.4,.5)
+#alphaloessTCCZ <- c(.15,.2,.25,.3,.4,.5)
+#alphaloessTCCZ <- c(.2,.3,.5,.6,.7,.8)
+alphaloessTCCZ <- seq(.15, .9, by = 0.05)
 
 # Use helper function to compute a range of loess models
-lloessm <- loessAlphaVect(lformula = "TCCZ_top~EASTING+NORTHING", ldata = TCCZe, ldegree = 2, spanvector = alphaloessTCCZ, lcontrol = lcontrold)
+lloessmd2 <- loessAlphaVect(lformula = "TCCZ_top~EASTING+NORTHING", ldata = TCCZe, ldegree = 2, spanvector = alphaloessTCCZ, lcontrol = lcontrold)
+lloessmd1 <- loessAlphaVect(lformula = "TCCZ_top~EASTING+NORTHING", ldata = TCCZe, ldegree = 1, spanvector = alphaloessTCCZ, lcontrol = lcontrold)
 
+loessmd1RMSD <- laply(lloessmd1, function(loessm){sqrt(sum(loessm$residuals^2))})
+loessmd2RMSD <- laply(lloessmd2, function(loessm){sqrt(sum(loessm$residuals^2))})
+ <- cbind(alphaloessTCCZ, loessmd1RMSD, loessd2RMSD)
+
+matplot(x = alphaloessTCCZ, y = cbind(loessmd1RMSD, loessmd2RMSD))
 
 #Local polynomial fit (2nd order) and linear model
 # TCCZe.loess1 <- loess(TCCZ_top~EASTING+NORTHING, data = TCCZe, degree = 2, span = alphaloessTCCZ[2], normalize = FALSE, method = c("loess"), control = lcontrold)
@@ -42,37 +50,60 @@ TCCZe.pred$ehat.lm <- TCCZe.pred$TCCZ_top - TCCZe.pred$TCCZ.fitlm
 #Save the linmod predictions
 saveRDS(TCCZe.pred,"./analysis/processed_data/TCCZlmpred.rdata")
 
-predloessm <- llply(lloessm, function(loessm){as.vector(predict(loessm, newdata = interpolation.grid))})
+predloessmd1 <- llply(lloessmd1, function(loessm){as.vector(predict(loessm, newdata = interpolation.grid))})
 
-predloessmse <- llply(lloessm, function(loessm){pred <- predict(loessm, newdata = interpolation.grid, se = TRUE); return(as.vector(pred$se.fit))})
+predloessmd1se <- llply(lloessmd1, function(loessm){pred <- predict(loessm, newdata = interpolation.grid, se = TRUE); return(as.vector(pred$se.fit))})
+
+predloessmd2 <- llply(lloessmd2, function(loessm){as.vector(predict(loessm, newdata = interpolation.grid))})
+
+predloessmd2se <- llply(lloessmd2, function(loessm){pred <- predict(loessm, newdata = interpolation.grid, se = TRUE); return(as.vector(pred$se.fit))})
 
 # names(predloessm)
 # length(predloessm[["alpha0.15"]])
 # as.data.frame(predloessm)
-TCCZ.interpolated <- cbind(interpolation.grid, as.data.frame(predloessm))
-TCCZ.interpolatedse <- cbind(interpolation.grid, as.data.frame(predloessmse))
-saveRDS(TCCZ.interpolated,"./analysis/processed_data/TCCZloessinterpolation.rdata")
-saveRDS(TCCZ.interpolatedse,"./analysis/processed_data/TCCZloessinterpolationse.rdata")
+TCCZ.interpolatedd1 <- cbind(interpolation.grid, as.data.frame(predloessmd1))
+TCCZ.interpolatedd1se <- cbind(interpolation.grid, as.data.frame(predloessmd1se))
+saveRDS(TCCZ.interpolatedd1,"./analysis/processed_data/TCCZloessinterpolationd1.rdata")
+saveRDS(TCCZ.interpolatedd1se,"./analysis/processed_data/TCCZloessinterpolationd1se.rdata")
 
-plot.df <- TCCZ.interpolated
-plot.df.se <- TCCZ.interpolatedse
-names(plot.df)
+TCCZ.interpolatedd2 <- cbind(interpolation.grid, as.data.frame(predloessmd2))
+TCCZ.interpolatedd2se <- cbind(interpolation.grid, as.data.frame(predloessmd2se))
+saveRDS(TCCZ.interpolatedd2,"./analysis/processed_data/TCCZloessinterpolationd2.rdata")
+saveRDS(TCCZ.interpolatedd2se,"./analysis/processed_data/TCCZloessinterpolationd2se.rdata")
 
-plot.df.long <- melt(plot.df, id.vars = c("EASTING","NORTHING"),
+plot.dfd1 <- TCCZ.interpolatedd1
+plot.dfd1.se <- TCCZ.interpolatedd1se
+plot.dfd2 <- TCCZ.interpolatedd2
+plot.dfd2.se <- TCCZ.interpolatedd2se
+#names(plot.df)
+
+plot.dfd1.long <- melt(plot.dfd1, id.vars = c("EASTING","NORTHING"),
      variable.name = "alpha", na.rm = FALSE,
      value.name = "TCCZ_top.fit")
 
-plot.df.se.long <- melt(plot.df.se, id.vars = c("EASTING","NORTHING"),
+plot.dfd1.se.long <- melt(plot.dfd1.se, id.vars = c("EASTING","NORTHING"),
                      variable.name = "alpha", na.rm = FALSE,
                      value.name = "TCCZ_top.sefit")
+
+plot.dfd2.long <- melt(plot.dfd2, id.vars = c("EASTING","NORTHING"),
+                       variable.name = "alpha", na.rm = FALSE,
+                       value.name = "TCCZ_top.fit")
+
+plot.dfd2.se.long <- melt(plot.dfd2.se, id.vars = c("EASTING","NORTHING"),
+                          variable.name = "alpha", na.rm = FALSE,
+                          value.name = "TCCZ_top.sefit")
 
 # Added facet_wrap plot with alpha for comparison between the alphas
 # require(ggthemes)
 # currentparamforplotting <- par(no.readonly = TRUE)
 
 # Base gg objects
-ggdiag <- ggplot(data = plot.df.long, mapping = aes(x=EASTING,y=NORTHING)) + theme_bw()
-ggdiagse <- ggplot(data = plot.df.se.long, mapping = aes(x=EASTING,y=NORTHING)) + theme_bw()
+ggdiagd1 <- ggplot(data = plot.dfd1.long, mapping = aes(x=EASTING,y=NORTHING)) + theme_bw()
+ggdiagd1se <- ggplot(data = plot.dfd1.se.long, mapping = aes(x=EASTING,y=NORTHING)) + theme_bw()
+
+ggdiagd2 <- ggplot(data = plot.dfd2.long, mapping = aes(x=EASTING,y=NORTHING)) + theme_bw()
+ggdiagd2se <- ggplot(data = plot.dfd2.se.long, mapping = aes(x=EASTING,y=NORTHING)) + theme_bw()
+
 
 #
 ggres <- ggdiag + geom_tile(aes(fill = TCCZ_top.fit)) + scale_fill_gradient_tableau("Blue-Green Sequential") + facet_wrap(~ alpha)
@@ -90,10 +121,20 @@ ggres3 <- ggdiag + geom_tile(aes(fill = TCCZ_top.fit)) + scale_fill_gradientn(co
 #   ggstderr <- ggdiag + geom_tile(aes(fill = se.fit)) + scale_fill_gradient(low = "white", high = "green")
 print(ggres3)
 
-ggres3 <- ggdiagse + geom_tile(aes(fill = TCCZ_top.sefit)) + scale_fill_gradientn(colours = rainbow(7)) + facet_wrap(~ alpha)
+ggres4 <- ggdiagse + geom_tile(aes(fill = TCCZ_top.sefit)) + scale_fill_gradientn(colours = rainbow(7)) + facet_wrap(~ alpha)
 # ggres <- ggres +coord_cartesian(xlim = c(), ylim = , wise = NULL)
 #   ggstderr <- ggdiag + geom_tile(aes(fill = se.fit)) + scale_fill_gradient(low = "white", high = "green")
-print(ggres3)
+print(ggres4)
+
+ggresd15 <- ggdiagd1se + geom_tile(aes(fill = TCCZ_top.sefit)) + scale_fill_gradientn(colours = rainbow(7), trans = "log") + facet_wrap(~ alpha)
+# ggres <- ggres +coord_cartesian(xlim = c(), ylim = , wise = NULL)
+#   ggstderr <- ggdiag + geom_tile(aes(fill = se.fit)) + scale_fill_gradient(low = "white", high = "green")
+print(ggresd15)
+
+ggresd25 <- ggdiagd2se + geom_tile(aes(fill = TCCZ_top.sefit)) + scale_fill_gradientn(colours = rainbow(7), trans = "log") + facet_wrap(~ alpha)
+# ggres <- ggres +coord_cartesian(xlim = c(), ylim = , wise = NULL)
+#   ggstderr <- ggdiag + geom_tile(aes(fill = se.fit)) + scale_fill_gradient(low = "white", high = "green")
+print(ggresd25)
 
 # ggdiag2 <- ggplot(data = plot.long2, mapping = aes(x=EASTING,y=NORTHING)) + theme_bw()
 # ggres2 <- ggdiag2 + geom_tile(aes(fill = TCCZ_top.fit)) + scale_fill_gradient_tableau("Blue-Green Sequential") + facet_wrap(~ alpha)
