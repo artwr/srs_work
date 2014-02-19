@@ -5,10 +5,11 @@ require(rgeos)
 
 
 # Load data
-TCCZe<-readRDS("./geo_data/processed/TCCZ_wtoppick.rdata")
+# TCCZe<-readRDS("./geo_data/processed/TCCZ_wtoppick.rdata")
+TCCZe <- readRDS("./geo_data/processed/TCCZ_nearF_final.rdata")
 # picks<-readRDS("./geo_data/processed/picks_all.rdata")
 
-pairs(TCCZe[,c("EASTING","NORTHING","g_elev_ft","TCCZ_top")])
+pairs(TCCZe[,c("EASTING","NORTHING","SurfaceElevation","TCCZ_top")])
 pairs(TCCZe[,c("EASTING","NORTHING","TCCZ_top")])
 TCCZe$logtccztop <- log(TCCZe$TCCZ_top)
 pairs(TCCZe[,c("EASTING","NORTHING","logtccztop")])
@@ -39,11 +40,11 @@ S1 = Lines(list(FMBl), ID="FMB")
 FMBldf <- SpatialLines(list(S1), proj4string = CRS("+proj=utm +zone=17 +datum=NAD27"))
 TCCZsp$disttoriver <- as.vector(gDistance(TCCZsp, FMBldf, byid=TRUE))
 
-TCCZe2 <- as.data.frame(TCCZsp)
+TCCZefsp <- as.data.frame(TCCZsp)
 
 #
-pairs(TCCZe2[,c("EASTING","NORTHING","TCCZ_top", "disttoriver")])
-pairs(TCCZe2[,c("EASTING","NORTHING","logtccztop", "disttoriver")])
+pairs(TCCZefsp[,c("EASTING","NORTHING","TCCZ_top", "disttoriver")])
+pairs(TCCZefsp[,c("EASTING","NORTHING","logtccztop", "disttoriver")])
 
 
 spplot(TCCZsp, c("TCCZ_top"), aspect = "iso")

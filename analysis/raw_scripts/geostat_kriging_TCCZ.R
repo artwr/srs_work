@@ -7,7 +7,8 @@ require(classInt)
 require(fields)
 #
 #Import picks for the TCCZ
-TCCZe<-readRDS("./geo_data/processed/TCCZ_wtoppick.rdata")
+# TCCZe<-readRDS("./geo_data/processed/TCCZ_wtoppick.rdata")
+TCCZe <- readRDS("./geo_data/processed/TCCZ_nearF_final.rdata")
 picks<-readRDS("./geo_data/processed/picks_all.rdata")
 
 ## gstat
@@ -135,7 +136,7 @@ print(spplot(TCCZk1, "var1.var", asp=1,  main="OK prediction, TCCZ elevation var
 #    r[i] <- (summary(fit))$r.squared
 #    ar[i] <- (summary(fit))$adj.r.squared
 #    }
-lm3_3 <- lm(TCCZ_top ~ EASTING + I(EASTING^2) + I(EASTING^3) + NORTHING + I(NORTHING^2) + I(NORTHING^3), data = TCCZe)
+# lm3_3 <- lm(TCCZ_top ~ EASTING + I(EASTING^2) + I(EASTING^3) + NORTHING + I(NORTHING^2) + I(NORTHING^3), data = TCCZe)
 
 
 ## geoR
