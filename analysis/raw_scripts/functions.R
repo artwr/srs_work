@@ -73,6 +73,13 @@ spatialLoessPrediction<-function(loess.model, grid.df) {
 #   expand.grid(EASTING=ea.v, NORTHING=no.v)
 # }
 
+
+# for (itm in ls()) { 
+#       print(formatC(c(itm, object.size(get(itm))), format="d", 
+#                                          big.mark=",", width=30), 
+#             quote=F)
+# }
+
 # Multiple plot function
 #
 # ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
