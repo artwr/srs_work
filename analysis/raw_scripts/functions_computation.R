@@ -1,6 +1,14 @@
 # Computation Functions
 require(data.table)
 require(plyr)
+require(cvTools)
+# require(multicore)
+# require(doMC)
+# registerDoMC(cores = 4)
+# require(parallel)
+# require(doParallel)
+# registerDoParallel(cl, cores=4)
+# require(foreach)
 
 # getAnalyteResults <- function(analyte_name, results.df) {
 #   require(data.table)
@@ -26,3 +34,21 @@ loessAlphaVect <- function(lformula, ldata, ldegree, spanvector = c(.25,.5,.75),
   }
   return(loess.models)
 }
+
+
+## loess alpha cross validation
+
+loessAlphaVect <- function(lformula, ldata, ldegree, spanvector = c(.25,.5,.75), lfamily = c("gaussian") ,lcontrol) {
+  loess.models <-list() 
+  for (k in 1:length(spanvector)) { 
+    loess.models[paste0("alpha",spanvector[k])] <- list(loess(as.formula(lformula), data = ldata, degree = ldegree, span = spanvector[k], family = lfamily, normalize = FALSE, method = c("loess"), control = lcontrol))
+    #     loess.models <- c(loess.models, list(loess(as.formula(lformula), data = ldata, degree = ldegree, span = spanvector[k], normalize = FALSE, method = c("loess"), control = lcontrol)))
+  }
+  return(loess.models)
+}
+
+
+
+
+
+
