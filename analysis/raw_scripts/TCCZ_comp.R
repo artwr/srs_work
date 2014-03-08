@@ -15,7 +15,7 @@ lloessmd1 <- loessAlphaVect(lformula = "TCCZ_top~EASTING+NORTHING", ldata = TCCZ
 
 loessmd1RMSD <- laply(lloessmd1, function(loessm){sqrt(sum(loessm$residuals^2))})
 loessmd2RMSD <- laply(lloessmd2, function(loessm){sqrt(sum(loessm$residuals^2))})
- <- cbind(alphaloessTCCZ, loessmd1RMSD, loessd2RMSD)
+# <- cbind(alphaloessTCCZ, loessmd1RMSD, loessd2RMSD)
 
 matplot(x = alphaloessTCCZ, y = cbind(loessmd1RMSD, loessmd2RMSD))
 
@@ -66,10 +66,15 @@ TCCZ.interpolatedd1se <- cbind(interpolation.grid, as.data.frame(predloessmd1se)
 saveRDS(TCCZ.interpolatedd1,"./analysis/processed_data/TCCZloessinterpolationd1.rdata")
 saveRDS(TCCZ.interpolatedd1se,"./analysis/processed_data/TCCZloessinterpolationd1se.rdata")
 
+saveRDS(TCCZ.interpolatedd1,file = paste0("./analysis/processed_data/TCCZloessinterpolationd1_",format(Sys.time(), "%Y%m%d-%H%M"),".rdata")
+saveRDS(TCCZ.interpolatedd1se,file = paste0("./analysis/processed_data/TCCZloessinterpolationd1se_",format(Sys.time(), "%Y%m%d-%H%M"),".rdata")
+
 TCCZ.interpolatedd2 <- cbind(interpolation.grid, as.data.frame(predloessmd2))
 TCCZ.interpolatedd2se <- cbind(interpolation.grid, as.data.frame(predloessmd2se))
 saveRDS(TCCZ.interpolatedd2,"./analysis/processed_data/TCCZloessinterpolationd2.rdata")
 saveRDS(TCCZ.interpolatedd2se,"./analysis/processed_data/TCCZloessinterpolationd2se.rdata")
+saveRDS(TCCZ.interpolatedd2,file = paste0("./analysis/processed_data/TCCZloessinterpolationd2_",format(Sys.time(), "%Y%m%d-%H%M"),".rdata")
+saveRDS(TCCZ.interpolatedd2se,file = paste0("./analysis/processed_data/TCCZloessinterpolationd2se_",format(Sys.time(), "%Y%m%d-%H%M"),".rdata")
 
 plot.dfd1 <- TCCZ.interpolatedd1
 plot.dfd1.se <- TCCZ.interpolatedd1se
