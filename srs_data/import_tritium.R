@@ -57,6 +57,7 @@ tritiumC.plyra<-ddply(tritiumC.clean, c('MYEAR'), function(x) c(count=nrow(x),me
 #Save as R datasets
 setwd("../processed/")
 saveRDS(tritium.clean,file="tritiumcleanall.rdata")
+saveRDS(tritiumC.clean,file="tritiumCcleanall.rdata")
 saveRDS(tritium.plyr1, file = "tritium.rdata")
 saveRDS(tritiumC.plyr1, file = "tritiumC.rdata")
 saveRDS(tritium.plyra, file = "tritiumavg.rdata")
