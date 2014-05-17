@@ -1,5 +1,6 @@
 #Define interpolation domain and compute area, define other parameters
 require(splancs)
+source("geo_data/function_create_interpolation_grid.R")
 
 ## Size of the mesh on the regular grid 
 ## (I used 20m to develop the algorithm)
@@ -14,14 +15,17 @@ no.min<-3680930
 no.max<-3682110
 ea.min<-436175
 ea.max<-437155
-#number of spatial.steps ~ 20 m apart
-ea.b<-1+(ea.max-ea.min)/spatial.step.size.ea
-no.b<-1+(no.max-no.min)/spatial.step.size.no
-#Create the vectors
-ea.v<-seq(ea.min, ea.max, length = ea.b)
-no.v<-seq(no.min, no.max, length = no.b)
-#Create the expandgrid df for predictions
-interpolation.grid<-expand.grid(EASTING=ea.v, NORTHING=no.v)
+
+# #number of spatial.steps ~ 20 m apart
+# ea.b<-1+(ea.max-ea.min)/spatial.step.size.ea
+# no.b<-1+(no.max-no.min)/spatial.step.size.no
+# #Create the vectors
+# ea.v<-seq(ea.min, ea.max, length = ea.b)
+# no.v<-seq(no.min, no.max, length = no.b)
+# #Create the expandgrid df for predictions
+# interpolation.grid<-expand.grid(EASTING=ea.v, NORTHING=no.v)
+
+interpolation.grid <- createInterpGrid(ea.min, ea.max, no.min, no.max, spatial.step.size.ea, spatial.step.size.no)
 
 # Create polygon to compute area. 
 # Needs splancs lib for more complex polygons
