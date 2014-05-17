@@ -1,7 +1,7 @@
 # create subsets by analyte
 
-results <- readRDS("./srs_data/processed/results.rdata")
-resultsC <- readRDS("./srs_data/processed/resultsC.rdata")
+results <- readRDS("./srs_data/processed/resultsclean.rdata")
+resultsC <- readRDS("./srs_data/processed/resultsCclean.rdata")
 
 resultsDT <- as.data.table(results)
 resultsCDT <- as.data.table(resultsC)
@@ -48,3 +48,4 @@ for(i in 1:length(varofinterest3)) {
 }
 
 rm(list=ls())
+message("Analyte RDS files created")
