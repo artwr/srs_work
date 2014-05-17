@@ -4,8 +4,6 @@
 results <- readRDS("./srs_data/processed/results.rdata")
 resultsC <- readRDS("./srs_data/processed/resultsC.rdata")
 
-# 
-
 #Remove FEX8 because of the double screen
 results.clean1<-results[!results$STATION_ID=='FEX  8',]
 results.clean1<-results.clean1[!results.clean1$STATION_ID=='FEX  9',]
@@ -27,11 +25,13 @@ resultsC.clean1[resultsC.clean1$RESULT<0,]$RESULT<-NA
 #Remove NA values since I cannot use them
 results.clean<-results.clean1[!is.na(results.clean1$RESULT),]
 resultsC.clean<-resultsC.clean1[!is.na(resultsC.clean1$RESULT),]
-
+# Remove unused levels
+results.clean<-droplevels(results.clean1)
+resultsC.clean<-droplevels(resultsC.clean1)
 #
 
-saveRDS(results.clean, "./srs_data/processed/resultsnonegnona.rdata")
-saveRDS(resultsC.clean, "./srs_data/processed/resultsCnonegnona.rdata")
+saveRDS(results.clean, "./srs_data/processed/resultsclean.rdata")
+saveRDS(resultsC.clean, "./srs_data/processed/resultsCclean.rdata")
 
 rm(results)
 rm(results.clean1)
