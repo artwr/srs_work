@@ -43,10 +43,10 @@ resultsCDT$ADATE <- as.Date(resultsCDT$ANALYSIS_DATE)
 # and ZYEAR for yearly aggregation
 resultsDT$ZDATE <- resultsDT$CDATE
 resultsDT$ZDATE[is.na(resultsDT$ZDATE)] <- resultsDT$ADATE[is.na(resultsDT$ZDATE)]
-resultsDT$ZYEAR <- format(resultsDT$ZDATE,"%Y")
+resultsDT$ZYEAR <- as.integer(format(resultsDT$ZDATE,"%Y"))
 resultsCDT$ZDATE <- resultsCDT$CDATE
 resultsCDT$ZDATE[is.na(resultsCDT$ZDATE)] <- resultsCDT$ADATE[is.na(resultsCDT$ZDATE)]
-resultsCDT$ZYEAR <- format(resultsCDT$ZDATE,"%Y")
+resultsCDT$ZYEAR <- as.integer(format(resultsCDT$ZDATE,"%Y"))
 saveRDS(as.data.frame(resultsDT), "./srs_data/processed/results.rdata")
 saveRDS(as.data.frame(resultsCDT), "./srs_data/processed/resultsC.rdata")
 
